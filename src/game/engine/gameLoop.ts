@@ -3,13 +3,9 @@ import { tickSystems } from "../systems";
 
 export type StateUpdater = (updater: (s: GameState) => GameState) => void;
 
-const TARGET_FPS = 60;
-const FRAME_MS = 1000 / TARGET_FPS;
-
 export class GameLoop {
   private rafId: number | null = null;
   private lastTime = 0;
-  private accumulator = 0;
   private updateState: StateUpdater;
 
   constructor(updateState: StateUpdater) {
@@ -27,18 +23,12 @@ export class GameLoop {
   }
 
   private loop = (now: number) => {
-    const delta = now - this.lastTime;
+    const dt = Math.min((now - this.lastTime) / 1000, 0.1); // cap at 100 ms
     this.lastTime = now;
-    this.accumulator += delta;
-
-    // Fixed-step ticks — catch up if we fell behind, cap at 3 ticks
-    let steps = 0;
-    while (this.accumulator >= FRAME_MS && steps < 3) {
-      this.updateState(state => tickSystems(state, FRAME_MS / 1000));
-      this.accumulator -= FRAME_MS;
-      steps++;
-    }
-
+    this.updateState(state => {
+      if (state.isPaused || state.phase !== "wave") return state;
+      return tickSystems(state, dt);
+    });
     this.rafId = requestAnimationFrame(this.loop);
   };
 }

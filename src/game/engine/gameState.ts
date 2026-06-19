@@ -1,42 +1,61 @@
-export type Phase = "idle" | "wave" | "victory" | "defeat";
+import type { TowerType } from "../../data/towers";
+
+export type Phase = "idle" | "wave" | "defeat";
+
+export interface Point { x: number; y: number; }
+
+export interface Creep {
+  id: string;
+  hp: number;
+  maxHp: number;
+  pathProgress: number; // continuous 0..PATH.length-1
+  position: Point;      // tile-space for rendering
+}
+
+export interface Tower {
+  id: string;
+  type: TowerType;
+  col: number;
+  row: number;
+  damage: number;
+  range: number;
+  attackSpeed: number;
+  cost: number;
+  sellValue: number;
+  aoe: number;
+  lastAttackTime: number; // gameTime (seconds) of last attack
+}
 
 export interface GameState {
   phase: Phase;
   wave: number;
   gold: number;
   lives: number;
-  tick: number;        // incremented every frame
-  enemies: Enemy[];
+  creeps: Creep[];
   towers: Tower[];
+  isPaused: boolean;
+  gameTime: number;   // seconds elapsed (cumulative)
+  toSpawn: number;    // creeps remaining to spawn this wave
+  spawnTimer: number; // seconds until next spawn
 }
 
-export interface Enemy {
-  id: string;
-  pathIndex: number;   // index into PATH array
-  hp: number;
-  maxHp: number;
-  speed: number;       // path tiles per second
-  progress: number;    // 0..1 between current and next tile
-}
-
-export interface Tower {
-  id: string;
-  col: number;
-  row: number;
-  damage: number;
-  range: number;       // in grid cells
-  attackSpeed: number; // attacks per second
-  cooldown: number;    // ticks remaining until next attack
-}
+export const STARTING_GOLD   = 200;
+export const STARTING_LIVES  = 20;
+export const TOTAL_CREEPS    = 30;
+export const SPAWN_INTERVAL  = 0.5; // one creep every 500 ms
+export const CREEP_REWARD    = 5;
 
 export function createInitialState(): GameState {
   return {
     phase: "idle",
     wave: 0,
-    gold: 100,
-    lives: 20,
-    tick: 0,
-    enemies: [],
+    gold: STARTING_GOLD,
+    lives: STARTING_LIVES,
+    creeps: [],
     towers: [],
+    isPaused: false,
+    gameTime: 0,
+    toSpawn: 0,
+    spawnTimer: 0,
   };
 }
