@@ -1,5 +1,5 @@
 import type { GameState } from "./gameState";
-import { tickSystems } from "../systems";
+import { tickSystems, tickPrepSystems, tickIdleSystems } from "../systems";
 
 export type StateUpdater = (updater: (s: GameState) => GameState) => void;
 
@@ -23,11 +23,14 @@ export class GameLoop {
   }
 
   private loop = (now: number) => {
-    const dt = Math.min((now - this.lastTime) / 1000, 0.1); // cap at 100 ms
+    const dt = Math.min((now - this.lastTime) / 1000, 0.1);
     this.lastTime = now;
     this.updateState(state => {
-      if (state.isPaused || state.phase !== "wave") return state;
-      return tickSystems(state, dt);
+      if (state.isPaused) return state;
+      if (state.phase === "wave") return tickSystems(state, dt);
+      if (state.phase === "prep") return tickPrepSystems(state, dt);
+      if (state.phase === "idle" || state.phase === "victory") return tickIdleSystems(state, dt);
+      return state; // defeat — заморожено
     });
     this.rafId = requestAnimationFrame(this.loop);
   };

@@ -60,6 +60,7 @@ export function tickTowerAttack(state: GameState): GameState {
   const newProjectiles: Projectile[] = [];
 
   const towers = state.towers.map(tower => {
+    if (tower.buildTimeRemaining > 0) return tower;
     if (state.gameTime - tower.lastAttackTime < 1 / tower.attackSpeed) return tower;
     const target = findTarget(tower, state.creeps);
     if (!target) return tower;

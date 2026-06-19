@@ -1,6 +1,5 @@
 import type { GameState } from "../game/engine/gameState";
 import { startWave } from "../game/entities/spawnWave";
-import { createInitialState } from "../game/engine/gameState";
 import versionData from "../version.json";
 
 interface Props {
@@ -10,25 +9,37 @@ interface Props {
 }
 
 export default function HUD({ state, onUpdateState, onReset }: Props) {
-  const canStart = state.phase === "idle";
-  const remaining = state.creeps.length + state.spawnQueue.length;
-  void createInitialState; // imported for reset reference in parent
+  const { phase, wave, gold, lives, food, spawnQueue, creeps } = state;
+  const remaining = creeps.length + spawnQueue.length;
+  const isPrep = phase === "prep";
+  const isWave = phase === "wave";
 
   return (
     <div className="hud">
-      <div className="hud-stat">💰 {state.gold}</div>
-      <div className="hud-stat">❤️ {state.lives}</div>
-      <div className="hud-stat">🌊 Волна {state.wave}</div>
+      <div className="hud-stat">💰 {gold}</div>
+      <div className="hud-stat">❤️ {lives}</div>
+      <div className="hud-stat">🌾 {food}</div>
+      <div className="hud-stat">🌊 {wave}/10</div>
 
-      <button
-        className="hud-btn"
-        disabled={!canStart}
-        onClick={() => onUpdateState(startWave)}
-      >
-        {canStart ? "▶ Начать волну" : `👾 ${remaining}`}
-      </button>
+      {phase === "idle" && (
+        <button className="hud-btn" onClick={() => onUpdateState(startWave)}>
+          ▶ Начать
+        </button>
+      )}
 
-      {state.phase === "wave" && (
+      {isPrep && (
+        <div className="hud-btn secondary" style={{ cursor: "default", minWidth: 120 }}>
+          ⏱ Волна {wave + 1} через {Math.ceil(state.prepTimer)}с
+        </div>
+      )}
+
+      {isWave && (
+        <div className="hud-btn secondary" style={{ cursor: "default" }}>
+          👾 {remaining}
+        </div>
+      )}
+
+      {(isWave || isPrep) && (
         <button
           className="hud-btn secondary"
           onClick={() => onUpdateState(s => ({ ...s, isPaused: !s.isPaused }))}
@@ -37,9 +48,7 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
         </button>
       )}
 
-      <button className="hud-btn reset" onClick={onReset}>
-        🔄 Reset
-      </button>
+      <button className="hud-btn reset" onClick={onReset}>🔄</button>
 
       <span style={{ fontSize: "0.7rem", color: "#666", marginLeft: 4 }}>
         v{versionData.version}

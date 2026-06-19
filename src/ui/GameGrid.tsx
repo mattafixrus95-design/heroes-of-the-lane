@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import type { GameState, Tower, Projectile, SplashEffect } from "../game/engine/gameState";
+import type { GameState, Tower, Farm, FloatingText } from "../game/engine/gameState";
+import { FARM_COST, FARM_FOOD_PER_LEVEL } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data/map";
@@ -7,6 +8,7 @@ import GateSVG from "../assets/GateSVG";
 import CastleSVG from "../assets/CastleSVG";
 import TowerIcon from "./TowerIcon";
 import { CREEP_DEFS } from "../data/waves";
+import type { ShopItem } from "./TowerShop";
 
 const MAX_CELL = 56;
 
@@ -24,16 +26,18 @@ function useCell(): number {
 
 interface Props {
   state: GameState;
-  selectedTower: TowerType | null;
+  selectedItem: ShopItem | null;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onClearSelection: () => void;
   onSelectTowerId: (id: string) => void;
+  onSelectFarmId: (id: string) => void;
 }
 
 function placeTower(col: number, row: number, type: TowerType, state: GameState): GameState {
   const def = TOWER_DEFS[type];
-  if (state.gold < def.purchaseCost) return state;
+  if (state.gold < def.purchaseCost || state.food < def.foodCost) return state;
   if (state.towers.some(t => t.col === col && t.row === row)) return state;
+  if (state.farms.some(f => f.col === col && f.row === row)) return state;
   const g = def.grades[0];
   const tower: Tower = {
     id: `t-${Date.now()}-${Math.random()}`,
@@ -42,9 +46,42 @@ function placeTower(col: number, row: number, type: TowerType, state: GameState)
     damage: g.damage, range: g.range, attackSpeed: g.attackSpeed,
     aoe: g.aoe, aoeDmgPct: g.aoeDmgPct, slow: g.slow,
     totalInvested: def.purchaseCost,
+    foodSpent: def.foodCost,
     lastAttackTime: -999,
+    buildTimeRemaining: def.buildTime,
   };
-  return { ...state, gold: state.gold - def.purchaseCost, towers: [...state.towers, tower] };
+  return {
+    ...state,
+    gold: state.gold - def.purchaseCost,
+    food: state.food - def.foodCost,
+    towers: [...state.towers, tower],
+    floatingTexts: [...state.floatingTexts, {
+      id: `ft-${Date.now()}`, text: `-${def.purchaseCost}💰`,
+      x: col, y: row, color: "#ff8080", spawnTime: state.gameTime, duration: 1.4,
+    }],
+  };
+}
+
+function placeFarm(col: number, row: number, state: GameState): GameState {
+  if (state.gold < FARM_COST) return state;
+  if (state.towers.some(t => t.col === col && t.row === row)) return state;
+  if (state.farms.some(f => f.col === col && f.row === row)) return state;
+  const farm: Farm = {
+    id: `f-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    col, row,
+    foodProduced: FARM_FOOD_PER_LEVEL,
+    totalInvested: FARM_COST,
+  };
+  return {
+    ...state,
+    gold: state.gold - FARM_COST,
+    food: state.food + FARM_FOOD_PER_LEVEL,
+    farms: [...state.farms, farm],
+    floatingTexts: [...state.floatingTexts, {
+      id: `ft-${Date.now()}`, text: `+${FARM_FOOD_PER_LEVEL}🌾`,
+      x: col, y: row, color: "#8bc34a", spawnTime: state.gameTime, duration: 1.4,
+    }],
+  };
 }
 
 function cellBg(col: number, row: number, isPath: boolean): string {
@@ -58,16 +95,10 @@ function ArrowMarker({ angle, towerType }: { angle: number; towerType: string })
   const shaft = isElf ? "#8B6914" : "#5C3A1E";
   const feather = isElf ? "#2a9d2a" : "#9d5a2a";
   return (
-    <svg
-      width="28" height="8" viewBox="0 0 28 8"
-      style={{
-        position: "absolute", left: -14, top: -4,
-        overflow: "visible",
-        transform: `rotate(${angle}deg)`,
-        transformOrigin: "14px 4px",
-        pointerEvents: "none",
-      }}
-    >
+    <svg width="28" height="8" viewBox="0 0 28 8" style={{
+      position: "absolute", left: -14, top: -4, overflow: "visible",
+      transform: `rotate(${angle}deg)`, transformOrigin: "14px 4px", pointerEvents: "none",
+    }}>
       <line x1="2" y1="4" x2="22" y2="4" stroke={shaft} strokeWidth={isElf ? 1.5 : 2}/>
       <polygon points="20,1 28,4 20,7" fill={shaft}/>
       <line x1="4" y1="4" x2="1" y2="1" stroke={feather} strokeWidth="1.2"/>
@@ -91,7 +122,7 @@ function FireballMarker({ progress }: { progress: number }) {
   );
 }
 
-function SplashRing({ effect, gameTime, cell }: { effect: SplashEffect; gameTime: number; cell: number }) {
+function SplashRing({ effect, gameTime, cell }: { effect: import("../game/engine/gameState").SplashEffect; gameTime: number; cell: number }) {
   const t = Math.min(1, (gameTime - effect.spawnTime) / effect.duration);
   const maxR = effect.radius * cell;
   const r = maxR * (0.3 + t * 0.7);
@@ -100,10 +131,8 @@ function SplashRing({ effect, gameTime, cell }: { effect: SplashEffect; gameTime
   const cy = effect.y * cell + cell / 2;
   return (
     <div style={{
-      position: "absolute",
-      left: cx - r, top: cy - r,
-      width: r * 2, height: r * 2,
-      borderRadius: "50%",
+      position: "absolute", left: cx - r, top: cy - r,
+      width: r * 2, height: r * 2, borderRadius: "50%",
       border: `${3 - t * 2}px solid rgba(255,140,0,${opacity})`,
       boxShadow: `inset 0 0 ${12 * opacity}px rgba(255,200,0,${opacity * 0.5})`,
       pointerEvents: "none",
@@ -111,40 +140,35 @@ function SplashRing({ effect, gameTime, cell }: { effect: SplashEffect; gameTime
   );
 }
 
-function ProjectileLayer({ projectiles, splashEffects, gameTime, cell }: {
-  projectiles: Projectile[];
-  splashEffects: SplashEffect[];
-  gameTime: number;
-  cell: number;
-}) {
+function FloatingTextView({ ft, gameTime, cell }: { ft: FloatingText; gameTime: number; cell: number }) {
+  const age = gameTime - ft.spawnTime;
+  const t = Math.min(1, age / ft.duration);
+  const opacity = 1 - t;
+  const yOff = -t * cell * 1.2;
+  const x = ft.x * cell + cell / 2;
+  const y = ft.y * cell + cell / 2;
   return (
-    <>
-      {splashEffects.map(e =>
-        <SplashRing key={e.id} effect={e} gameTime={gameTime} cell={cell} />
-      )}
-      {projectiles.map(p => {
-        const progress = Math.min(1, (gameTime - p.spawnTime) / p.duration);
-        const x = (p.fromCol + (p.toX - p.fromCol) * progress) * cell + cell / 2;
-        const y = (p.fromRow + (p.toY - p.fromRow) * progress) * cell + cell / 2;
-        const angle = Math.atan2(p.toY - p.fromRow, p.toX - p.fromCol) * (180 / Math.PI);
-        return (
-          <div key={p.id} style={{ position: "absolute", left: x, top: y, pointerEvents: "none" }}>
-            {p.kind === "fireball"
-              ? <FireballMarker progress={progress} />
-              : <ArrowMarker angle={angle} towerType={p.towerType} />
-            }
-          </div>
-        );
-      })}
-    </>
+    <div style={{
+      position: "absolute",
+      left: x, top: y + yOff,
+      transform: "translateX(-50%)",
+      fontSize: "0.8rem", fontWeight: 800,
+      color: ft.color,
+      opacity,
+      pointerEvents: "none",
+      textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+      whiteSpace: "nowrap",
+    }}>
+      {ft.text}
+    </div>
   );
 }
 
-export default function GameGrid({ state, selectedTower, onUpdateState, onClearSelection, onSelectTowerId }: Props) {
+export default function GameGrid({ state, selectedItem, onUpdateState, onClearSelection, onSelectTowerId, onSelectFarmId }: Props) {
   const cell = useCell();
   const waveActive = state.phase === "wave";
+  const canBuild = state.phase !== "wave"; // разрешено и в idle и в prep
 
-  // Scale tower/gate icons proportionally
   const iconSize = Math.round(cell * 0.72);
   const towerSize = Math.round(cell * 0.71);
 
@@ -153,6 +177,7 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
     for (let c = 0; c < GRID_COLS; c++) {
       const isPath  = isPathCell(c, r);
       const tower   = state.towers.find(t => t.col === c && t.row === r);
+      const farm    = state.farms.find(f => f.col === c && f.row === r);
       const isEntry = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
       const isExit  = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
@@ -161,8 +186,13 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
         if (tower) {
           onSelectTowerId(tower.id);
           onClearSelection();
-        } else if (!isPath && !waveActive && selectedTower) {
-          onUpdateState(s => placeTower(c, r, selectedTower, s));
+        } else if (farm) {
+          onSelectFarmId(farm.id);
+          onClearSelection();
+        } else if (!isPath && canBuild && selectedItem === "farm") {
+          onUpdateState(s => placeFarm(c, r, s));
+        } else if (!isPath && canBuild && selectedItem && selectedItem !== "farm") {
+          onUpdateState(s => placeTower(c, r, selectedItem as TowerType, s));
         }
       };
 
@@ -174,25 +204,53 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
             width: cell, height: cell,
             background: cellBg(c, r, isPath),
             border: "1px solid rgba(0,0,0,0.15)",
-            cursor: tower ? "pointer" : (isPath || waveActive) ? "default" : selectedTower ? "crosshair" : "default",
+            cursor: (tower || farm) ? "pointer"
+              : (isPath || waveActive) ? "default"
+              : selectedItem ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
-            position: "relative",
-            overflow: "visible",
+            position: "relative", overflow: "visible",
             touchAction: "manipulation",
           }}
         >
-          {isEntry && !tower && <GateSVG size={iconSize} />}
-          {isExit  && !tower && <CastleSVG size={iconSize} />}
+          {isEntry && !tower && !farm && <GateSVG size={iconSize} />}
+          {isExit  && !tower && !farm && <CastleSVG size={iconSize} />}
+
+          {/* Башня */}
           {tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <TowerIcon type={tower.type} grade={tower.gradeIndex} size={towerSize} />
-              {!isMaxGrade && (
+              {/* Индикатор строительства */}
+              {tower.buildTimeRemaining > 0 && (
+                <span style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                  color: "#f0c040", flexDirection: "column", gap: 1,
+                }}>
+                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(tower.buildTimeRemaining)}с</span>
+                </span>
+              )}
+              {/* Значок апгрейда */}
+              {!isMaxGrade && tower.buildTimeRemaining === 0 && (
                 <span style={{
                   position: "absolute", top: -6, right: -8,
                   fontSize: "0.5rem", background: "#f0c040", color: "#1a1a2e",
                   borderRadius: 3, padding: "1px 3px", fontWeight: 800,
                 }}>⬆</span>
               )}
+            </span>
+          )}
+
+          {/* Ферма */}
+          {farm && !tower && (
+            <span style={{ fontSize: `${Math.max(0.8, cell / 40)}rem`, lineHeight: 1 }}>
+              🌾
+              <span style={{
+                position: "absolute", bottom: 1, right: 2,
+                fontSize: "0.45rem", color: "#8bc34a", fontWeight: 800,
+              }}>
+                +{farm.foodProduced}
+              </span>
             </span>
           )}
         </div>
@@ -206,20 +264,19 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
     const y = e.position.y * cell + cell / 2;
     const hpPct = e.hp / e.maxHp;
     const isSlowed = e.slowTimer > 0;
-    const isBoss = e.kind === "minotaur_king";
+    const isBoss = e.kind === "minotaur_king" || e.kind === "black_dragon";
     const creepSize = isBoss ? Math.round(baseCreepSize * 1.6) : baseCreepSize;
     const def = CREEP_DEFS[e.kind];
-    const hpBarColor = e.regenPerSec > 0 ? "#8bc34a" : (hpPct > 0.5 ? "#4caf50" : "#f44336");
+    const hpBarColor = e.regenPerSec > 0
+      ? "#8bc34a"
+      : hpPct > 0.5 ? "#4caf50" : "#f44336";
     return (
-      <div
-        key={e.id}
-        style={{
-          position: "absolute",
-          left: x - creepSize / 2, top: y - creepSize * 0.65,
-          width: creepSize, pointerEvents: "none",
-          display: "flex", flexDirection: "column", alignItems: "center",
-        }}
-      >
+      <div key={e.id} style={{
+        position: "absolute",
+        left: x - creepSize / 2, top: y - creepSize * 0.65,
+        width: creepSize, pointerEvents: "none",
+        display: "flex", flexDirection: "column", alignItems: "center",
+      }}>
         <div style={{ width: "100%", height: isBoss ? 4 : 3, background: "#333", borderRadius: 2, marginBottom: 1 }}>
           <div style={{
             width: `${hpPct * 100}%`, height: "100%", borderRadius: 2,
@@ -238,12 +295,9 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
   return (
     <div style={{
       position: "relative",
-      width: GRID_COLS * cell,
-      height: GRID_ROWS * cell,
+      width: GRID_COLS * cell, height: GRID_ROWS * cell,
       border: "2px solid rgba(255,255,255,0.15)",
-      borderRadius: 6,
-      overflow: "hidden",
-      touchAction: "none",
+      borderRadius: 6, overflow: "hidden", touchAction: "none",
     }}>
       <div style={{
         display: "grid",
@@ -254,12 +308,28 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
       </div>
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         {creepMarkers}
-        <ProjectileLayer
-          projectiles={state.projectiles}
-          splashEffects={state.splashEffects}
-          gameTime={state.gameTime}
-          cell={cell}
-        />
+        {/* Projectiles & splash */}
+        {state.splashEffects.map(e =>
+          <SplashRing key={e.id} effect={e} gameTime={state.gameTime} cell={cell} />
+        )}
+        {state.projectiles.map(p => {
+          const progress = Math.min(1, (state.gameTime - p.spawnTime) / p.duration);
+          const x = (p.fromCol + (p.toX - p.fromCol) * progress) * cell + cell / 2;
+          const y = (p.fromRow + (p.toY - p.fromRow) * progress) * cell + cell / 2;
+          const angle = Math.atan2(p.toY - p.fromRow, p.toX - p.fromCol) * (180 / Math.PI);
+          return (
+            <div key={p.id} style={{ position: "absolute", left: x, top: y, pointerEvents: "none" }}>
+              {p.kind === "fireball"
+                ? <FireballMarker progress={progress} />
+                : <ArrowMarker angle={angle} towerType={p.towerType} />
+              }
+            </div>
+          );
+        })}
+        {/* Floating texts */}
+        {state.floatingTexts.map(ft =>
+          <FloatingTextView key={ft.id} ft={ft} gameTime={state.gameTime} cell={cell} />
+        )}
       </div>
     </div>
   );

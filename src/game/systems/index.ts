@@ -4,13 +4,30 @@ import { tickEnemyMovement } from "./enemyMovement";
 import { tickTowerAttack } from "./towerAttack";
 import { tickProjectiles } from "./projectiles";
 import { tickWaveEnd } from "./waveEnd";
+import { tickBuildTimer } from "./buildTimer";
+import { tickFloatingTexts } from "./floatingTexts";
+import { tickPrepCountdown } from "./prepCountdown";
 
 export function tickSystems(state: GameState, dt: number): GameState {
-  let next = { ...state, gameTime: state.gameTime + dt };
-  next = tickCreepSpawn(next, dt);
-  next = tickEnemyMovement(next, dt);
-  next = tickTowerAttack(next);
-  next = tickProjectiles(next);
-  next = tickWaveEnd(next);
-  return next;
+  let s = { ...state, gameTime: state.gameTime + dt };
+  s = tickBuildTimer(s, dt);
+  s = tickCreepSpawn(s, dt);
+  s = tickEnemyMovement(s, dt);
+  s = tickTowerAttack(s);
+  s = tickProjectiles(s);
+  s = tickWaveEnd(s);
+  s = tickFloatingTexts(s);
+  return s;
+}
+
+export function tickPrepSystems(state: GameState, dt: number): GameState {
+  let s = { ...state, gameTime: state.gameTime + dt };
+  s = tickBuildTimer(s, dt);
+  s = tickPrepCountdown(s, dt);
+  s = tickFloatingTexts(s);
+  return s;
+}
+
+export function tickIdleSystems(state: GameState, dt: number): GameState {
+  return tickFloatingTexts({ ...state, gameTime: state.gameTime + dt });
 }

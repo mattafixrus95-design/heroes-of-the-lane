@@ -1,20 +1,57 @@
-import type { GameState, Projectile, SplashEffect } from "../engine/gameState";
+import type { GameState, Projectile, SplashEffect, FloatingText, Creep } from "../engine/gameState";
 import { SLOW_DURATION } from "../engine/gameState";
 
 let effectCounter = 0;
+let ftCounter = 0;
+
+function makeFt(c: Creep, gameTime: number): FloatingText {
+  return {
+    id: `ft-${++ftCounter}`,
+    text: `+${c.reward}`,
+    x: c.position.x,
+    y: c.position.y,
+    color: "#f0c040",
+    spawnTime: gameTime,
+    duration: 1.4,
+  };
+}
+
+function sweepDead(
+  creeps: Creep[],
+  gold: number,
+  killed: number,
+  waveGold: number,
+  texts: FloatingText[],
+  gameTime: number,
+): { creeps: Creep[]; gold: number; killed: number; waveGold: number; texts: FloatingText[] } {
+  const alive: Creep[] = [];
+  for (const c of creeps) {
+    if (c.hp <= 0) {
+      gold += c.reward;
+      killed++;
+      waveGold += c.reward;
+      texts.push(makeFt(c, gameTime));
+    } else {
+      alive.push(c);
+    }
+  }
+  return { creeps: alive, gold, killed, waveGold, texts };
+}
 
 function applyExpired(state: GameState, expired: Projectile[]): GameState {
   if (expired.length === 0) return state;
 
   let creeps = [...state.creeps];
   let gold = state.gold;
+  let killed = state.currentWaveKilled;
+  let waveGold = state.currentWaveGold;
+  let texts: FloatingText[] = [];
   const newSplash: SplashEffect[] = [];
 
   for (const p of expired) {
     const pd = p.pendingDamage;
 
     if (p.kind === "fireball" && pd.explosionAoe) {
-      // Apply main damage to primary target if still alive
       const hasTarget = creeps.some(c => c.id === pd.targetId);
       if (hasTarget) {
         creeps = creeps.map(c => c.id === pd.targetId
@@ -22,17 +59,14 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
           : c,
         );
       }
-      // Explosion splash — always fires even if main target is already dead
       creeps = creeps.map(c => {
         if (c.id === pd.targetId) return c;
         const d = Math.hypot(p.toX - c.position.x, p.toY - c.position.y);
-        return d <= pd.explosionAoe!
-          ? { ...c, hp: c.hp - pd.damage * pd.explosionDmgPct! }
-          : c;
+        return d <= pd.explosionAoe! ? { ...c, hp: c.hp - pd.damage * pd.explosionDmgPct! } : c;
       });
-      // Sweep dead creeps
-      creeps = creeps.filter(c => { if (c.hp <= 0) { gold += c.reward; return false; } return true; });
-      // Visual splash ring
+      const swept = sweepDead(creeps, gold, killed, waveGold, texts, state.gameTime);
+      creeps = swept.creeps; gold = swept.gold; killed = swept.killed;
+      waveGold = swept.waveGold; texts = swept.texts;
       newSplash.push({
         id: `sx-${++effectCounter}`,
         x: p.toX, y: p.toY,
@@ -41,35 +75,38 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
         duration: 0.38,
       });
     } else {
-      // Arrow — apply to specific target if still alive
       const target = creeps.find(c => c.id === pd.targetId);
       if (!target) continue;
       creeps = creeps.map(c => c.id === pd.targetId
         ? { ...c, hp: c.hp - pd.damage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }
         : c,
       );
-      creeps = creeps.filter(c => { if (c.hp <= 0) { gold += c.reward; return false; } return true; });
+      const swept = sweepDead(creeps, gold, killed, waveGold, texts, state.gameTime);
+      creeps = swept.creeps; gold = swept.gold; killed = swept.killed;
+      waveGold = swept.waveGold; texts = swept.texts;
     }
   }
 
-  // Clean up expired splash effects (tick alongside projectiles)
   const splashEffects = [
     ...state.splashEffects.filter(e => state.gameTime - e.spawnTime < e.duration),
     ...newSplash,
   ];
 
-  return { ...state, creeps, gold, splashEffects };
+  return {
+    ...state,
+    creeps, gold, splashEffects,
+    currentWaveKilled: killed,
+    currentWaveGold: waveGold,
+    floatingTexts: [...state.floatingTexts, ...texts],
+  };
 }
 
 export function tickProjectiles(state: GameState): GameState {
   const now = state.gameTime;
   const active: Projectile[] = [];
   const expired: Projectile[] = [];
-
   for (const p of state.projectiles) {
     (now - p.spawnTime >= p.duration ? expired : active).push(p);
   }
-
-  const next = applyExpired({ ...state, projectiles: active }, expired);
-  return next;
+  return applyExpired({ ...state, projectiles: active }, expired);
 }
