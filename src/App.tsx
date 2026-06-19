@@ -23,7 +23,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1 className="title">Tower Lane Chess</h1>
+      <h1 className="title">Heroes of the Lane</h1>
       <HUD state={state} onUpdateState={updateState} />
       <GameGrid state={state} onUpdateState={updateState} />
       {state.phase === "defeat" && (

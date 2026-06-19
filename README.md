@@ -1,4 +1,4 @@
-# Tower Lane Chess
+# Heroes of the Lane
 
 Браузерный tower defense MVP. Vite + React + TypeScript.
 
