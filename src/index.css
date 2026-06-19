@@ -111,6 +111,104 @@ body {
 }
 .shop-cancel:hover { background: rgba(255,80,80,0.35); }
 
+.shop-locked {
+  padding: 10px 20px;
+  color: #f0c040;
+  font-size: 0.9rem;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+/* ── Tower menu ── */
+.tower-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.tower-menu {
+  background: #16213e;
+  border: 2px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  padding: 16px 20px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tm-title { font-weight: 700; font-size: 1rem; }
+
+.tm-close {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.tm-close:hover { color: #fff; }
+
+.tm-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #ccc;
+}
+
+.tm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tm-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.tm-btn:hover  { opacity: 0.88; transform: scale(1.02); }
+.tm-btn:active { transform: scale(0.98); }
+
+.tm-btn.upgrade { background: #f0c040; color: #1a1a2e; }
+.tm-btn.sell    { background: rgba(255,255,255,0.1); color: #eee; }
+
+.tm-btn-cost { font-size: 0.8rem; opacity: 0.85; }
+
+.tm-maxed {
+  color: #f0c040;
+  font-size: 0.85rem;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* ── HUD reset btn ── */
+.hud-btn.reset {
+  background: rgba(255,80,80,0.2);
+  color: #ff9999;
+  border: 1px solid rgba(255,80,80,0.3);
+}
+
 /* ── Overlay ── */
 .overlay {
   position: fixed;

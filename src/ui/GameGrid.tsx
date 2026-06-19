@@ -3,38 +3,31 @@ import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data/map";
 
-const CELL = 56; // px per tile
+const CELL = 56;
 
 interface Props {
   state: GameState;
   selectedTower: TowerType | null;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onClearSelection: () => void;
+  onSelectTowerId: (id: string) => void;
 }
 
 function placeTower(col: number, row: number, type: TowerType, state: GameState): GameState {
   const def = TOWER_DEFS[type];
-  if (state.gold < def.cost) return state;
+  if (state.gold < def.purchaseCost) return state;
   if (state.towers.some(t => t.col === col && t.row === row)) return state;
+  const g = def.grades[0];
   const tower: Tower = {
     id: `t-${Date.now()}-${Math.random()}`,
     type, col, row,
-    damage: def.damage, range: def.range,
-    attackSpeed: def.attackSpeed, cost: def.cost,
-    sellValue: def.sellValue, aoe: def.aoe,
+    gradeIndex: 0,
+    damage: g.damage, range: g.range, attackSpeed: g.attackSpeed,
+    aoe: g.aoe, aoeDmgPct: g.aoeDmgPct, slow: g.slow,
+    totalInvested: def.purchaseCost,
     lastAttackTime: -999,
   };
-  return { ...state, gold: state.gold - def.cost, towers: [...state.towers, tower] };
-}
-
-function sellTower(id: string, state: GameState): GameState {
-  const tower = state.towers.find(t => t.id === id);
-  if (!tower) return state;
-  return {
-    ...state,
-    gold: state.gold + tower.sellValue,
-    towers: state.towers.filter(t => t.id !== id),
-  };
+  return { ...state, gold: state.gold - def.purchaseCost, towers: [...state.towers, tower] };
 }
 
 function cellBg(col: number, row: number, isPath: boolean): string {
@@ -43,22 +36,24 @@ function cellBg(col: number, row: number, isPath: boolean): string {
   return isPath ? "#c8a84a" : "#4a7c59";
 }
 
-export default function GameGrid({ state, selectedTower, onUpdateState, onClearSelection }: Props) {
+export default function GameGrid({ state, selectedTower, onUpdateState, onClearSelection, onSelectTowerId }: Props) {
+  const waveActive = state.phase === "wave";
+
   const cells = [];
   for (let r = 0; r < GRID_ROWS; r++) {
     for (let c = 0; c < GRID_COLS; c++) {
-      const isPath = isPathCell(c, r);
-      const tower  = state.towers.find(t => t.col === c && t.row === r);
+      const isPath  = isPathCell(c, r);
+      const tower   = state.towers.find(t => t.col === c && t.row === r);
       const isEntry = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
       const isExit  = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
+      const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
 
       const handleClick = () => {
-        if (isPath && !tower) return;
         if (tower) {
-          // always sell on click
-          onUpdateState(s => sellTower(tower.id, s));
+          // Always open the menu for placed towers
+          onSelectTowerId(tower.id);
           onClearSelection();
-        } else if (selectedTower) {
+        } else if (!isPath && !waveActive && selectedTower) {
           onUpdateState(s => placeTower(c, r, selectedTower, s));
         }
       };
@@ -71,21 +66,26 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
             width: CELL, height: CELL,
             background: cellBg(c, r, isPath),
             border: "1px solid rgba(0,0,0,0.15)",
-            cursor: isPath && !tower ? "default" : "pointer",
+            cursor: tower ? "pointer" : (isPath || waveActive) ? "default" : selectedTower ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "1.6rem",
+            fontSize: "1.5rem",
             position: "relative",
           }}
-          title={
-            tower
-              ? `${TOWER_DEFS[tower.type].name} — клик чтобы продать (+${tower.sellValue}💰)`
-              : isEntry ? "Вход G" : isExit ? "Выход C"
-              : selectedTower ? `Поставить ${TOWER_DEFS[selectedTower].name}` : ""
-          }
         >
-          {isEntry && !tower && <span style={{ fontSize: "0.65rem", fontWeight: 800, color: "#fff" }}>G</span>}
-          {isExit  && !tower && <span style={{ fontSize: "0.65rem", fontWeight: 800, color: "#fff" }}>C</span>}
-          {tower && TOWER_DEFS[tower.type].emoji}
+          {isEntry && !tower && <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "#fff" }}>G</span>}
+          {isExit  && !tower && <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "#fff" }}>C</span>}
+          {tower && (
+            <span style={{ position: "relative" }}>
+              {TOWER_DEFS[tower.type].emoji}
+              {!isMaxGrade && (
+                <span style={{
+                  position: "absolute", top: -6, right: -8,
+                  fontSize: "0.55rem", background: "#f0c040", color: "#1a1a2e",
+                  borderRadius: 3, padding: "1px 3px", fontWeight: 800,
+                }}>⬆</span>
+              )}
+            </span>
+          )}
         </div>
       );
     }
@@ -95,6 +95,7 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
     const x = e.position.x * CELL + CELL / 2;
     const y = e.position.y * CELL + CELL / 2;
     const hpPct = e.hp / e.maxHp;
+    const isSlowed = e.slowTimer > 0;
     return (
       <div
         key={e.id}
@@ -111,7 +112,7 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
             background: hpPct > 0.5 ? "#4caf50" : "#f44336",
           }} />
         </div>
-        <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>👾</span>
+        <span style={{ fontSize: "1.1rem", lineHeight: 1, filter: isSlowed ? "hue-rotate(180deg)" : "none" }}>👾</span>
       </div>
     );
   });

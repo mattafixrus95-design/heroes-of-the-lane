@@ -8,8 +8,10 @@ export interface Creep {
   id: string;
   hp: number;
   maxHp: number;
-  pathProgress: number; // continuous 0..PATH.length-1
-  position: Point;      // tile-space for rendering
+  pathProgress: number;
+  position: Point;
+  slowFactor: number; // 0 = not slowed, 0.25 = 25% slower
+  slowTimer: number;  // seconds remaining on slow effect
 }
 
 export interface Tower {
@@ -17,13 +19,15 @@ export interface Tower {
   type: TowerType;
   col: number;
   row: number;
+  gradeIndex: number;    // 0 = base, 1 = upgraded
   damage: number;
   range: number;
   attackSpeed: number;
-  cost: number;
-  sellValue: number;
   aoe: number;
-  lastAttackTime: number; // gameTime (seconds) of last attack
+  aoeDmgPct: number;
+  slow: number;
+  totalInvested: number; // gold spent (purchase + upgrades), used for sell calculation
+  lastAttackTime: number;
 }
 
 export interface GameState {
@@ -34,16 +38,18 @@ export interface GameState {
   creeps: Creep[];
   towers: Tower[];
   isPaused: boolean;
-  gameTime: number;   // seconds elapsed (cumulative)
-  toSpawn: number;    // creeps remaining to spawn this wave
-  spawnTimer: number; // seconds until next spawn
+  gameTime: number;
+  toSpawn: number;
+  spawnTimer: number;
 }
 
-export const STARTING_GOLD   = 200;
-export const STARTING_LIVES  = 20;
-export const TOTAL_CREEPS    = 30;
-export const SPAWN_INTERVAL  = 0.5; // one creep every 500 ms
-export const CREEP_REWARD    = 5;
+export const STARTING_GOLD  = 200;
+export const STARTING_LIVES = 20;
+export const TOTAL_CREEPS   = 30;
+export const SPAWN_INTERVAL = 0.5;
+export const CREEP_REWARD   = 5;
+export const SLOW_DURATION  = 1.5; // seconds a slow effect lasts
+export const SELL_RATE      = 0.7; // 70% refund
 
 export function createInitialState(): GameState {
   return {

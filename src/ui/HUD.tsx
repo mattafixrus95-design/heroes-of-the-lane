@@ -1,14 +1,17 @@
 import type { GameState } from "../game/engine/gameState";
 import { startWave } from "../game/entities/spawnWave";
+import { createInitialState } from "../game/engine/gameState";
 
 interface Props {
   state: GameState;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
+  onReset: () => void;
 }
 
-export default function HUD({ state, onUpdateState }: Props) {
+export default function HUD({ state, onUpdateState, onReset }: Props) {
   const canStart = state.phase === "idle";
   const remaining = state.creeps.length + state.toSpawn;
+  void createInitialState; // imported for reset reference in parent
 
   return (
     <div className="hud">
@@ -32,6 +35,10 @@ export default function HUD({ state, onUpdateState }: Props) {
           {state.isPaused ? "▶ Продолжить" : "⏸ Пауза"}
         </button>
       )}
+
+      <button className="hud-btn reset" onClick={onReset}>
+        🔄 Reset
+      </button>
     </div>
   );
 }

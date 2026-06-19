@@ -12,6 +12,8 @@ function makeCreep(): Creep {
     maxHp: 10,
     pathProgress: 0,
     position: { x: cx, y: cy },
+    slowFactor: 0,
+    slowTimer: 0,
   };
 }
 
