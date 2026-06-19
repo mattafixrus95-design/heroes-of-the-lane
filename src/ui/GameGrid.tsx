@@ -135,8 +135,8 @@ function SplashRing({ effect, gameTime, cell }: { effect: import("../game/engine
 function FloatingTextView({ ft, gameTime, cell }: { ft: FloatingText; gameTime: number; cell: number }) {
   const age = gameTime - ft.spawnTime;
   const t = Math.min(1, age / ft.duration);
-  const opacity = 1 - t;
-  const yOff = -t * cell * 1.2;
+  const opacity = ft.large ? (t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4) : 1 - t;
+  const yOff = -t * cell * (ft.large ? 1.8 : 1.2);
   const x = ft.x * cell + cell / 2;
   const y = ft.y * cell + cell / 2;
   return (
@@ -144,11 +144,14 @@ function FloatingTextView({ ft, gameTime, cell }: { ft: FloatingText; gameTime: 
       position: "absolute",
       left: x, top: y + yOff,
       transform: "translateX(-50%)",
-      fontSize: "0.8rem", fontWeight: 800,
+      fontSize: ft.large ? "1.6rem" : "0.8rem",
+      fontWeight: 800,
       color: ft.color,
       opacity,
       pointerEvents: "none",
-      textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+      textShadow: ft.large
+        ? "0 0 12px rgba(240,192,64,0.7), 0 2px 4px rgba(0,0,0,0.9)"
+        : "0 1px 3px rgba(0,0,0,0.8)",
       whiteSpace: "nowrap",
     }}>
       {ft.text}

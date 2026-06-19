@@ -17,11 +17,12 @@ function waveBonus(wave: number): number {
 function bonusText(bonus: number, gameTime: number): FloatingText {
   return {
     id: `ft-wavebonus-${Date.now()}`,
-    text: `+${bonus}💰`,
-    x: 9, y: 8,
+    text: `+${bonus}`,
+    x: 4.5, y: 3.5,
     color: "#f0c040",
     spawnTime: gameTime,
     duration: 2.5,
+    large: true,
   };
 }
 

@@ -95,6 +95,7 @@ export interface FloatingText {
   color: string;
   spawnTime: number;
   duration: number;
+  large?: boolean;
 }
 
 export interface WaveStat {
