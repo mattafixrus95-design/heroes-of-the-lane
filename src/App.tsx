@@ -8,6 +8,7 @@ import type { ShopItem } from "./ui/TowerShop";
 import GameGrid from "./ui/GameGrid";
 import TowerMenu from "./ui/TowerMenu";
 import FarmMenu from "./ui/FarmMenu";
+import FarmPanel from "./ui/FarmPanel";
 import StatsOverlay from "./ui/StatsOverlay";
 import "./index.css";
 
@@ -69,13 +70,13 @@ export default function App() {
         waveActive={state.phase === "wave"}
         onSelect={setSelectedItem}
       />
+      <FarmPanel farms={state.farms} onSelectFarmId={handleSelectFarmId} />
       <GameGrid
         state={state}
         selectedItem={selectedItem}
         onUpdateState={updateState}
         onClearSelection={() => setSelectedItem(null)}
         onSelectTowerId={handleSelectTowerId}
-        onSelectFarmId={handleSelectFarmId}
       />
       {menuTower && !showStats && (
         <TowerMenu

@@ -51,8 +51,6 @@ export interface Tower {
 
 export interface Farm {
   id: string;
-  col: number;
-  row: number;
   foodProduced: number;  // суммарно еды выдано
   totalInvested: number; // суммарно потрачено золота
 }
@@ -145,7 +143,7 @@ export function createInitialState(): GameState {
     food: STARTING_FOOD,
     creeps: [],
     towers: [],
-    farms: [{ id: "farm-default", col: 8, row: 1, foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: FARM_COST }],
+    farms: [{ id: "farm-default", foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: FARM_COST }],
     projectiles: [],
     splashEffects: [],
     floatingTexts: [],

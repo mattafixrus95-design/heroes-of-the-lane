@@ -29,14 +29,12 @@ interface Props {
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onClearSelection: () => void;
   onSelectTowerId: (id: string) => void;
-  onSelectFarmId: (id: string) => void;
 }
 
 function placeTower(col: number, row: number, type: TowerType, state: GameState): GameState {
   const def = TOWER_DEFS[type];
   if (state.gold < def.purchaseCost || state.food < def.foodCost) return state;
   if (state.towers.some(t => t.col === col && t.row === row)) return state;
-  if (state.farms.some(f => f.col === col && f.row === row)) return state;
   const g = def.grades[0];
   const tower: Tower = {
     id: `t-${Date.now()}-${Math.random()}`,
@@ -159,7 +157,7 @@ function FloatingTextView({ ft, gameTime, cell }: { ft: FloatingText; gameTime: 
   );
 }
 
-export default function GameGrid({ state, selectedItem, onUpdateState, onClearSelection, onSelectTowerId, onSelectFarmId }: Props) {
+export default function GameGrid({ state, selectedItem, onUpdateState, onClearSelection, onSelectTowerId }: Props) {
   const cell = useCell();
   const waveActive = state.phase === "wave";
   const canBuild = state.phase !== "wave"; // разрешено и в idle и в prep
@@ -172,7 +170,6 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
     for (let c = 0; c < GRID_COLS; c++) {
       const isPath  = isPathCell(c, r);
       const tower   = state.towers.find(t => t.col === c && t.row === r);
-      const farm    = state.farms.find(f => f.col === c && f.row === r);
       const isEntry = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
       const isExit  = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
@@ -180,9 +177,6 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
       const handleClick = () => {
         if (tower) {
           onSelectTowerId(tower.id);
-          onClearSelection();
-        } else if (farm) {
-          onSelectFarmId(farm.id);
           onClearSelection();
         } else if (!isPath && canBuild && selectedItem) {
           onUpdateState(s => placeTower(c, r, selectedItem, s));
@@ -199,7 +193,7 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
             border: isPath
               ? "1px solid rgba(80,55,25,0.45)"
               : "1px solid rgba(25,70,35,0.35)",
-            cursor: (tower || farm) ? "pointer"
+            cursor: tower ? "pointer"
               : (isPath || waveActive) ? "default"
               : selectedItem ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -207,8 +201,8 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
             touchAction: "manipulation",
           }}
         >
-          {isEntry && !tower && !farm && <GateSVG size={iconSize} />}
-          {isExit  && !tower && !farm && <CastleSVG size={iconSize} />}
+          {isEntry && !tower && <GateSVG size={iconSize} />}
+          {isExit  && !tower && <CastleSVG size={iconSize} />}
 
           {/* Башня */}
           {tower && (
@@ -236,18 +230,7 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
             </span>
           )}
 
-          {/* Ферма */}
-          {farm && !tower && (
-            <span style={{ fontSize: `${Math.max(0.8, cell / 40)}rem`, lineHeight: 1 }}>
-              🌾
-              <span style={{
-                position: "absolute", bottom: 1, right: 2,
-                fontSize: "0.45rem", color: "#8bc34a", fontWeight: 800,
-              }}>
-                +{farm.foodProduced}
-              </span>
-            </span>
-          )}
+
         </div>
       );
     }

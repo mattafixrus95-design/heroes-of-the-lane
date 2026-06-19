@@ -10,8 +10,8 @@ interface Props {
   onClose: () => void;
 }
 
-function ft(text: string, x: number, y: number, color: string, gameTime: number): FloatingText {
-  return { id: `ft-${Date.now()}`, text, x, y, color, spawnTime: gameTime, duration: 1.4 };
+function ft(text: string, color: string, gameTime: number): FloatingText {
+  return { id: `ft-${Date.now()}-${Math.random().toString(36).slice(2)}`, text, x: 4.5, y: 4, color, spawnTime: gameTime, duration: 1.4 };
 }
 
 function applyFarmUpgrade(id: string, state: GameState): GameState {
@@ -28,8 +28,8 @@ function applyFarmUpgrade(id: string, state: GameState): GameState {
     food: state.food + FARM_FOOD_PER_LEVEL,
     farms: state.farms.map(f => f.id === id ? newFarm : f),
     floatingTexts: [...state.floatingTexts,
-      ft(`+${FARM_FOOD_PER_LEVEL}🌾`, farm.col, farm.row, "#8bc34a", state.gameTime),
-      ft(`-${FARM_UPGRADE_COST}💰`, farm.col, farm.row - 0.5, "#ff8080", state.gameTime),
+      ft(`+${FARM_FOOD_PER_LEVEL}`, "#8bc34a", state.gameTime),
+      ft(`-${FARM_UPGRADE_COST}`, "#ff8080", state.gameTime),
     ],
   };
 }
@@ -37,7 +37,7 @@ function applyFarmUpgrade(id: string, state: GameState): GameState {
 function applyFarmSell(id: string, state: GameState): GameState {
   const farm = state.farms.find(f => f.id === id);
   if (!farm) return state;
-  if (state.food < farm.foodProduced) return state; // не хватит еды после продажи
+  if (state.food < farm.foodProduced) return state;
   const value = Math.floor(farm.totalInvested * SELL_RATE);
   return {
     ...state,
@@ -45,7 +45,7 @@ function applyFarmSell(id: string, state: GameState): GameState {
     food: state.food - farm.foodProduced,
     farms: state.farms.filter(f => f.id !== id),
     floatingTexts: [...state.floatingTexts,
-      ft(`+${value}💰`, farm.col, farm.row, "#f0c040", state.gameTime),
+      ft(`+${value}`, "#f0c040", state.gameTime),
     ],
   };
 }
@@ -54,18 +54,19 @@ export default function FarmMenu({ farm, gold, food, waveActive, onUpdateState, 
   const canUpgrade = gold >= FARM_UPGRADE_COST && !waveActive;
   const canSell = !waveActive && food >= farm.foodProduced;
   const sellValue = Math.floor(farm.totalInvested * SELL_RATE);
+  const level = Math.round(farm.foodProduced / FARM_FOOD_PER_LEVEL);
 
   return (
     <div className="tower-menu-overlay" onClick={onClose}>
       <div className="tower-menu" onClick={e => e.stopPropagation()}>
         <div className="tm-header">
-          <span className="tm-title">🌾 Ферма</span>
+          <span className="tm-title">Ферма ур.{level}</span>
           <button className="tm-close" onClick={onClose}>✕</button>
         </div>
 
         <div className="tm-stats">
-          <span>🌾 +{farm.foodProduced} еды выдано</span>
-          <span>💰 {farm.totalInvested} вложено</span>
+          <span>+{farm.foodProduced} еды</span>
+          <span>{farm.totalInvested} вложено</span>
         </div>
 
         <div className="tm-actions">
@@ -74,9 +75,9 @@ export default function FarmMenu({ farm, gold, food, waveActive, onUpdateState, 
             disabled={!canUpgrade}
             onClick={() => { onUpdateState(s => applyFarmUpgrade(farm.id, s)); onClose(); }}
           >
-            ⬆ Улучшить (+15🌾)
+            Улучшить (+{FARM_FOOD_PER_LEVEL} еды)
             <span className="tm-btn-cost">
-              💰 {FARM_UPGRADE_COST}
+              {FARM_UPGRADE_COST}
               {waveActive ? " (волна)" : gold < FARM_UPGRADE_COST ? " (недост.)" : ""}
             </span>
           </button>
@@ -88,7 +89,7 @@ export default function FarmMenu({ farm, gold, food, waveActive, onUpdateState, 
           >
             Продать
             <span className="tm-btn-cost">
-              {!canSell && !waveActive ? "(мало еды)" : waveActive ? "(волна)" : `+${sellValue}💰`}
+              {!canSell && !waveActive ? "(мало еды)" : waveActive ? "(волна)" : `+${sellValue}`}
             </span>
           </button>
         </div>
