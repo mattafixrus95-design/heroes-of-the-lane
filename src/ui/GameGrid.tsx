@@ -6,6 +6,7 @@ import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data
 import GateSVG from "../assets/GateSVG";
 import CastleSVG from "../assets/CastleSVG";
 import TowerIcon from "./TowerIcon";
+import { CREEP_DEFS } from "../data/waves";
 
 const MAX_CELL = 56;
 
@@ -199,12 +200,16 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
     }
   }
 
-  const creepSize = Math.max(16, Math.round(cell * 0.5));
+  const baseCreepSize = Math.max(16, Math.round(cell * 0.5));
   const creepMarkers = state.creeps.map(e => {
     const x = e.position.x * cell + cell / 2;
     const y = e.position.y * cell + cell / 2;
     const hpPct = e.hp / e.maxHp;
     const isSlowed = e.slowTimer > 0;
+    const isBoss = e.kind === "minotaur_king";
+    const creepSize = isBoss ? Math.round(baseCreepSize * 1.6) : baseCreepSize;
+    const def = CREEP_DEFS[e.kind];
+    const hpBarColor = e.regenPerSec > 0 ? "#8bc34a" : (hpPct > 0.5 ? "#4caf50" : "#f44336");
     return (
       <div
         key={e.id}
@@ -215,17 +220,17 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
           display: "flex", flexDirection: "column", alignItems: "center",
         }}
       >
-        <div style={{ width: "100%", height: 3, background: "#333", borderRadius: 2, marginBottom: 1 }}>
+        <div style={{ width: "100%", height: isBoss ? 4 : 3, background: "#333", borderRadius: 2, marginBottom: 1 }}>
           <div style={{
             width: `${hpPct * 100}%`, height: "100%", borderRadius: 2,
-            background: hpPct > 0.5 ? "#4caf50" : "#f44336",
+            background: hpBarColor,
           }}/>
         </div>
         <span style={{
-          fontSize: `${Math.max(0.6, cell / 56)}rem`,
+          fontSize: `${Math.max(0.6, (isBoss ? cell * 1.3 : cell) / 56)}rem`,
           lineHeight: 1,
           filter: isSlowed ? "hue-rotate(180deg)" : "none",
-        }}>👾</span>
+        }}>{def.emoji}</span>
       </div>
     );
   });

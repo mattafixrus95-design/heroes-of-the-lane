@@ -11,7 +11,7 @@ interface Props {
 
 export default function HUD({ state, onUpdateState, onReset }: Props) {
   const canStart = state.phase === "idle";
-  const remaining = state.creeps.length + state.toSpawn;
+  const remaining = state.creeps.length + state.spawnQueue.length;
   void createInitialState; // imported for reset reference in parent
 
   return (

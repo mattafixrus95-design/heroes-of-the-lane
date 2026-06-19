@@ -1,5 +1,5 @@
 import type { GameState, Projectile, SplashEffect } from "../engine/gameState";
-import { CREEP_REWARD, SLOW_DURATION } from "../engine/gameState";
+import { SLOW_DURATION } from "../engine/gameState";
 
 let effectCounter = 0;
 
@@ -31,7 +31,7 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
           : c;
       });
       // Sweep dead creeps
-      creeps = creeps.filter(c => { if (c.hp <= 0) { gold += CREEP_REWARD; return false; } return true; });
+      creeps = creeps.filter(c => { if (c.hp <= 0) { gold += c.reward; return false; } return true; });
       // Visual splash ring
       newSplash.push({
         id: `sx-${++effectCounter}`,
@@ -48,7 +48,7 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
         ? { ...c, hp: c.hp - pd.damage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }
         : c,
       );
-      creeps = creeps.filter(c => { if (c.hp <= 0) { gold += CREEP_REWARD; return false; } return true; });
+      creeps = creeps.filter(c => { if (c.hp <= 0) { gold += c.reward; return false; } return true; });
     }
   }
 

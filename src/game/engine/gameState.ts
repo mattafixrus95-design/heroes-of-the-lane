@@ -2,12 +2,25 @@ import type { TowerType } from "../../data/towers";
 
 export type Phase = "idle" | "wave" | "defeat";
 
+export type CreepKind =
+  | "imp" | "pikeman" | "wolf_rider"
+  | "zombie" | "minotaur" | "minotaur_king";
+
+export interface SpawnEntry {
+  kind: CreepKind;
+  delay: number; // seconds to wait after previous spawn before this one
+}
+
 export interface Point { x: number; y: number; }
 
 export interface Creep {
   id: string;
+  kind: CreepKind;
   hp: number;
   maxHp: number;
+  speed: number;       // tiles per second
+  regenPerSec: number; // HP per second
+  reward: number;      // gold on kill
   pathProgress: number;
   position: Point;
   slowFactor: number;
@@ -30,12 +43,10 @@ export interface Tower {
   lastAttackTime: number;
 }
 
-// Damage that will be applied when the projectile arrives
 export interface PendingDamage {
-  targetId: string;    // main creep ID (may be dead on arrival — OK for splash)
-  damage: number;      // damage to main target
-  slow: number;        // slow factor for main target
-  // Fireball only: apply explosion to all creeps near impact point
+  targetId: string;
+  damage: number;
+  slow: number;
   explosionAoe?: number;
   explosionDmgPct?: number;
 }
@@ -45,7 +56,7 @@ export interface Projectile {
   towerType: TowerType;
   fromCol: number;
   fromRow: number;
-  toX: number;          // target tile-space x (creep position at fire time)
+  toX: number;
   toY: number;
   kind: "arrow" | "fireball";
   spawnTime: number;
@@ -53,12 +64,11 @@ export interface Projectile {
   pendingDamage: PendingDamage;
 }
 
-// Short-lived visual splash ring shown on fireball impact
 export interface SplashEffect {
   id: string;
-  x: number;          // tile-space centre
+  x: number;
   y: number;
-  radius: number;     // tile-space radius (for sizing the ring)
+  radius: number;
   spawnTime: number;
   duration: number;
 }
@@ -74,15 +84,12 @@ export interface GameState {
   splashEffects: SplashEffect[];
   isPaused: boolean;
   gameTime: number;
-  toSpawn: number;
+  spawnQueue: SpawnEntry[];
   spawnTimer: number;
 }
 
 export const STARTING_GOLD  = 200;
 export const STARTING_LIVES = 20;
-export const TOTAL_CREEPS   = 30;
-export const SPAWN_INTERVAL = 0.5;
-export const CREEP_REWARD   = 5;
 export const SLOW_DURATION  = 1.5;
 export const SELL_RATE      = 0.7;
 
@@ -98,7 +105,7 @@ export function createInitialState(): GameState {
     splashEffects: [],
     isPaused: false,
     gameTime: 0,
-    toSpawn: 0,
+    spawnQueue: [],
     spawnTimer: 0,
   };
 }
