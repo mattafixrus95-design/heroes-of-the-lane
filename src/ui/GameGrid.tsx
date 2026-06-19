@@ -1,6 +1,6 @@
 import type { GameState, Tower } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
-import { TOWER_DEFS } from "../data/towers";
+import { TOWER_DEFS, gradeEmoji } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data/map";
 
 const CELL = 56;
@@ -74,9 +74,11 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
         >
           {isEntry && !tower && <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "#fff" }}>G</span>}
           {isExit  && !tower && <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "#fff" }}>C</span>}
-          {tower && (
+          {tower && (() => {
+            const { emoji, filter } = gradeEmoji(tower.type, tower.gradeIndex);
+            return (
             <span style={{ position: "relative" }}>
-              {TOWER_DEFS[tower.type].emoji}
+              <span style={{ filter }}>{emoji}</span>
               {!isMaxGrade && (
                 <span style={{
                   position: "absolute", top: -6, right: -8,
@@ -85,7 +87,8 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
                 }}>⬆</span>
               )}
             </span>
-          )}
+            );
+          })()}
         </div>
       );
     }

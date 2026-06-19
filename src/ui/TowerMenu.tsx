@@ -1,9 +1,10 @@
 import type { GameState, Tower } from "../game/engine/gameState";
 import { SELL_RATE } from "../game/engine/gameState";
-import { TOWER_DEFS } from "../data/towers";
+import { TOWER_DEFS, gradeEmoji } from "../data/towers";
 
 interface Props {
   tower: Tower;
+  gold: number;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onClose: () => void;
 }
@@ -40,17 +41,22 @@ function applySell(id: string, state: GameState): GameState {
   };
 }
 
-export default function TowerMenu({ tower, onUpdateState, onClose }: Props) {
+export default function TowerMenu({ tower, gold, onUpdateState, onClose }: Props) {
   const def = TOWER_DEFS[tower.type];
   const currentGrade = def.grades[tower.gradeIndex];
   const nextGrade = def.grades[tower.gradeIndex + 1] ?? null;
   const sellValue = Math.floor(tower.totalInvested * SELL_RATE);
+  const { emoji, filter } = gradeEmoji(tower.type, tower.gradeIndex);
+  const canAffordUpgrade = nextGrade ? gold >= nextGrade.upgradeCost : false;
 
   return (
     <div className="tower-menu-overlay" onClick={onClose}>
       <div className="tower-menu" onClick={e => e.stopPropagation()}>
         <div className="tm-header">
-          <span className="tm-title">{def.emoji} {def.name} · {currentGrade.gradeName}</span>
+          <span className="tm-title">
+            <span style={{ filter }}>{emoji}</span>
+            {" "}{def.name} · {currentGrade.gradeName}
+          </span>
           <button className="tm-close" onClick={onClose}>✕</button>
         </div>
 
@@ -66,10 +72,14 @@ export default function TowerMenu({ tower, onUpdateState, onClose }: Props) {
           {nextGrade ? (
             <button
               className="tm-btn upgrade"
+              disabled={!canAffordUpgrade}
               onClick={() => { onUpdateState(s => applyUpgrade(tower.id, s)); onClose(); }}
             >
               ⬆️ {nextGrade.gradeName}
-              <span className="tm-btn-cost">💰 {nextGrade.upgradeCost}</span>
+              <span className="tm-btn-cost">
+                💰 {nextGrade.upgradeCost}
+                {!canAffordUpgrade && " (недостаточно)"}
+              </span>
             </button>
           ) : (
             <div className="tm-maxed">★ Макс. грейд</div>

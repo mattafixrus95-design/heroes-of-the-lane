@@ -56,6 +56,7 @@ export default function App() {
       {menuTower && (
         <TowerMenu
           tower={menuTower}
+          gold={state.gold}
           onUpdateState={updateState}
           onClose={() => setSelectedTowerId(null)}
         />

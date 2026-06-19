@@ -1,5 +1,5 @@
 import type { TowerType } from "../data/towers";
-import { TOWER_DEFS } from "../data/towers";
+import { TOWER_DEFS, gradeEmoji } from "../data/towers";
 
 interface Props {
   gold: number;
@@ -23,7 +23,7 @@ export default function TowerShop({ gold, selected, waveActive, onSelect }: Prop
             onClick={() => canAfford && onSelect(isSelected ? null : def.type)}
             disabled={!canAfford && !isSelected}
           >
-            <span className="shop-emoji">{def.emoji}</span>
+            <span className="shop-emoji" style={{ filter: gradeEmoji(def.type, 0).filter }}>{gradeEmoji(def.type, 0).emoji}</span>
             <span className="shop-name">{def.name} · {base.gradeName}</span>
             <span className="shop-stat">⚔️ {base.damage}{base.aoe > 0 ? ` AoE${base.aoe}` : ""}</span>
             <span className="shop-stat">🎯 {base.range} &nbsp; ⚡ {base.attackSpeed}/с</span>

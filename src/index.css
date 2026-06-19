@@ -191,6 +191,7 @@ body {
 .tm-btn:active { transform: scale(0.98); }
 
 .tm-btn.upgrade { background: #f0c040; color: #1a1a2e; }
+.tm-btn.upgrade:disabled { background: rgba(240,192,64,0.25); color: #888; cursor: not-allowed; transform: none; }
 .tm-btn.sell    { background: rgba(255,255,255,0.1); color: #eee; }
 
 .tm-btn-cost { font-size: 0.8rem; opacity: 0.85; }
