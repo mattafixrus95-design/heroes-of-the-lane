@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import type { GameState, Tower, Farm, FloatingText } from "../game/engine/gameState";
-import { FARM_COST, FARM_FOOD_PER_LEVEL } from "../game/engine/gameState";
+import type { GameState, Tower, FloatingText } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data/map";
@@ -62,27 +61,6 @@ function placeTower(col: number, row: number, type: TowerType, state: GameState)
   };
 }
 
-function placeFarm(col: number, row: number, state: GameState): GameState {
-  if (state.gold < FARM_COST) return state;
-  if (state.towers.some(t => t.col === col && t.row === row)) return state;
-  if (state.farms.some(f => f.col === col && f.row === row)) return state;
-  const farm: Farm = {
-    id: `f-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    col, row,
-    foodProduced: FARM_FOOD_PER_LEVEL,
-    totalInvested: FARM_COST,
-  };
-  return {
-    ...state,
-    gold: state.gold - FARM_COST,
-    food: state.food + FARM_FOOD_PER_LEVEL,
-    farms: [...state.farms, farm],
-    floatingTexts: [...state.floatingTexts, {
-      id: `ft-${Date.now()}`, text: `+${FARM_FOOD_PER_LEVEL}🌾`,
-      x: col, y: row, color: "#8bc34a", spawnTime: state.gameTime, duration: 1.4,
-    }],
-  };
-}
 
 // Ячейки дороги с особым направлением (из PATH в map.ts)
 const PATH_CORNER   = new Set(["9,0","9,2","0,2","0,4","9,4","9,6","0,6","0,8"]);
@@ -203,10 +181,8 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
         } else if (farm) {
           onSelectFarmId(farm.id);
           onClearSelection();
-        } else if (!isPath && canBuild && selectedItem === "farm") {
-          onUpdateState(s => placeFarm(c, r, s));
-        } else if (!isPath && canBuild && selectedItem && selectedItem !== "farm") {
-          onUpdateState(s => placeTower(c, r, selectedItem as TowerType, s));
+        } else if (!isPath && canBuild && selectedItem) {
+          onUpdateState(s => placeTower(c, r, selectedItem, s));
         }
       };
 

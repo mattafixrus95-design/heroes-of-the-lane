@@ -141,7 +141,7 @@ export function createInitialState(): GameState {
     food: STARTING_FOOD,
     creeps: [],
     towers: [],
-    farms: [],
+    farms: [{ id: "farm-default", col: 8, row: 1, foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: FARM_COST }],
     projectiles: [],
     splashEffects: [],
     floatingTexts: [],
