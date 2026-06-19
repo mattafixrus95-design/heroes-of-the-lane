@@ -54,7 +54,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Благородный",
-        damage: 8, range: 4, attackSpeed: 1.00, aoe: 2, aoeDmgPct: 0.35, slow: 0,
+        damage: 8, range: 4, attackSpeed: 1.20, aoe: 2, aoeDmgPct: 0.35, slow: 0,
         upgradeCost: 100, upgradeTime: 5, foodUpgradeCost: 2,
       },
     ],

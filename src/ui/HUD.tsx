@@ -18,7 +18,7 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
       <div className="hud-stat">💰 {gold}</div>
       <div className="hud-stat">❤️ {lives}</div>
       <div className="hud-stat">🌾 {food}</div>
-      <div className="hud-stat">🌊 {wave}/10</div>
+      <div className="hud-stat">🌊 {wave}/20</div>
 
       {phase === "idle" && (
         <button className="hud-btn" onClick={() => onUpdateState(startWave)}>

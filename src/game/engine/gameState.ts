@@ -3,14 +3,15 @@ import type { TowerType } from "../../data/towers";
 export type Phase = "idle" | "prep" | "wave" | "defeat" | "victory";
 
 export type CreepKind =
-  // Волны 1-10 (T1-T3)
+  // Волны 1-9 (T1-T3)
   | "imp" | "goblin" | "pikeman"
   | "wolf_rider" | "zombie"
   | "orc" | "wight" | "minotaur" | "golem"
-  // Волна 10 — босс
+  // Волна 10 (T6)
   | "angel"
-  // Волны 11+ (T4-T7, зарезервировано)
-  | "minotaur_king" | "cavalier" | "pit_lord" | "titan" | "behemoth" | "black_dragon";
+  // Волны 11-20 (T4-T7)
+  | "ogr" | "crusader" | "vampire_lord" | "pit_lord" | "roc"
+  | "lich" | "devil" | "titan" | "black_dragon" | "archangel";
 
 export interface SpawnEntry {
   kind: CreepKind;
