@@ -1,6 +1,7 @@
 import type { GameState, Tower } from "../game/engine/gameState";
 import { SELL_RATE } from "../game/engine/gameState";
-import { TOWER_DEFS, gradeEmoji } from "../data/towers";
+import { TOWER_DEFS } from "../data/towers";
+import TowerIcon from "./TowerIcon";
 
 interface Props {
   tower: Tower;
@@ -46,7 +47,6 @@ export default function TowerMenu({ tower, gold, onUpdateState, onClose }: Props
   const currentGrade = def.grades[tower.gradeIndex];
   const nextGrade = def.grades[tower.gradeIndex + 1] ?? null;
   const sellValue = Math.floor(tower.totalInvested * SELL_RATE);
-  const { emoji, filter } = gradeEmoji(tower.type, tower.gradeIndex);
   const canAffordUpgrade = nextGrade ? gold >= nextGrade.upgradeCost : false;
 
   return (
@@ -54,7 +54,7 @@ export default function TowerMenu({ tower, gold, onUpdateState, onClose }: Props
       <div className="tower-menu" onClick={e => e.stopPropagation()}>
         <div className="tm-header">
           <span className="tm-title">
-            <span style={{ filter }}>{emoji}</span>
+            <TowerIcon type={tower.type} grade={tower.gradeIndex} size={28} />
             {" "}{def.name} · {currentGrade.gradeName}
           </span>
           <button className="tm-close" onClick={onClose}>✕</button>

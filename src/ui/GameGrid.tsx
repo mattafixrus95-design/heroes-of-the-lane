@@ -1,9 +1,10 @@
 import type { GameState, Tower, Projectile } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
-import { TOWER_DEFS, gradeEmoji } from "../data/towers";
+import { TOWER_DEFS } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data/map";
 import GateSVG from "../assets/GateSVG";
 import CastleSVG from "../assets/CastleSVG";
+import TowerIcon from "./TowerIcon";
 
 const CELL = 56;
 
@@ -148,21 +149,18 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
         >
           {isEntry && !tower && <GateSVG size={CELL - 4} />}
           {isExit  && !tower && <CastleSVG size={CELL - 4} />}
-          {tower && (() => {
-            const { emoji, filter } = gradeEmoji(tower.type, tower.gradeIndex);
-            return (
-              <span style={{ position: "relative" }}>
-                <span style={{ filter }}>{emoji}</span>
-                {!isMaxGrade && (
-                  <span style={{
-                    position: "absolute", top: -6, right: -8,
-                    fontSize: "0.55rem", background: "#f0c040", color: "#1a1a2e",
-                    borderRadius: 3, padding: "1px 3px", fontWeight: 800,
-                  }}>⬆</span>
-                )}
-              </span>
-            );
-          })()}
+          {tower && (
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <TowerIcon type={tower.type} grade={tower.gradeIndex} size={40} />
+              {!isMaxGrade && (
+                <span style={{
+                  position: "absolute", top: -6, right: -8,
+                  fontSize: "0.55rem", background: "#f0c040", color: "#1a1a2e",
+                  borderRadius: 3, padding: "1px 3px", fontWeight: 800,
+                }}>⬆</span>
+              )}
+            </span>
+          )}
         </div>
       );
     }
