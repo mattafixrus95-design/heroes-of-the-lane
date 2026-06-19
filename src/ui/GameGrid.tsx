@@ -1,4 +1,4 @@
-import type { GameState, Tower, Projectile } from "../game/engine/gameState";
+import type { GameState, Tower, Projectile, SplashEffect } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data/map";
@@ -40,8 +40,8 @@ function cellBg(col: number, row: number, isPath: boolean): string {
 }
 
 // Arrow SVG pointing right (rotated via CSS to match direction)
-function ArrowMarker({ angle, type }: { angle: number; type: "elf" | "dwarf" }) {
-  const isElf = type === "elf";
+function ArrowMarker({ angle, towerType }: { angle: number; towerType: string }) {
+  const isElf = towerType === "elf";
   const shaft = isElf ? "#8B6914" : "#5C3A1E";
   const feather = isElf ? "#2a9d2a" : "#9d5a2a";
   return (
@@ -71,24 +71,48 @@ function ArrowMarker({ angle, type }: { angle: number; type: "elf" | "dwarf" }) 
 }
 
 function FireballMarker({ progress }: { progress: number }) {
-  const scale = 0.8 + progress * 0.4; // grows slightly as it travels
-  const size = 22 * scale;
+  const size = 20 + progress * 6;
   return (
     <div style={{
       position: "absolute",
       left: -size / 2, top: -size / 2,
       width: size, height: size,
       borderRadius: "50%",
-      background: "radial-gradient(circle, #fff 0%, #FFD700 25%, #FF6000 60%, #CC0000 100%)",
-      boxShadow: `0 0 ${8 + progress * 6}px ${4 + progress * 4}px rgba(255,120,0,0.75)`,
+      background: "radial-gradient(circle, #fff 0%, #FFD700 20%, #FF6000 55%, #CC0000 100%)",
+      boxShadow: `0 0 ${10 + progress * 8}px ${5 + progress * 5}px rgba(255,100,0,0.8)`,
       pointerEvents: "none",
     }}/>
   );
 }
 
-function ProjectileLayer({ projectiles, gameTime }: { projectiles: Projectile[]; gameTime: number }) {
+function SplashRing({ effect, gameTime }: { effect: SplashEffect; gameTime: number }) {
+  const t = Math.min(1, (gameTime - effect.spawnTime) / effect.duration);
+  const maxR = effect.radius * CELL;
+  const r = maxR * (0.3 + t * 0.7);
+  const opacity = 1 - t;
+  const cx = effect.x * CELL + CELL / 2;
+  const cy = effect.y * CELL + CELL / 2;
+  return (
+    <div style={{
+      position: "absolute",
+      left: cx - r, top: cy - r,
+      width: r * 2, height: r * 2,
+      borderRadius: "50%",
+      border: `${3 - t * 2}px solid rgba(255,140,0,${opacity})`,
+      boxShadow: `inset 0 0 ${12 * opacity}px rgba(255,200,0,${opacity * 0.5})`,
+      pointerEvents: "none",
+    }}/>
+  );
+}
+
+function ProjectileLayer({ projectiles, splashEffects, gameTime }: {
+  projectiles: Projectile[];
+  splashEffects: SplashEffect[];
+  gameTime: number;
+}) {
   return (
     <>
+      {splashEffects.map(e => <SplashRing key={e.id} effect={e} gameTime={gameTime} />)}
       {projectiles.map(p => {
         const progress = Math.min(1, (gameTime - p.spawnTime) / p.duration);
         const x = (p.fromCol + (p.toX - p.fromCol) * progress) * CELL + CELL / 2;
@@ -96,13 +120,10 @@ function ProjectileLayer({ projectiles, gameTime }: { projectiles: Projectile[];
         const angle = Math.atan2(p.toY - p.fromRow, p.toX - p.fromCol) * (180 / Math.PI);
 
         return (
-          <div
-            key={p.id}
-            style={{ position: "absolute", left: x, top: y, pointerEvents: "none" }}
-          >
+          <div key={p.id} style={{ position: "absolute", left: x, top: y, pointerEvents: "none" }}>
             {p.kind === "fireball"
               ? <FireballMarker progress={progress} />
-              : <ArrowMarker angle={angle} type={p.fromCol % 2 === 0 ? "elf" : "dwarf"} />
+              : <ArrowMarker angle={angle} towerType={p.towerType} />
             }
           </div>
         );
@@ -203,7 +224,7 @@ export default function GameGrid({ state, selectedTower, onUpdateState, onClearS
       </div>
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         {creepMarkers}
-        <ProjectileLayer projectiles={state.projectiles} gameTime={state.gameTime} />
+        <ProjectileLayer projectiles={state.projectiles} splashEffects={state.splashEffects} gameTime={state.gameTime} />
       </div>
     </div>
   );

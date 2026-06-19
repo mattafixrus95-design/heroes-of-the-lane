@@ -30,15 +30,37 @@ export interface Tower {
   lastAttackTime: number;
 }
 
+// Damage that will be applied when the projectile arrives
+export interface PendingDamage {
+  targetId: string;    // main creep ID (may be dead on arrival — OK for splash)
+  damage: number;      // damage to main target
+  slow: number;        // slow factor for main target
+  // Fireball only: apply explosion to all creeps near impact point
+  explosionAoe?: number;
+  explosionDmgPct?: number;
+}
+
 export interface Projectile {
   id: string;
-  fromCol: number;   // tower tile col
-  fromRow: number;   // tower tile row
-  toX: number;       // target tile-space x (creep position at fire time)
-  toY: number;       // target tile-space y
+  towerType: TowerType;
+  fromCol: number;
+  fromRow: number;
+  toX: number;          // target tile-space x (creep position at fire time)
+  toY: number;
   kind: "arrow" | "fireball";
-  spawnTime: number; // gameTime when fired
-  duration: number;  // seconds to reach target
+  spawnTime: number;
+  duration: number;
+  pendingDamage: PendingDamage;
+}
+
+// Short-lived visual splash ring shown on fireball impact
+export interface SplashEffect {
+  id: string;
+  x: number;          // tile-space centre
+  y: number;
+  radius: number;     // tile-space radius (for sizing the ring)
+  spawnTime: number;
+  duration: number;
 }
 
 export interface GameState {
@@ -49,6 +71,7 @@ export interface GameState {
   creeps: Creep[];
   towers: Tower[];
   projectiles: Projectile[];
+  splashEffects: SplashEffect[];
   isPaused: boolean;
   gameTime: number;
   toSpawn: number;
@@ -72,6 +95,7 @@ export function createInitialState(): GameState {
     creeps: [],
     towers: [],
     projectiles: [],
+    splashEffects: [],
     isPaused: false,
     gameTime: 0,
     toSpawn: 0,
