@@ -1,6 +1,5 @@
 import type { GameState } from "../game/engine/gameState";
 import { startWave } from "../game/entities/spawnWave";
-import versionData from "../version.json";
 
 interface Props {
   state: GameState;
@@ -48,27 +47,7 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
         </button>
       )}
 
-      <button
-        title="Сбросить игру / обновить до последней версии"
-        style={{
-          background: "rgba(255,255,255,0.07)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          borderRadius: 6, color: "#888",
-          fontSize: "0.68rem", padding: "3px 8px",
-          cursor: "pointer", marginLeft: "auto",
-          touchAction: "manipulation",
-        }}
-        onClick={() => {
-          onReset();
-          if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.getRegistrations().then(regs => {
-              regs.forEach(r => r.update());
-            });
-          }
-        }}
-      >
-        v{versionData.version}
-      </button>
+      <button className="hud-btn reset" onClick={onReset}>↺</button>
     </div>
   );
 }
