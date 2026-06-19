@@ -1,5 +1,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
 body {
   font-family: system-ui, 'Segoe UI', sans-serif;
   background: #1a1a2e;
@@ -7,6 +13,7 @@ body {
   min-height: 100dvh;
   display: flex;
   justify-content: center;
+  user-select: none;
 }
 
 #root { width: 100%; display: flex; justify-content: center; }
@@ -16,12 +23,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 16px 24px;
-  gap: 10px;
+  padding: 8px 4px 16px;
+  gap: 8px;
+  width: 100%;
+  max-width: 600px;
 }
 
 .title {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: #f0c040;
   letter-spacing: 1px;
@@ -31,30 +40,32 @@ body {
 .hud {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 12px;
-  padding: 8px 18px;
+  padding: 6px 12px;
+  width: 100%;
 }
 
-.hud-stat { font-size: 1rem; font-weight: 700; }
+.hud-stat { font-size: 0.9rem; font-weight: 700; }
 
 .hud-btn {
   background: #f0c040;
   color: #1a1a2e;
   border: none;
   border-radius: 8px;
-  padding: 7px 16px;
-  font-size: 0.95rem;
+  padding: 7px 14px;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
+  min-height: 36px;
+  touch-action: manipulation;
   transition: opacity 0.15s, transform 0.1s;
 }
 .hud-btn:disabled { opacity: 0.4; cursor: default; }
-.hud-btn:not(:disabled):hover  { transform: scale(1.04); }
 .hud-btn:not(:disabled):active { transform: scale(0.97); }
 .hud-btn.secondary {
   background: rgba(255,255,255,0.12);
@@ -64,11 +75,16 @@ body {
 /* ── Tower shop ── */
 .shop {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: stretch;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  padding: 2px 2px 4px;
+  scrollbar-width: none;
 }
+.shop::-webkit-scrollbar { display: none; }
 
 .shop-item {
   display: flex;
@@ -78,25 +94,25 @@ body {
   background: rgba(255,255,255,0.08);
   border: 2px solid rgba(255,255,255,0.12);
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   cursor: pointer;
   color: #eee;
-  min-width: 90px;
+  min-width: 80px;
+  flex-shrink: 0;
+  touch-action: manipulation;
   transition: border-color 0.15s, background 0.15s, transform 0.1s;
 }
-.shop-item:hover:not(:disabled) { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
-.shop-item:active:not(:disabled) { transform: translateY(0); }
+.shop-item:active:not(:disabled) { transform: scale(0.97); }
 .shop-item.selected {
   border-color: #f0c040;
   background: rgba(240,192,64,0.15);
 }
 .shop-item.unaffordable { opacity: 0.4; cursor: not-allowed; }
 
-.shop-emoji { font-size: 1.8rem; line-height: 1; }
-.shop-name  { font-size: 0.8rem; font-weight: 700; }
-.shop-stat  { font-size: 0.7rem; color: #aaa; }
-.shop-cost  { font-size: 0.85rem; font-weight: 700; color: #f0c040; margin-top: 2px; }
-.shop-sell  { font-size: 0.65rem; color: #888; }
+.shop-emoji { font-size: 1.6rem; line-height: 1; }
+.shop-name  { font-size: 0.72rem; font-weight: 700; }
+.shop-stat  { font-size: 0.65rem; color: #aaa; }
+.shop-cost  { font-size: 0.8rem; font-weight: 700; color: #f0c040; margin-top: 2px; }
 
 .shop-cancel {
   background: rgba(255,80,80,0.2);
@@ -104,30 +120,33 @@ body {
   border-radius: 10px;
   color: #ff8080;
   font-size: 1.2rem;
-  padding: 8px 12px;
+  padding: 6px 12px;
   cursor: pointer;
   align-self: center;
+  flex-shrink: 0;
+  touch-action: manipulation;
   transition: background 0.15s;
 }
-.shop-cancel:hover { background: rgba(255,80,80,0.35); }
 
 .shop-locked {
-  padding: 10px 20px;
+  padding: 8px 16px;
   color: #f0c040;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   opacity: 0.8;
+  white-space: nowrap;
 }
 
 /* ── Tower menu ── */
 .tower-menu-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
+  padding: 16px;
 }
 
 .tower-menu {
@@ -135,7 +154,8 @@ body {
   border: 2px solid rgba(255,255,255,0.18);
   border-radius: 14px;
   padding: 16px 20px;
-  min-width: 220px;
+  width: 100%;
+  max-width: 300px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -148,24 +168,25 @@ body {
   gap: 8px;
 }
 
-.tm-title { font-weight: 700; font-size: 1rem; }
+.tm-title { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
 
 .tm-close {
   background: none;
   border: none;
   color: #aaa;
-  font-size: 1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   line-height: 1;
-  padding: 2px 6px;
+  padding: 4px 8px;
+  min-height: 36px;
+  touch-action: manipulation;
 }
-.tm-close:hover { color: #fff; }
 
 .tm-stats {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #ccc;
 }
 
@@ -179,15 +200,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 14px;
+  padding: 11px 14px;
   border: none;
   border-radius: 9px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
+  min-height: 44px;
+  touch-action: manipulation;
   transition: opacity 0.15s, transform 0.1s;
 }
-.tm-btn:hover  { opacity: 0.88; transform: scale(1.02); }
 .tm-btn:active { transform: scale(0.98); }
 
 .tm-btn.upgrade { background: #f0c040; color: #1a1a2e; }
@@ -202,6 +224,7 @@ body {
   font-size: 0.85rem;
   text-align: center;
   opacity: 0.8;
+  padding: 8px 0;
 }
 
 /* ── HUD reset btn ── */
@@ -211,7 +234,7 @@ body {
   border: 1px solid rgba(255,80,80,0.3);
 }
 
-/* ── Overlay ── */
+/* ── Defeat overlay ── */
 .overlay {
   position: fixed;
   inset: 0;
@@ -222,8 +245,9 @@ body {
   justify-content: center;
   gap: 16px;
   z-index: 100;
+  padding: 24px;
 }
-.overlay h2 { font-size: 2.4rem; }
+.overlay h2 { font-size: 2rem; }
 .overlay button {
   background: #f0c040;
   color: #1a1a2e;
@@ -233,4 +257,15 @@ body {
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+/* ── Desktop enhancements (hover states only for non-touch) ── */
+@media (hover: hover) {
+  .hud-btn:not(:disabled):hover { transform: scale(1.04); }
+  .shop-item:hover:not(:disabled) { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
+  .tm-btn:hover { opacity: 0.88; transform: scale(1.02); }
+  .shop-cancel:hover { background: rgba(255,80,80,0.35); }
+  .tm-close:hover { color: #fff; }
 }
