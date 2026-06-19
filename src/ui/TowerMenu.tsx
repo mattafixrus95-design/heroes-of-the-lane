@@ -89,10 +89,13 @@ export default function TowerMenu({ tower, gold, waveActive, onUpdateState, onCl
 
           <button
             className="tm-btn sell"
+            disabled={waveActive}
             onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
           >
             Продать
-            <span className="tm-btn-cost">+{sellValue}💰</span>
+            <span className="tm-btn-cost">
+              {waveActive ? "(волна)" : `+${sellValue}💰`}
+            </span>
           </button>
         </div>
       </div>

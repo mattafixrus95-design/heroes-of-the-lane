@@ -1,0 +1,38 @@
+name: Bump version
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    # Skip if this commit was already made by the version bumper
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Increment version
+        run: |
+          VERSION=$(jq -r '.version' src/version.json)
+          MAJOR="${VERSION%.*}"
+          MINOR="${VERSION##*.}"
+          NEW_MINOR=$((MINOR + 1))
+          NEW_VERSION="$MAJOR.$NEW_MINOR"
+          echo "{\"version\": \"$NEW_VERSION\"}" > src/version.json
+          echo "Bumped $VERSION → $NEW_VERSION"
+
+      - name: Commit and push
+        run: |
+          NEW_VERSION=$(jq -r '.version' src/version.json)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/version.json
+          git commit -m "v$NEW_VERSION [skip ci]"
+          git push

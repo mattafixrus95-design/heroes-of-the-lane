@@ -1,6 +1,7 @@
 import type { GameState } from "../game/engine/gameState";
 import { startWave } from "../game/entities/spawnWave";
 import { createInitialState } from "../game/engine/gameState";
+import versionData from "../version.json";
 
 interface Props {
   state: GameState;
@@ -39,6 +40,10 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
       <button className="hud-btn reset" onClick={onReset}>
         🔄 Reset
       </button>
+
+      <span style={{ fontSize: "0.7rem", color: "#666", marginLeft: 4 }}>
+        v{versionData.version}
+      </span>
     </div>
   );
 }
