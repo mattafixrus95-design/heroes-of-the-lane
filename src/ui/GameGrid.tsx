@@ -242,7 +242,7 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
     const y = e.position.y * cell + cell / 2;
     const hpPct = e.hp / e.maxHp;
     const isSlowed = e.slowTimer > 0;
-    const isBoss = e.kind === "minotaur_king" || e.kind === "black_dragon";
+    const isBoss = e.kind === "angel" || e.kind === "black_dragon" || e.kind === "archangel";
     const creepSize = isBoss ? Math.round(baseCreepSize * 1.6) : baseCreepSize;
     const def = CREEP_DEFS[e.kind];
     const hpBarColor = e.regenPerSec > 0
