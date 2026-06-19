@@ -48,28 +48,26 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
         </button>
       )}
 
-      <button className="hud-btn reset" onClick={onReset}>🔄</button>
-
       <button
-        title="Обновить до последней версии"
+        title="Сбросить игру / обновить до последней версии"
         style={{
           background: "rgba(255,255,255,0.07)",
           border: "1px solid rgba(255,255,255,0.15)",
           borderRadius: 6, color: "#888",
           fontSize: "0.68rem", padding: "3px 8px",
-          cursor: "pointer", marginLeft: 4,
+          cursor: "pointer", marginLeft: "auto",
           touchAction: "manipulation",
         }}
         onClick={() => {
+          onReset();
           if ("serviceWorker" in navigator) {
             navigator.serviceWorker.getRegistrations().then(regs => {
               regs.forEach(r => r.update());
             });
           }
-          window.location.reload();
         }}
       >
-        🔄 v{versionData.version}
+        v{versionData.version}
       </button>
     </div>
   );

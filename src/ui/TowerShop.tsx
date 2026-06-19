@@ -14,9 +14,11 @@ interface Props {
 
 export default function TowerShop({ gold, food, selected, waveActive, onSelect }: Props) {
   return (
-    <div className="shop">
-      {waveActive && <div className="shop-locked">🔒 Строительство заблокировано</div>}
-      {!waveActive && Object.values(TOWER_DEFS).map(def => {
+    <div
+      className="shop"
+      style={waveActive ? { filter: "blur(2px)", pointerEvents: "none", opacity: 0.5 } : undefined}
+    >
+      {Object.values(TOWER_DEFS).map(def => {
         const base = def.grades[0];
         const canAffordGold = gold >= def.purchaseCost;
         const canAffordFood = food >= def.foodCost;
@@ -37,7 +39,7 @@ export default function TowerShop({ gold, food, selected, waveActive, onSelect }
           </button>
         );
       })}
-      {!waveActive && selected && (
+      {selected && (
         <button className="shop-cancel" onClick={() => onSelect(null)}>✕</button>
       )}
     </div>

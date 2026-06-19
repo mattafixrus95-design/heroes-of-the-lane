@@ -63,6 +63,13 @@ export default function App() {
     <div className="app">
       <h1 className="title">Heroes of the Lane</h1>
       <HUD state={state} onUpdateState={updateState} onReset={handleReset} />
+      <GameGrid
+        state={state}
+        selectedItem={selectedItem}
+        onUpdateState={updateState}
+        onClearSelection={() => setSelectedItem(null)}
+        onSelectTowerId={handleSelectTowerId}
+      />
       <TowerShop
         gold={state.gold}
         food={state.food}
@@ -71,13 +78,6 @@ export default function App() {
         onSelect={setSelectedItem}
       />
       <FarmPanel farms={state.farms} onSelectFarmId={handleSelectFarmId} />
-      <GameGrid
-        state={state}
-        selectedItem={selectedItem}
-        onUpdateState={updateState}
-        onClearSelection={() => setSelectedItem(null)}
-        onSelectTowerId={handleSelectTowerId}
-      />
       {menuTower && !showStats && (
         <TowerMenu
           tower={menuTower}

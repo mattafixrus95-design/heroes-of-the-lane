@@ -11,7 +11,7 @@ function saveWaveStat(state: GameState): WaveStat[] {
 }
 
 function waveBonus(wave: number): number {
-  return 50 + (wave - 1) * 5;
+  return 25 + (wave - 1) * 5;
 }
 
 function bonusText(bonus: number, gameTime: number): FloatingText {
