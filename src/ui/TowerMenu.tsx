@@ -6,6 +6,7 @@ import TowerIcon from "./TowerIcon";
 interface Props {
   tower: Tower;
   gold: number;
+  waveActive: boolean;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onClose: () => void;
 }
@@ -42,12 +43,13 @@ function applySell(id: string, state: GameState): GameState {
   };
 }
 
-export default function TowerMenu({ tower, gold, onUpdateState, onClose }: Props) {
+export default function TowerMenu({ tower, gold, waveActive, onUpdateState, onClose }: Props) {
   const def = TOWER_DEFS[tower.type];
   const currentGrade = def.grades[tower.gradeIndex];
   const nextGrade = def.grades[tower.gradeIndex + 1] ?? null;
   const sellValue = Math.floor(tower.totalInvested * SELL_RATE);
   const canAffordUpgrade = nextGrade ? gold >= nextGrade.upgradeCost : false;
+  const canUpgrade = canAffordUpgrade && !waveActive;
 
   return (
     <div className="tower-menu-overlay" onClick={onClose}>
@@ -72,13 +74,13 @@ export default function TowerMenu({ tower, gold, onUpdateState, onClose }: Props
           {nextGrade ? (
             <button
               className="tm-btn upgrade"
-              disabled={!canAffordUpgrade}
+              disabled={!canUpgrade}
               onClick={() => { onUpdateState(s => applyUpgrade(tower.id, s)); onClose(); }}
             >
               ⬆️ {nextGrade.gradeName}
               <span className="tm-btn-cost">
                 💰 {nextGrade.upgradeCost}
-                {!canAffordUpgrade && " (недостаточно)"}
+                {waveActive ? " (волна)" : !canAffordUpgrade ? " (недостаточно)" : ""}
               </span>
             </button>
           ) : (

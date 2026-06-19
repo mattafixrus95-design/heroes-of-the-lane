@@ -57,6 +57,7 @@ export default function App() {
         <TowerMenu
           tower={menuTower}
           gold={state.gold}
+          waveActive={state.phase === "wave"}
           onUpdateState={updateState}
           onClose={() => setSelectedTowerId(null)}
         />
