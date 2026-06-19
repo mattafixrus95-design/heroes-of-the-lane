@@ -7,6 +7,8 @@ export type CreepKind =
   | "imp" | "goblin" | "pikeman"
   | "wolf_rider" | "zombie"
   | "orc" | "wight" | "minotaur" | "golem"
+  // Волна 10 — босс
+  | "angel"
   // Волны 11+ (T4-T7, зарезервировано)
   | "minotaur_king" | "cavalier" | "pit_lord" | "titan" | "behemoth" | "black_dragon";
 

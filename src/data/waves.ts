@@ -23,6 +23,8 @@ export const CREEP_DEFS: Record<CreepKind, CreepDef> = {
   wight:        { kind: "wight",        name: "Призрак",        hp: 185, speed: 1.05,regenPerSec: 3, reward:  14, emoji: "👻" }, // Necropolis T3
   minotaur:     { kind: "minotaur",     name: "Минотавр",       hp: 230, speed: 1.2, regenPerSec: 0, reward:  15, emoji: "🐂" }, // Dungeon T3
   golem:        { kind: "golem",        name: "Голем",          hp: 420, speed: 0.5, regenPerSec: 4, reward:  24, emoji: "🗿" }, // Tower T3
+  // ── Волна 10: финальный босс ────────────────────────────────────────────
+  angel:        { kind: "angel",        name: "Ангел",          hp: 600, speed: 1.4, regenPerSec: 10, reward: 100, emoji: "😇" }, // Castle T6
   // ── Волны 11+: T4–T7 (зарезервировано) ─────────────────────────────────
   minotaur_king:{ kind: "minotaur_king",name: "Кор. Минотавров",hp: 250, speed: 1.0, regenPerSec: 0, reward:  50, emoji: "👑" }, // Dungeon T4
   cavalier:     { kind: "cavalier",     name: "Кавалерист",     hp: 180, speed: 1.7, regenPerSec: 0, reward:  20, emoji: "🐴" }, // Castle T5
@@ -59,9 +61,9 @@ export const WAVE_DEFS: WaveDef[] = [
   { entries: group("minotaur", 20, 0.65) },
   // Волна 9 — 14 Големов (Tower T3): сверхтанки с реген            HP=5880  gold=336
   { entries: group("golem", 14, 1.2) },
-  // Волна 10 — 14 Минотавров + 12 Големов: финальная смешанная     HP=8260  gold=498
+  // Волна 10 — 30 Копейщиков + 3 Ангела: финал   HP=30×30+3×600=2700  gold=30×4+3×100=420
   { entries: [
-    ...group("minotaur", 14, 0.65),
-    ...group("golem", 12, 1.2).map((e, i) => i === 0 ? { ...e, delay: 2.0 } : e),
+    ...group("pikeman", 30, 0.4),
+    ...group("angel", 3, 3.0).map((e, i) => i === 0 ? { ...e, delay: 3.0 } : e),
   ]},
 ];
