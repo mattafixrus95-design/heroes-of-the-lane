@@ -84,10 +84,24 @@ function placeFarm(col: number, row: number, state: GameState): GameState {
   };
 }
 
+// Ячейки дороги с особым направлением (из PATH в map.ts)
+const PATH_CORNER   = new Set(["9,0","9,2","0,2","0,4","9,4","9,6","0,6","0,8"]);
+const PATH_VERTICAL = new Set(["9,1","0,3","9,5","0,7"]);
+
 function cellBg(col: number, row: number, isPath: boolean): string {
-  if (col === ENTRY_CELL[0] && row === ENTRY_CELL[1]) return "#3a6b3a";
-  if (col === EXIT_CELL[0]  && row === EXIT_CELL[1])  return "#5a3030";
-  return isPath ? "#c8a84a" : "#4a7c59";
+  if (col === ENTRY_CELL[0] && row === ENTRY_CELL[1]) return "#2a5c30";
+  if (col === EXIT_CELL[0]  && row === EXIT_CELL[1])  return "#502828";
+  if (!isPath) {
+    // Трава — шахматный паттерн для текстуры
+    return (col + row) % 2 === 0
+      ? "linear-gradient(145deg,#52965c 0%,#3d7a48 100%)"
+      : "linear-gradient(145deg,#3d7a48 0%,#4d8e58 100%)";
+  }
+  // Дорога с эффектом обочины (тёмные края, светлая середина)
+  const key = `${col},${row}`;
+  if (PATH_CORNER.has(key))   return "#8a7050";
+  if (PATH_VERTICAL.has(key)) return "linear-gradient(to right,#6a5038 0%,#a08860 30%,#aa9468 50%,#a08860 70%,#6a5038 100%)";
+  return                              "linear-gradient(to bottom,#6a5038 0%,#a08860 30%,#aa9468 50%,#a08860 70%,#6a5038 100%)";
 }
 
 function ArrowMarker({ angle, towerType }: { angle: number; towerType: string }) {
@@ -203,7 +217,9 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
           style={{
             width: cell, height: cell,
             background: cellBg(c, r, isPath),
-            border: "1px solid rgba(0,0,0,0.15)",
+            border: isPath
+              ? "1px solid rgba(80,55,25,0.45)"
+              : "1px solid rgba(25,70,35,0.35)",
             cursor: (tower || farm) ? "pointer"
               : (isPath || waveActive) ? "default"
               : selectedItem ? "crosshair" : "default",
