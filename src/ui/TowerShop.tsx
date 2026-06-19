@@ -16,7 +16,7 @@ export default function TowerShop({ gold, food, selected, waveActive, onSelect }
   return (
     <div
       className="shop"
-      style={waveActive ? { filter: "blur(2px)", pointerEvents: "none", opacity: 0.5 } : undefined}
+      style={waveActive ? { pointerEvents: "none", opacity: 0.45 } : undefined}
     >
       {Object.values(TOWER_DEFS).map(def => {
         const base = def.grades[0];
