@@ -89,7 +89,7 @@ body {
 .shop-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 2px;
   background: rgba(255,255,255,0.08);
   border: 2px solid rgba(255,255,255,0.12);
@@ -111,7 +111,7 @@ body {
 
 .shop-emoji { font-size: 1.6rem; line-height: 1; }
 .shop-name  { font-size: 0.72rem; font-weight: 700; }
-.shop-stat  { font-size: 0.65rem; color: #aaa; }
+.shop-stat  { font-size: 0.75rem; color: #ccc; }
 .shop-cost  { font-size: 0.8rem; font-weight: 700; color: #f0c040; margin-top: 2px; }
 
 .shop-cancel {
