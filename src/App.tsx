@@ -10,6 +10,7 @@ import GameGrid from "./ui/GameGrid";
 import TowerMenu from "./ui/TowerMenu";
 import FarmPanel from "./ui/FarmPanel";
 import StatsOverlay from "./ui/StatsOverlay";
+import UpdateButton from "./ui/UpdateButton";
 import "./index.css";
 
 export default function App() {
@@ -82,33 +83,7 @@ export default function App() {
       {showStats && (
         <StatsOverlay state={state} onReset={handleReset} />
       )}
-      {/* Версия — фиксированно внизу справа */}
-      <div style={{
-        position: "fixed", bottom: 10, right: 12,
-        display: "flex", alignItems: "center", gap: 6,
-        fontSize: "0.65rem", color: "#555",
-      }}>
-        <span>v{versionData.version}</span>
-        <button
-          onClick={() => {
-            if ("serviceWorker" in navigator) {
-              navigator.serviceWorker.getRegistrations().then(regs => {
-                regs.forEach(r => r.update());
-              });
-            }
-            window.location.reload();
-          }}
-          style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 4, color: "#666",
-            fontSize: "0.6rem", padding: "2px 6px",
-            cursor: "pointer", touchAction: "manipulation",
-          }}
-        >
-          обновить
-        </button>
-      </div>
+      <UpdateButton currentVersion={versionData.version} />
     </div>
   );
 }
