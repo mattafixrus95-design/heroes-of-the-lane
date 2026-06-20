@@ -15,10 +15,14 @@ function makeCreep(kind: CreepKind): Creep {
     speed: def.speed,
     regenPerSec: def.regenPerSec,
     reward: def.reward,
+    livesLost: def.livesLost,
     pathProgress: 0,
     position: { x: cx, y: cy },
     slowFactor: 0,
     slowTimer: 0,
+    abilities: def.abilities,
+    selfHealUsed: false,
+    healTimer: 0,
   };
 }
 

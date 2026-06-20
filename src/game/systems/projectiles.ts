@@ -77,8 +77,16 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
     } else {
       const target = creeps.find(c => c.id === pd.targetId);
       if (!target) continue;
+
+      // Dodge: 20% chance — skip damage AND slow
+      if (target.abilities.includes("dodge") && Math.random() < 0.20) continue;
+
+      // Block: 20% chance — skip damage only (slow still applies)
+      const blocked = target.abilities.includes("block") && Math.random() < 0.20;
+      const actualDamage = blocked ? 0 : pd.damage;
+
       creeps = creeps.map(c => c.id === pd.targetId
-        ? { ...c, hp: c.hp - pd.damage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }
+        ? { ...c, hp: c.hp - actualDamage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }
         : c,
       );
       const swept = sweepDead(creeps, gold, killed, waveGold, texts, state.gameTime);

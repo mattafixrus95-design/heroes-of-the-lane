@@ -26,7 +26,7 @@ export default function StatsOverlay({ state, onReset }: Props) {
       <h2 style={{ fontSize: "1.8rem" }}>
         {isVictory ? "🏆 Победа!" : "💀 Поражение"}
       </h2>
-      <p style={{ color: "#aaa", fontSize: "0.9rem" }}>Волна {state.wave} из 10</p>
+      <p style={{ color: "#aaa", fontSize: "0.9rem" }}>Волна {state.wave} из 20</p>
 
       {/* Статистика по волнам */}
       <div style={{

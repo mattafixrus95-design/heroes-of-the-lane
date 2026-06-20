@@ -14,21 +14,50 @@ export function tickEnemyMovement(state: GameState, dt: number): GameState {
   let lives = state.lives;
   const creeps: Creep[] = [];
 
-  for (const c of state.creeps) {
-    const slowTimer = Math.max(0, c.slowTimer - dt);
-    const effectiveSpeed = c.speed * (1 - (slowTimer > 0 ? c.slowFactor : 0));
-    const newProgress = c.pathProgress + effectiveSpeed * dt;
+  for (let c of state.creeps) {
+    // Regen
+    if (c.regenPerSec > 0) {
+      c = { ...c, hp: Math.min(c.maxHp, c.hp + c.regenPerSec * dt) };
+    }
 
-    if (newProgress >= PATH.length - 1) {
-      lives -= 1;
+    // Self-heal trigger: once per wave, at <50% HP
+    if (
+      c.abilities.includes("self_heal") &&
+      !c.selfHealUsed &&
+      c.healTimer <= 0 &&
+      c.hp < c.maxHp * 0.5
+    ) {
+      c = {
+        ...c,
+        hp: Math.min(c.maxHp, c.hp + c.maxHp * 0.3),
+        selfHealUsed: true,
+        healTimer: 1.0,
+      };
+    }
+
+    // If healing — pause movement
+    if (c.healTimer > 0) {
+      creeps.push({ ...c, healTimer: Math.max(0, c.healTimer - dt) });
       continue;
     }
 
-    const hp = c.regenPerSec > 0
-      ? Math.min(c.maxHp, c.hp + c.regenPerSec * dt)
-      : c.hp;
+    // Slow (slow_resist ignores it)
+    const slowTimer = Math.max(0, c.slowTimer - dt);
+    const slowActive = slowTimer > 0 && !c.abilities.includes("slow_resist");
+    const effectiveSpeed = c.speed * (1 - (slowActive ? c.slowFactor : 0));
+    const newProgress = c.pathProgress + effectiveSpeed * dt;
 
-    creeps.push({ ...c, hp, pathProgress: newProgress, position: positionAt(newProgress), slowTimer });
+    if (newProgress >= PATH.length - 1) {
+      lives -= c.livesLost;
+      continue;
+    }
+
+    creeps.push({
+      ...c,
+      pathProgress: newProgress,
+      position: positionAt(newProgress),
+      slowTimer,
+    });
   }
 
   return { ...state, lives, creeps };

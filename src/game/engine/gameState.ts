@@ -13,6 +13,8 @@ export type CreepKind =
   | "ogr" | "crusader" | "vampire_lord" | "pit_lord" | "roc"
   | "lich" | "devil" | "titan" | "black_dragon" | "archangel";
 
+export type AbilityKind = "block" | "dodge" | "slow_resist" | "self_heal";
+
 export interface SpawnEntry {
   kind: CreepKind;
   delay: number;
@@ -28,10 +30,14 @@ export interface Creep {
   speed: number;
   regenPerSec: number;
   reward: number;
+  livesLost: number;
   pathProgress: number;
   position: Point;
   slowFactor: number;
   slowTimer: number;
+  abilities: AbilityKind[];
+  selfHealUsed: boolean;
+  healTimer: number;
 }
 
 export interface Tower {
@@ -128,7 +134,7 @@ export interface GameState {
 }
 
 export const STARTING_GOLD        = 200;
-export const STARTING_LIVES       = 20;
+export const STARTING_LIVES       = 50;
 export const STARTING_FOOD        = 15;
 export const SLOW_DURATION        = 1.5;
 export const SELL_RATE            = 0.7;
