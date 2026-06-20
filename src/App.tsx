@@ -8,7 +8,6 @@ import TowerShop from "./ui/TowerShop";
 import type { ShopItem } from "./ui/TowerShop";
 import GameGrid from "./ui/GameGrid";
 import TowerMenu from "./ui/TowerMenu";
-import FarmMenu from "./ui/FarmMenu";
 import FarmPanel from "./ui/FarmPanel";
 import StatsOverlay from "./ui/StatsOverlay";
 import StatsPanel from "./ui/StatsPanel";
@@ -18,7 +17,6 @@ export default function App() {
   const [state, setState] = useState<GameState>(createInitialState);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
-  const [selectedFarmId, setSelectedFarmId] = useState<string | null>(null);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
 
   const updateState = useCallback(
@@ -37,27 +35,15 @@ export default function App() {
     setState(createInitialState());
     setSelectedItem(null);
     setSelectedTowerId(null);
-    setSelectedFarmId(null);
   }
 
   function handleSelectTowerId(id: string) {
     setSelectedTowerId(id);
-    setSelectedFarmId(null);
-    setSelectedItem(null);
-  }
-
-  function handleSelectFarmId(id: string) {
-    setSelectedFarmId(id);
-    setSelectedTowerId(null);
     setSelectedItem(null);
   }
 
   const menuTower = selectedTowerId
     ? state.towers.find(t => t.id === selectedTowerId) ?? null
-    : null;
-
-  const menuFarm = selectedFarmId
-    ? state.farms.find(f => f.id === selectedFarmId) ?? null
     : null;
 
   const showStats = state.phase === "defeat" || state.phase === "victory";
@@ -80,7 +66,12 @@ export default function App() {
         waveActive={state.phase === "wave"}
         onSelect={setSelectedItem}
       />
-      <FarmPanel farms={state.farms} onSelectFarmId={handleSelectFarmId} />
+      <FarmPanel
+        farms={state.farms}
+        gold={state.gold}
+        waveActive={state.phase === "wave"}
+        onUpdateState={updateState}
+      />
       {menuTower && !showStats && (
         <TowerMenu
           tower={menuTower}
@@ -89,16 +80,6 @@ export default function App() {
           waveActive={state.phase === "wave"}
           onUpdateState={updateState}
           onClose={() => setSelectedTowerId(null)}
-        />
-      )}
-      {menuFarm && !showStats && (
-        <FarmMenu
-          farm={menuFarm}
-          gold={state.gold}
-          food={state.food}
-          waveActive={state.phase === "wave"}
-          onUpdateState={updateState}
-          onClose={() => setSelectedFarmId(null)}
         />
       )}
       {showStats && (

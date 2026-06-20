@@ -60,8 +60,9 @@ export interface Tower {
 
 export interface Farm {
   id: string;
-  foodProduced: number;  // суммарно еды выдано
-  totalInvested: number; // суммарно потрачено золота
+  foodProduced: number;    // суммарно еды выдано
+  totalInvested: number;   // суммарно потрачено золота
+  buildTimeRemaining: number; // > 0 = строится
 }
 
 export interface PendingDamage {
@@ -152,7 +153,7 @@ export function createInitialState(): GameState {
     food: STARTING_FOOD,
     creeps: [],
     towers: [],
-    farms: [{ id: "farm-default", foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: FARM_COST }],
+    farms: [{ id: "farm-default", foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: FARM_COST, buildTimeRemaining: 0 }],
     projectiles: [],
     splashEffects: [],
     floatingTexts: [],

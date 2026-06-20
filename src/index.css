@@ -143,6 +143,23 @@ body {
 .shop-stat  { font-size: 0.75rem; color: #ccc; }
 .shop-cost  { font-size: 0.8rem; font-weight: 700; color: #f0c040; margin-top: 2px; }
 
+.farm-build-btn {
+  background: rgba(139,195,74,0.18);
+  border: 1px solid rgba(139,195,74,0.4);
+  border-radius: 6px;
+  color: #c8e6a0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  margin-top: 2px;
+  width: 100%;
+  transition: background 0.15s;
+}
+.farm-build-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+@media (hover: hover) { .farm-build-btn:not(:disabled):hover { background: rgba(139,195,74,0.32); } }
+
 .shop-cancel {
   background: rgba(255,80,80,0.2);
   border: 2px solid rgba(255,80,80,0.4);
