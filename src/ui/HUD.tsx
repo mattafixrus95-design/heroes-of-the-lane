@@ -5,9 +5,10 @@ interface Props {
   state: GameState;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onReset: () => void;
+  onShowStats: () => void;
 }
 
-export default function HUD({ state, onUpdateState, onReset }: Props) {
+export default function HUD({ state, onUpdateState, onReset, onShowStats }: Props) {
   const { phase, wave, gold, lives, food, spawnQueue, creeps } = state;
   const remaining = creeps.length + spawnQueue.length;
   const isPrep = phase === "prep";
@@ -47,6 +48,7 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
         </button>
       )}
 
+      <button className="hud-btn secondary" onClick={onShowStats}>📊</button>
       <button className="hud-btn reset" onClick={onReset}>↺</button>
     </div>
   );
