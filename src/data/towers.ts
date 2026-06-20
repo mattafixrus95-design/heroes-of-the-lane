@@ -37,14 +37,14 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       {
         gradeName: "Боевой",
         damage: 6, range: 2, attackSpeed: 1.20, aoe: 0, aoeDmgPct: 1, slow: 0.25,
-        upgradeCost: 50, upgradeTime: 2, foodUpgradeCost: 0,
+        upgradeCost: 50, upgradeTime: 1, foodUpgradeCost: 0,
       },
     ],
   },
   elf: {
     type: "elf", name: "Эльф",
     purchaseCost: 50,
-    buildTime: 3,
+    buildTime: 1,
     foodCost: 1,
     grades: [
       {
@@ -55,14 +55,14 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       {
         gradeName: "Благородный",
         damage: 8, range: 4, attackSpeed: 1.40, aoe: 2, aoeDmgPct: 0.35, slow: 0,
-        upgradeCost: 100, upgradeTime: 5, foodUpgradeCost: 2,
+        upgradeCost: 100, upgradeTime: 2, foodUpgradeCost: 2,
       },
     ],
   },
   dragon: {
     type: "dragon", name: "Дракон",
     purchaseCost: 185,
-    buildTime: 7,
+    buildTime: 2,
     foodCost: 3,
     grades: [
       {
@@ -73,7 +73,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       {
         gradeName: "Золотой",
         damage: 30, range: 5, attackSpeed: 0.75, aoe: 2, aoeDmgPct: 0.5, slow: 0,
-        upgradeCost: 320, upgradeTime: 9, foodUpgradeCost: 4,
+        upgradeCost: 320, upgradeTime: 3, foodUpgradeCost: 4,
       },
     ],
   },
