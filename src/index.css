@@ -80,6 +80,7 @@ body {
 }
 
 .hud-stat { font-size: 0.9rem; font-weight: 700; }
+.hud-stat-dim { color: #999; font-size: 0.78rem; font-weight: 600; }
 
 .hud-btn {
   background: #f0c040;

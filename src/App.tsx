@@ -10,14 +10,12 @@ import GameGrid from "./ui/GameGrid";
 import TowerMenu from "./ui/TowerMenu";
 import FarmPanel from "./ui/FarmPanel";
 import StatsOverlay from "./ui/StatsOverlay";
-import StatsPanel from "./ui/StatsPanel";
 import "./index.css";
 
 export default function App() {
   const [state, setState] = useState<GameState>(createInitialState);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
-  const [showStatsPanel, setShowStatsPanel] = useState(false);
 
   const updateState = useCallback(
     (updater: (s: GameState) => GameState) => setState(updater),
@@ -51,7 +49,7 @@ export default function App() {
   return (
     <div className="app">
       <h1 className="title">Heroes of the Lane</h1>
-      <HUD state={state} onUpdateState={updateState} onReset={handleReset} onShowStats={() => setShowStatsPanel(true)} />
+      <HUD state={state} onUpdateState={updateState} onReset={handleReset} />
       <GameGrid
         state={state}
         selectedItem={selectedItem}
@@ -84,10 +82,6 @@ export default function App() {
       {showStats && (
         <StatsOverlay state={state} onReset={handleReset} />
       )}
-      {showStatsPanel && !showStats && (
-        <StatsPanel state={state} onClose={() => setShowStatsPanel(false)} />
-      )}
-
       {/* Версия — фиксированно внизу справа */}
       <div style={{
         position: "fixed", bottom: 10, right: 12,
