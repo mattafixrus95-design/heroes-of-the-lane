@@ -1,5 +1,6 @@
 import type { GameState } from "../game/engine/gameState";
 import { startWave } from "../game/entities/spawnWave";
+import { WAVE_DEFS } from "../data/waves";
 
 interface Props {
   state: GameState;
@@ -14,42 +15,55 @@ export default function HUD({ state, onUpdateState, onReset, onShowStats }: Prop
   const isPrep = phase === "prep";
   const isWave = phase === "wave";
 
+  // Wave name: during active wave show current, otherwise show upcoming
+  const nameIdx = isWave
+    ? Math.max(wave - 1, 0)
+    : Math.min(wave, WAVE_DEFS.length - 1);
+  const waveName = WAVE_DEFS[nameIdx]?.name ?? "";
+
   return (
     <div className="hud">
-      <div className="hud-stat">💰 {gold}</div>
-      <div className="hud-stat">❤️ {lives}</div>
-      <div className="hud-stat">🌾 {food}</div>
-      <div className="hud-stat">🌊 {wave}/20</div>
+      {/* Строка 1: Ресурсы */}
+      <div className="hud-row">
+        <span className="hud-stat">💰 {gold}</span>
+        <span className="hud-stat">❤️ {lives}</span>
+        <span className="hud-stat">🌾 {food}</span>
+      </div>
 
-      {phase === "idle" && (
-        <button className="hud-btn" onClick={() => onUpdateState(startWave)}>
-          ▶ Начать
-        </button>
-      )}
-
-      {isPrep && (
-        <div className="hud-btn secondary" style={{ cursor: "default", minWidth: 120 }}>
-          ⏱ Волна {wave + 1} через {Math.ceil(state.prepTimer)}с
+      {/* Строка 2: Инфо о волне + кнопки */}
+      <div className="hud-row">
+        <div className="hud-wave-info">
+          <span className="hud-stat">🌊 {wave}/20</span>
+          {waveName && <span className="hud-wave-name">{waveName}</span>}
+          {isWave && <span className="hud-stat">👾 {remaining}</span>}
         </div>
-      )}
 
-      {isWave && (
-        <div className="hud-btn secondary" style={{ cursor: "default" }}>
-          👾 {remaining}
+        <div className="hud-actions">
+          {phase === "idle" && (
+            <button className="hud-btn" onClick={() => onUpdateState(startWave)}>
+              ▶ Начать
+            </button>
+          )}
+
+          {isPrep && (
+            <div className="hud-btn secondary" style={{ cursor: "default" }}>
+              ⏱ {Math.ceil(state.prepTimer)}с
+            </div>
+          )}
+
+          {(isWave || isPrep) && (
+            <button
+              className="hud-btn secondary"
+              onClick={() => onUpdateState(s => ({ ...s, isPaused: !s.isPaused }))}
+            >
+              {state.isPaused ? "▶" : "⏸"}
+            </button>
+          )}
+
+          <button className="hud-btn secondary" onClick={onShowStats}>📊</button>
+          <button className="hud-btn secondary" onClick={onReset}>↺</button>
         </div>
-      )}
-
-      {(isWave || isPrep) && (
-        <button
-          className="hud-btn secondary"
-          onClick={() => onUpdateState(s => ({ ...s, isPaused: !s.isPaused }))}
-        >
-          {state.isPaused ? "▶ Продолжить" : "⏸ Пауза"}
-        </button>
-      )}
-
-      <button className="hud-btn secondary" onClick={onShowStats}>📊</button>
-      <button className="hud-btn reset" onClick={onReset}>↺</button>
+      </div>
     </div>
   );
 }

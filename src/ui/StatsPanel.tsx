@@ -7,8 +7,10 @@ interface Props {
 }
 
 export default function StatsPanel({ state, onClose }: Props) {
-  const waveIdx = Math.min(state.wave - 1, WAVE_DEFS.length - 1);
-  const recommended = state.wave > 0 ? (WAVE_DEFS[waveIdx]?.recommended ?? 0) : 0;
+  // Always show recommendation for the NEXT wave
+  const nextWaveNum = Math.min(state.wave + 1, 20);
+  const nextWaveIdx = Math.min(state.wave, WAVE_DEFS.length - 1);
+  const recommended = WAVE_DEFS[nextWaveIdx]?.recommended ?? 0;
   const towerValue = state.towers.reduce((s, t) => s + t.totalInvested, 0);
 
   return (
@@ -32,7 +34,7 @@ export default function StatsPanel({ state, onClose }: Props) {
           Информация об игре
         </div>
 
-        <Row label="Рекомендуемая стоимость башен" value={recommended} color="#e57373" />
+        <Row label={`Рекомендуемая стоимость башен к уровню ${nextWaveNum}`} value={recommended} color="#e57373" />
         <Row label="Текущая стоимость башен" value={towerValue} color="#81c784" />
 
         <button
