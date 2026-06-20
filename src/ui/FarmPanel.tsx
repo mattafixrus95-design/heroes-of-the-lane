@@ -4,7 +4,6 @@ import { FARM_UPGRADE_COST, FARM_FOOD_PER_LEVEL } from "../game/engine/gameState
 interface Props {
   farms: Farm[];
   gold: number;
-  waveActive: boolean;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
 }
 
@@ -31,20 +30,16 @@ function buildFarm(farmId: string, state: GameState): GameState {
   };
 }
 
-export default function FarmPanel({ farms, gold, waveActive, onUpdateState }: Props) {
+export default function FarmPanel({ farms, gold, onUpdateState }: Props) {
   if (farms.length === 0) return null;
   return (
     <div className="shop" style={{ justifyContent: "flex-start" }}>
       {farms.map(farm => {
         const level = Math.round(farm.foodProduced / FARM_FOOD_PER_LEVEL);
         const isBuilding = farm.buildTimeRemaining > 0;
-        const canBuild = !isBuilding && !waveActive && gold >= FARM_UPGRADE_COST;
+        const canBuild = !isBuilding && gold >= FARM_UPGRADE_COST;
         return (
-          <div
-            key={farm.id}
-            className="shop-item"
-            style={{ minWidth: 90 }}
-          >
+          <div key={farm.id} className="shop-item" style={{ minWidth: 90 }}>
             <span className="shop-emoji">🌾</span>
             <span className="shop-name">Ферма ур.{level}</span>
             <span className="shop-stat">
@@ -60,7 +55,7 @@ export default function FarmPanel({ farms, gold, waveActive, onUpdateState }: Pr
                 disabled={!canBuild}
                 onClick={() => onUpdateState(s => buildFarm(farm.id, s))}
               >
-                {waveActive ? "Волна" : gold < FARM_UPGRADE_COST ? "Мало 💰" : "Построить"}
+                {gold < FARM_UPGRADE_COST ? "Мало 💰" : "Построить"}
               </button>
             )}
           </div>

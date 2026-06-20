@@ -80,7 +80,7 @@ export interface Projectile {
   fromRow: number;
   toX: number;
   toY: number;
-  kind: "arrow" | "fireball";
+  kind: "arrow" | "axe" | "fireball";
   spawnTime: number;
   duration: number;
   pendingDamage: PendingDamage;

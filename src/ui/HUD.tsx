@@ -35,7 +35,16 @@ export default function HUD({ state, onUpdateState, onReset, onShowStats }: Prop
         <div className="hud-wave-info">
           <span className="hud-stat">🌊 {wave}/20</span>
           {waveName && <span className="hud-wave-name">{waveName}</span>}
-          {isWave && <span className="hud-stat">👾 {remaining}</span>}
+          {/* Таймер до волны — сразу после названия */}
+          {isPrep && (
+            <span className="hud-stat" style={{ color: "#f0c040" }}>
+              ⏱ {Math.ceil(state.prepTimer)}с
+            </span>
+          )}
+          {/* Счётчик крипов — появляется когда волна началась */}
+          {isWave && (
+            <span className="hud-stat">👾 {remaining}</span>
+          )}
         </div>
 
         <div className="hud-actions">
@@ -43,12 +52,6 @@ export default function HUD({ state, onUpdateState, onReset, onShowStats }: Prop
             <button className="hud-btn" onClick={() => onUpdateState(startWave)}>
               ▶ Начать
             </button>
-          )}
-
-          {isPrep && (
-            <div className="hud-btn secondary" style={{ cursor: "default" }}>
-              ⏱ {Math.ceil(state.prepTimer)}с
-            </div>
           )}
 
           {(isWave || isPrep) && (

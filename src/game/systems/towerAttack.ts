@@ -30,11 +30,11 @@ function makeProjectile(
   gameTime: number,
   damage: number,
   slow: number,
-  isFireball: boolean,
+  kind: "arrow" | "axe" | "fireball",
   aoeDmgPct: number,
   explosionAoe: number,
 ): Projectile {
-  const speed = isFireball ? FIREBALL_SPEED : ARROW_SPEED;
+  const speed = kind === "fireball" ? FIREBALL_SPEED : ARROW_SPEED;
   return {
     id: `p-${++projCounter}`,
     towerType: tower.type,
@@ -42,7 +42,7 @@ function makeProjectile(
     fromRow: tower.row,
     toX: target.position.x,
     toY: target.position.y,
-    kind: isFireball ? "fireball" : "arrow",
+    kind,
     spawnTime: gameTime,
     duration: travelTime(tower.col, tower.row, target.position.x, target.position.y, speed),
     pendingDamage: {
@@ -65,23 +65,26 @@ export function tickTowerAttack(state: GameState): GameState {
     const target = findTarget(tower, state.creeps);
     if (!target) return tower;
 
-    const isFireball = tower.type === "dragon";
-
-    if (isFireball) {
-      // One fireball: handles main damage + AoE explosion on arrival
+    if (tower.type === "dragon") {
       newProjectiles.push(makeProjectile(
         tower, target, state.gameTime,
         tower.damage, tower.slow,
-        true, tower.aoeDmgPct, tower.aoe,
+        "fireball", tower.aoeDmgPct, tower.aoe,
+      ));
+    } else if (tower.type === "dwarf") {
+      // Гном бросает топор (одиночный, без AoE)
+      newProjectiles.push(makeProjectile(
+        tower, target, state.gameTime,
+        tower.damage, tower.slow,
+        "axe", 0, 0,
       ));
     } else {
-      // Main arrow to primary target
+      // Эльф: стрела к основной цели + веерные стрелы по AoE
       newProjectiles.push(makeProjectile(
         tower, target, state.gameTime,
         tower.damage, tower.slow,
-        false, 0, 0,
+        "arrow", 0, 0,
       ));
-      // Additional arrows to every creep in AoE radius (elf upgrade)
       if (tower.aoe > 0) {
         for (const c of state.creeps) {
           if (c.id === target.id) continue;
@@ -90,7 +93,7 @@ export function tickTowerAttack(state: GameState): GameState {
             newProjectiles.push(makeProjectile(
               tower, c, state.gameTime,
               tower.damage * tower.aoeDmgPct, 0,
-              false, 0, 0,
+              "arrow", 0, 0,
             ));
           }
         }
