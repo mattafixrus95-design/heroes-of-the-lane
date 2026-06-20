@@ -25,13 +25,13 @@ export interface TowerDef {
 export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   dwarf: {
     type: "dwarf", name: "Гном",
-    purchaseCost: 20,
+    purchaseCost: 15,
     buildTime: 1,
     foodCost: 1,
     grades: [
       {
         gradeName: "Лесной",
-        damage: 2, range: 2, attackSpeed: 1.30, aoe: 0, aoeDmgPct: 1, slow: 0,
+        damage: 2, range: 2, attackSpeed: 1.10, aoe: 0, aoeDmgPct: 1, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
@@ -49,30 +49,30 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Лесной",
-        damage: 4, range: 3, attackSpeed: 0.75, aoe: 0, aoeDmgPct: 1, slow: 0,
+        damage: 4, range: 3, attackSpeed: 0.85, aoe: 0, aoeDmgPct: 1, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Благородный",
-        damage: 7, range: 4, attackSpeed: 1.40, aoe: 2, aoeDmgPct: 0.35, slow: 0,
-        upgradeCost: 100, upgradeTime: 2, foodUpgradeCost: 2,
+        damage: 6, range: 4, attackSpeed: 1.30, aoe: 2, aoeDmgPct: 0.35, slow: 0,
+        upgradeCost: 105, upgradeTime: 2, foodUpgradeCost: 2,
       },
     ],
   },
   dragon: {
     type: "dragon", name: "Дракон",
-    purchaseCost: 185,
+    purchaseCost: 190,
     buildTime: 2,
     foodCost: 3,
     grades: [
       {
         gradeName: "Зелёный",
-        damage: 14, range: 4, attackSpeed: 0.50, aoe: 1, aoeDmgPct: 0.5, slow: 0,
+        damage: 13, range: 4, attackSpeed: 0.50, aoe: 1, aoeDmgPct: 0.5, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Золотой",
-        damage: 23, range: 5, attackSpeed: 0.75, aoe: 2, aoeDmgPct: 0.5, slow: 0,
+        damage: 22, range: 5, attackSpeed: 0.75, aoe: 2, aoeDmgPct: 0.5, slow: 0,
         upgradeCost: 320, upgradeTime: 3, foodUpgradeCost: 4,
       },
     ],
