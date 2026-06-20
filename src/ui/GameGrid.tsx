@@ -99,6 +99,23 @@ function ArrowMarker({ angle, towerType }: { angle: number; towerType: string })
   );
 }
 
+function AxeMarker({ angle, progress }: { angle: number; progress: number }) {
+  const spin = angle + progress * 540; // 1.5 оборота в полёте
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" style={{
+      position: "absolute", left: -9, top: -9, overflow: "visible",
+      transform: `rotate(${spin}deg)`, transformOrigin: "9px 9px", pointerEvents: "none",
+    }}>
+      {/* рукоять */}
+      <line x1="9" y1="15" x2="9" y2="7" stroke="#7a4520" strokeWidth="2" strokeLinecap="round"/>
+      {/* лезвие левое */}
+      <path d="M9,7 L4,2 L4,9 Z" fill="#b8b8c8" stroke="#888" strokeWidth="0.6"/>
+      {/* лезвие правое */}
+      <path d="M9,7 L14,2 L14,9 Z" fill="#d0d0e0" stroke="#aaa" strokeWidth="0.6"/>
+    </svg>
+  );
+}
+
 function FireballMarker({ progress }: { progress: number }) {
   const size = 20 + progress * 6;
   return (
@@ -299,7 +316,9 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
             <div key={p.id} style={{ position: "absolute", left: x, top: y, pointerEvents: "none" }}>
               {p.kind === "fireball"
                 ? <FireballMarker progress={progress} />
-                : <ArrowMarker angle={angle} towerType={p.towerType} />
+                : p.kind === "axe"
+                  ? <AxeMarker angle={angle} progress={progress} />
+                  : <ArrowMarker angle={angle} towerType={p.towerType} />
               }
             </div>
           );

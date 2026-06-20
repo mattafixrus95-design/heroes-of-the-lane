@@ -69,7 +69,6 @@ export default function App() {
       <FarmPanel
         farms={state.farms}
         gold={state.gold}
-        waveActive={state.phase === "wave"}
         onUpdateState={updateState}
       />
       {menuTower && !showStats && (
