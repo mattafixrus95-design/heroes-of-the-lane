@@ -1,4 +1,4 @@
-name: Auto PR
+name: Auto PR + Merge
 
 on:
   push:
@@ -6,15 +6,20 @@ on:
       - 'feature/**'
 
 jobs:
-  create-pr:
+  auto-merge:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create PR (skip if already exists)
+      - name: Create PR
         run: gh pr create --base master --fill || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge PR
+        run: gh pr merge --merge --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

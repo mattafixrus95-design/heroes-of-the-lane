@@ -78,4 +78,3 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     ],
   },
 };
-// auto-merge test
