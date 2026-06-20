@@ -33,8 +33,7 @@ export default function TowerShop({ gold, food, selected, waveActive, onSelect }
           >
             <span className="shop-emoji"><TowerIcon type={def.type} grade={0} size={40} /></span>
             <span className="shop-name">{def.name} · {base.gradeName}</span>
-            <span className="shop-stat">⚔️ {base.damage}{base.aoe > 0 ? ` AoE${base.aoe}` : ""}</span>
-            <span className="shop-stat">🎯 {base.range} &nbsp; ⚡ {base.attackSpeed}/с</span>
+            <span className="shop-stat">⚔️ {base.damage} &nbsp; 🎯 {base.range} &nbsp; ⚡ {base.attackSpeed}/с</span>
             <span className="shop-cost">💰 {def.purchaseCost} &nbsp; 🌾 {def.foodCost}</span>
           </button>
         );
