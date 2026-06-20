@@ -49,12 +49,12 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Лесной",
-        damage: 4, range: 3, attackSpeed: 0.85, aoe: 0, aoeDmgPct: 1, slow: 0,
+        damage: 3, range: 3, attackSpeed: 0.85, aoe: 0, aoeDmgPct: 1, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Благородный",
-        damage: 6, range: 4, attackSpeed: 1.30, aoe: 2, aoeDmgPct: 0.35, slow: 0,
+        damage: 5, range: 4, attackSpeed: 1.30, aoe: 2, aoeDmgPct: 0.35, slow: 0,
         upgradeCost: 105, upgradeTime: 2, foodUpgradeCost: 2,
       },
     ],
@@ -67,7 +67,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Зелёный",
-        damage: 13, range: 4, attackSpeed: 0.50, aoe: 1, aoeDmgPct: 0.5, slow: 0,
+        damage: 12, range: 4, attackSpeed: 0.50, aoe: 1, aoeDmgPct: 0.5, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
