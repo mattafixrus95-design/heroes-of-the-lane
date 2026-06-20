@@ -13,13 +13,13 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Create PR
-        run: gh pr create --base master --fill || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Merge PR
-        run: gh pr merge --merge --delete-branch
+      - name: Create & merge PR
+        run: |
+          git checkout "$GITHUB_REF_NAME"
+          gh pr create --base master --fill || true
+          gh pr merge --merge --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
