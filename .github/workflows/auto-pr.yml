@@ -1,0 +1,20 @@
+name: Auto PR
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create PR (skip if already exists)
+        run: gh pr create --base master --fill || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
