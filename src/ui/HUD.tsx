@@ -14,16 +14,16 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
   const isPrep = phase === "prep";
   const isWave = phase === "wave";
 
-  // Текущая стоимость башен (сумма totalInvested)
+  // Один индекс для имени И рекомендации — всегда одна волна
+  // Во время волны: текущая (wave-1), в prep/idle: следующая (wave)
+  const waveIdx = isWave
+    ? Math.max(wave - 1, 0)
+    : Math.min(wave, WAVE_DEFS.length - 1);
+  const waveName    = WAVE_DEFS[waveIdx]?.name ?? "";
+  const recommended = WAVE_DEFS[waveIdx]?.recommended ?? 0;
+
+  // Текущая стоимость башен
   const towerValue = state.towers.reduce((s, t) => s + t.totalInvested, 0);
-
-  // Рекомендуемая стоимость для следующей волны
-  const recIdx = Math.min(wave, WAVE_DEFS.length - 1);
-  const recommended = WAVE_DEFS[recIdx]?.recommended ?? 0;
-
-  // Название текущей/предстоящей волны
-  const nameIdx = isWave ? Math.max(wave - 1, 0) : Math.min(wave, WAVE_DEFS.length - 1);
-  const waveName = WAVE_DEFS[nameIdx]?.name ?? "";
 
   return (
     <div className="hud">
@@ -40,7 +40,6 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
         <div className="hud-wave-info">
           <span className="hud-stat">🌊 {wave}/20</span>
           {waveName && <span className="hud-wave-name">{waveName}</span>}
-          {/* Рекомендуемая стоимость — между названием и таймером/крипами */}
           <span className="hud-stat hud-stat-dim">Рек.{recommended}</span>
           {isPrep && (
             <span className="hud-stat" style={{ color: "#f0c040" }}>

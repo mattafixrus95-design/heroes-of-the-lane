@@ -134,7 +134,7 @@ export interface GameState {
   currentWaveGold: number;
 }
 
-export const STARTING_GOLD        = 200;
+export const STARTING_GOLD        = 160;
 export const STARTING_LIVES       = 50;
 export const STARTING_FOOD        = 15;
 export const SLOW_DURATION        = 1.5;
