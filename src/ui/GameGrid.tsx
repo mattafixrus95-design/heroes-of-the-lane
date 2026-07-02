@@ -176,7 +176,7 @@ export default function GameGrid({
   state, selectedItem, selection, onUpdateState, onExitBuildMode, onSelect,
 }: Props) {
   const cell = useCell();
-  const canBuild = state.phase !== "wave";
+  const canBuild = true;
 
   const iconSize  = Math.round(cell * 0.72);
   const towerSize = Math.round(cell * 0.71);

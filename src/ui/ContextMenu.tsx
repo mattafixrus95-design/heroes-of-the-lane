@@ -8,6 +8,7 @@ import {
   TOWN_LEVELS,
 } from "../data/buildings";
 import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../data/map";
+import { auraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
 import WoodSVG from "../assets/WoodSVG";
 import SawmillSVG from "../assets/SawmillSVG";
@@ -81,10 +82,12 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
   const nextGrade = def.grades[tower.gradeIndex + 1] ?? null;
   const sellValue = Math.floor(tower.totalInvested * SELL_RATE);
   const isBuilding = tower.buildTimeRemaining > 0;
-  const waveActive = state.phase === "wave";
 
   const maxUpgradeTier = TOWN_LEVELS[state.townLevel - 1].maxUpgradeTier;
   const tierLocked = def.tier > maxUpgradeTier;
+
+  const bonus = auraBonus(tower, state.towers);
+  const effectiveAttackSpeed = tower.attackSpeed * (1 + bonus);
 
   const canAffordUpgrade = nextGrade
     ? state.gold >= nextGrade.upgradeCost && state.food >= nextGrade.foodUpgradeCost
@@ -107,7 +110,7 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
       <div className="cm-stats">
         <span>⚔️ {tower.damage}</span>
         <span>🎯 {tower.range}</span>
-        <span>⚡ {tower.attackSpeed}/с</span>
+        <span>⚡ {bonus > 0 ? `${tower.attackSpeed} → ${effectiveAttackSpeed.toFixed(2)}` : tower.attackSpeed}/с{bonus > 0 && ` (+${Math.round(bonus * 100)}% аура)`}</span>
         {tower.ability?.kind === "aoe"           && <span>💥 AoE r{tower.ability.radius}</span>}
         {tower.ability?.kind === "multishot"     && <span>🏹 +{tower.ability.extraTargets}×{Math.round(tower.ability.extraDmgPct * 100)}%</span>}
         {tower.ability?.kind === "crit"           && <span>🎯 Крит {Math.round(tower.ability.chance * 100)}%×{tower.ability.multiplier}</span>}
@@ -137,12 +140,11 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
 
         <button
           className="cm-btn sell"
-          disabled={waveActive}
           onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
         >
           Продать
           <span className="cm-btn-cost">
-            {waveActive ? "(волна)" : `+${sellValue}💰 +${tower.foodSpent}🌾`}
+            {`+${sellValue}💰 +${tower.foodSpent}🌾`}
           </span>
         </button>
 

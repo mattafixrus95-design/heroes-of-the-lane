@@ -48,7 +48,6 @@ export default function BottomHUD({
           gold={state.gold}
           food={state.food}
           selected={selectedShopItem}
-          waveActive={state.phase === "wave"}
           maxBuildTier={maxBuildTier}
           onSelect={onSelectShopItem}
           onInfo={onInfo}

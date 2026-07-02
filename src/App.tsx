@@ -70,6 +70,7 @@ export default function App() {
   function handleSelect(sel: Selection | null) {
     setSelection(sel);
     setSelectedItem(null);
+    if (sel) setBottomTab(sel.kind === "tower" ? "towers" : "buildings");
   }
 
   function handleSelectShopItem(item: ShopItem | null) {
