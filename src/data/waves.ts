@@ -50,9 +50,9 @@ function group(kind: CreepKind, count: number, interval: number): SpawnEntry[] {
   return Array.from({ length: count }, (_, i) => ({ kind, delay: i === 0 ? 0 : interval }));
 }
 
-// Все крипы выходят за первые 7 секунд волны
+// Все крипы выходят за первые 10 секунд волны
 function wave(kind: CreepKind, count: number): SpawnEntry[] {
-  const interval = count > 1 ? +(7 / (count - 1)).toFixed(3) : 0;
+  const interval = count > 1 ? +(10 / (count - 1)).toFixed(3) : 0;
   return group(kind, count, interval);
 }
 
