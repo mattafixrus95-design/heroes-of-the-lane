@@ -375,7 +375,7 @@ export default function GameGrid({
   const creepMarkers = state.creeps.map(e => {
     const x = e.position.x * cell + cell / 2;
     const y = e.position.y * cell + cell / 2;
-    const hpPct = e.hp / e.maxHp;
+    const hpPct = Math.max(0, Math.min(1, e.hp / e.maxHp));
     const isSlowed = e.slowTimer > 0;
     const isBoss = e.kind === "angel" || e.kind === "black_dragon" || e.kind === "archangel";
     const creepSize = isBoss ? Math.round(baseCreepSize * 1.6) : baseCreepSize;
@@ -400,7 +400,7 @@ export default function GameGrid({
           boxShadow: isSelectedCreep ? "0 0 0 2px rgba(80,220,255,0.9)" : undefined,
         }}>
         <div style={{ width: "100%", height: isBoss ? 4 : 3, background: "#333", borderRadius: 2, marginBottom: 1 }}>
-          <div style={{ width: `${hpPct * 100}%`, height: "100%", borderRadius: 2, background: hpBarColor }}/>
+          <div style={{ width: `${hpPct * 100}%`, height: "100%", borderRadius: 2, background: hpBarColor, transition: "width 0.12s linear" }}/>
         </div>
         <span style={{
           fontSize: `${Math.max(0.6, (isBoss ? cell * 1.3 : cell) / 56)}rem`,
