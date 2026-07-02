@@ -89,7 +89,7 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
   const canAffordUpgrade = nextGrade
     ? state.gold >= nextGrade.upgradeCost && state.food >= nextGrade.foodUpgradeCost
     : false;
-  const canUpgrade = canAffordUpgrade && !waveActive && !isBuilding && !tierLocked;
+  const canUpgrade = canAffordUpgrade && !isBuilding && !tierLocked;
 
   return (
     <>
@@ -128,7 +128,7 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
             <span className="cm-btn-cost">
               💰 {nextGrade.upgradeCost}
               {nextGrade.foodUpgradeCost > 0 ? ` 🌾 ${nextGrade.foodUpgradeCost}` : ""}
-              {tierLocked ? " (город)" : isBuilding ? " (строится)" : waveActive ? " (волна)" : !canAffordUpgrade ? " (недост.)" : ""}
+              {tierLocked ? " (город)" : isBuilding ? " (строится)" : !canAffordUpgrade ? " (недост.)" : ""}
             </span>
           </button>
         ) : (
