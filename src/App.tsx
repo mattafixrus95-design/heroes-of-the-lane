@@ -71,7 +71,7 @@ export default function App() {
     setSelection(sel);
     setSelectedItem(null);
     if (sel?.kind === "tower") setBottomTab("towers");
-    else if (sel && sel.kind !== "creep") setBottomTab("buildings");
+    else if (sel?.kind === "farm" || sel?.kind === "sawmill" || sel?.kind === "town") setBottomTab("buildings");
   }
 
   function handleSelectShopItem(item: ShopItem | null) {

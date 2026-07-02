@@ -200,6 +200,7 @@ export default function GameGrid({
       const isSawmillCell = c === SAWMILL_CELL[0] && r === SAWMILL_CELL[1];
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
       const isSelectedTower = !!tower && selection?.kind === "tower" && selection.id === tower.id;
+      const isSelectedGate = isEntry && selection?.kind === "wave";
 
       // Состояние hover и подсветки
       const isHovered = !!selectedItem && hoveredCell?.col === c && hoveredCell?.row === r;
@@ -212,6 +213,11 @@ export default function GameGrid({
         if (tower) {
           const already = selection?.kind === "tower" && selection.id === tower.id;
           onSelect(already ? null : { kind: "tower", id: tower.id });
+          onExitBuildMode();
+          return;
+        }
+        if (isEntry) {
+          onSelect(selection?.kind === "wave" ? null : { kind: "wave" });
           onExitBuildMode();
           return;
         }
@@ -250,7 +256,7 @@ export default function GameGrid({
             border: isPath
               ? "1px solid rgba(80,55,25,0.45)"
               : "1px solid rgba(25,70,35,0.35)",
-            cursor: (tower || isExit || isFarmCell || isSawmillCell) ? "pointer"
+            cursor: (tower || isEntry || isExit || isFarmCell || isSawmillCell) ? "pointer"
               : (isPath || isTerritory || !canBuild) ? "default"
               : selectedItem ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -261,7 +267,7 @@ export default function GameGrid({
               ? "inset 0 0 0 2px rgba(80,255,80,0.7)"
               : "inset 0 0 0 2px rgba(255,60,60,0.7)"
             } : {}),
-            ...(isSelectedTower ? { boxShadow: "inset 0 0 0 2px rgba(80,220,255,0.85)" } : {}),
+            ...(isSelectedTower || isSelectedGate ? { boxShadow: "inset 0 0 0 2px rgba(80,220,255,0.85)" } : {}),
           }}
         >
           {/* Подсветка ячейки при hover в режиме строительства */}
