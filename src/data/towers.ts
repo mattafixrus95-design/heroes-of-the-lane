@@ -121,7 +121,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       {
         gradeName: "Страж",
         damage: 9, range: 2, attackSpeed: 0.80, slow: 0,
-        ability: { kind: "root", everyNth: 3, duration: 0.75 },
+        ability: { kind: "root", everyNth: 3, duration: 0.5 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
