@@ -17,14 +17,14 @@ export default function UpdateButton({ currentVersion }: { currentVersion: strin
     setStatus("checking");
 
     try {
-      const res = await fetch(`/version.json?t=${Date.now()}`);
+      const res = await fetch("/version.json", { cache: "no-store" });
       const data: { version: string } = await res.json();
 
       if (data.version !== currentVersion) {
         setStatus("updating");
         if ("serviceWorker" in navigator) {
           const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map(r => r.update()));
+          await Promise.all(regs.map(r => r.unregister()));
         }
         window.location.reload();
       } else {
