@@ -22,7 +22,7 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
       newTexts.push({
         id: `ft-farm-${++ftCounter}`,
         text: `+${FARM_FOOD_PER_LEVEL}🌾`,
-        x: FARM_CELL[0] + 0.5, y: FARM_CELL[1],
+        x: FARM_CELL[0], y: FARM_CELL[1],
         color: "#8bc34a",
         spawnTime: state.gameTime,
         duration: 1.4,
@@ -48,7 +48,7 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
       newTexts.push({
         id: `ft-sawmill-${++ftCounter}`,
         text: `+${gain} 🌲`,
-        x: SAWMILL_CELL[0] + 0.5, y: SAWMILL_CELL[1],
+        x: SAWMILL_CELL[0], y: SAWMILL_CELL[1],
         color: "#8bc34a",
         spawnTime: state.gameTime,
         duration: 1.4,
