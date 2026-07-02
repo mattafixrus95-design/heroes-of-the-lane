@@ -88,7 +88,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   pegasus: {
     type: "pegasus", name: "Пегас",
-    purchaseCost: 75,
+    purchaseCost: 80,
     buildTime: 2,
     foodCost: 2,
     grades: [
@@ -102,13 +102,13 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
         gradeName: "Серебряный",
         damage: 11, range: 4, attackSpeed: 2.30, slow: 0,
         ability: { kind: "vulnerability", pct: 0.30, duration: 3 },
-        upgradeCost: 140, upgradeTime: 3, foodUpgradeCost: 3,
+        upgradeCost: 150, upgradeTime: 3, foodUpgradeCost: 3,
       },
     ],
   },
   dendroid: {
     type: "dendroid", name: "Дендроид",
-    purchaseCost: 95,
+    purchaseCost: 100,
     buildTime: 2,
     foodCost: 2,
     grades: [
@@ -122,13 +122,13 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
         gradeName: "Солдат",
         damage: 16, range: 3, attackSpeed: 1.00, slow: 0,
         ability: { kind: "root", everyNth: 2, duration: 0.75 },
-        upgradeCost: 155, upgradeTime: 3, foodUpgradeCost: 3,
+        upgradeCost: 165, upgradeTime: 3, foodUpgradeCost: 3,
       },
     ],
   },
   unicorn: {
     type: "unicorn", name: "Единорог",
-    purchaseCost: 150,
+    purchaseCost: 165,
     buildTime: 2,
     foodCost: 3,
     grades: [
@@ -142,13 +142,13 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
         gradeName: "Боевой",
         damage: 20, range: 4, attackSpeed: 1.80, slow: 0,
         ability: { kind: "aura_haste", radius: 3, pct: 0.20 },
-        upgradeCost: 215, upgradeTime: 3, foodUpgradeCost: 3,
+        upgradeCost: 225, upgradeTime: 3, foodUpgradeCost: 3,
       },
     ],
   },
   dragon: {
     type: "dragon", name: "Дракон",
-    purchaseCost: 205,
+    purchaseCost: 215,
     buildTime: 2,
     foodCost: 3,
     grades: [
@@ -162,7 +162,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
         gradeName: "Золотой",
         damage: 23, range: 5, attackSpeed: 1.20, slow: 0,
         ability: { kind: "aoe", radius: 2, dmgPct: 0.5 },
-        upgradeCost: 320, upgradeTime: 3, foodUpgradeCost: 4,
+        upgradeCost: 330, upgradeTime: 3, foodUpgradeCost: 4,
       },
     ],
   },
