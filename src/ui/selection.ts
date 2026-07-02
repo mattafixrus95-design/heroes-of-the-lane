@@ -3,4 +3,5 @@ export type Selection =
   | { kind: "creep"; id: string }
   | { kind: "farm" }
   | { kind: "sawmill" }
-  | { kind: "town" };
+  | { kind: "town" }
+  | { kind: "wave" };

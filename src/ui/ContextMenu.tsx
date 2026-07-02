@@ -1,4 +1,4 @@
-import type { GameState, Tower, Creep, FloatingText } from "../game/engine/gameState";
+import type { GameState, Tower, Creep, CreepKind, FloatingText } from "../game/engine/gameState";
 import { SELL_RATE } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
 import type { TowerType } from "../data/towers";
@@ -8,7 +8,7 @@ import {
   TOWN_LEVELS,
 } from "../data/buildings";
 import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../data/map";
-import { CREEP_DEFS } from "../data/waves";
+import { CREEP_DEFS, WAVE_DEFS } from "../data/waves";
 import { auraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
 import WoodSVG from "../assets/WoodSVG";
@@ -448,6 +448,46 @@ function CreepPanel({ creep }: { creep: Creep }) {
   );
 }
 
+// ── Волна ─────────────────────────────────────────────────────────────────────
+function WavePanel({ state }: { state: GameState }) {
+  const isWaveActive = state.phase === "wave";
+  const waveIdx = isWaveActive ? Math.max(state.wave - 1, 0) : Math.min(state.wave, WAVE_DEFS.length - 1);
+  const waveDef = WAVE_DEFS[waveIdx];
+  const waveNum = waveIdx + 1;
+  const remaining = state.creeps.length + state.spawnQueue.length;
+
+  const counts = new Map<CreepKind, number>();
+  for (const entry of waveDef.entries) counts.set(entry.kind, (counts.get(entry.kind) ?? 0) + 1);
+
+  return (
+    <>
+      <div className="cm-header">
+        <span className="cm-title">🌊 Волна {waveNum} · {waveDef.name}</span>
+      </div>
+      <div className="cm-stats">
+        <span>💰 Рекомендовано: {waveDef.recommended}</span>
+        <span>👾 Всего в волне: {waveDef.entries.length}</span>
+        {isWaveActive
+          ? <span>⏳ Осталось: {remaining}</span>
+          : state.phase === "prep"
+            ? <span>⏱ Начнётся через {Math.ceil(state.prepTimer)}с</span>
+            : <span>Ещё не начата</span>}
+      </div>
+      <div className="cm-stats" style={{ flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+        {[...counts.entries()].map(([kind, count]) => {
+          const def = CREEP_DEFS[kind];
+          return (
+            <span key={kind}>
+              {def.emoji} {def.name} ×{count} — ❤️{def.hp} 🏃{def.speed}
+              {def.abilities.length > 0 && ` · ${def.abilities.map(a => ABILITY_LABEL[a]).join(", ")}`}
+            </span>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
 export default function ContextMenu({ state, selection, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo }: Props) {
   if (selection.kind === "tower") {
     const tower = state.towers.find(t => t.id === selection.id);
@@ -455,6 +495,14 @@ export default function ContextMenu({ state, selection, onUpdateState, onClose, 
     return (
       <div className="context-menu">
         <TowerPanel tower={tower} state={state} onUpdateState={onUpdateState} onClose={onClose} onShowTowerInfo={onShowTowerInfo} />
+      </div>
+    );
+  }
+
+  if (selection.kind === "wave") {
+    return (
+      <div className="context-menu">
+        <WavePanel state={state} />
       </div>
     );
   }
