@@ -10,10 +10,9 @@ interface Props {
   selected: ShopItem | null;
   maxBuildTier: number;
   onSelect: (item: ShopItem | null) => void;
-  onInfo: (type: TowerType) => void;
 }
 
-export default function TowerShop({ gold, food, selected, maxBuildTier, onSelect, onInfo }: Props) {
+export default function TowerShop({ gold, food, selected, maxBuildTier, onSelect }: Props) {
   return (
     <div className="shop">
       {Object.values(TOWER_DEFS).map(def => {
@@ -28,12 +27,6 @@ export default function TowerShop({ gold, food, selected, maxBuildTier, onSelect
             style={{ cursor: clickable ? "pointer" : "not-allowed" }}
             onClick={() => clickable && onSelect(isSelected ? null : def.type)}
           >
-            <button
-              className="shop-info-btn"
-              onClick={e => { e.stopPropagation(); onInfo(def.type); }}
-            >
-              ℹ
-            </button>
             <span className="shop-emoji">
               <TowerIcon type={def.type} grade={0} size={26} />
             </span>

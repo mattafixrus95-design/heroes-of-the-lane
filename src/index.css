@@ -172,28 +172,6 @@ body {
 .shop-stat  { font-size: 0.75rem; color: #ccc; }
 .shop-cost  { font-size: 0.6rem; font-weight: 700; color: #f0c040; margin-top: 1px; white-space: nowrap; }
 
-/* Кнопка информации о башне в шопе */
-.shop-info-btn {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 4px;
-  color: #aaa;
-  font-size: 0.55rem;
-  font-weight: 700;
-  padding: 0px 3px;
-  cursor: pointer;
-  line-height: 1.3;
-  touch-action: manipulation;
-  flex-shrink: 0;
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  transition: background 0.12s, color 0.12s;
-}
-@media (hover: hover) {
-  .shop-info-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
-}
-
 /* Регулятор громкости в HUD */
 .hud-volume {
   display: flex;
