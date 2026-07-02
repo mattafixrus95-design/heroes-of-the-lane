@@ -158,6 +158,217 @@ function ElfGrade1({ s }: { s: number }) {
   );
 }
 
+// ── Centaur ───────────────────────────────────────────────────────────────────
+function CentaurGrade0({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Horse body */}
+      <ellipse cx="21" cy="28" rx="14" ry="7" fill="#8B6914"/>
+      <rect x="4" y="24" width="4" height="12" rx="1.5" fill="#6B4020"/>
+      <rect x="32" y="24" width="4" height="12" rx="1.5" fill="#6B4020"/>
+      {/* Tail */}
+      <path d="M35,26 Q40,30 37,36" fill="none" stroke="#4a3000" strokeWidth="2.5"/>
+      {/* Human torso */}
+      <rect x="13" y="12" width="12" height="14" rx="3" fill="#4a7c59"/>
+      {/* Head */}
+      <circle cx="19" cy="9" r="6" fill="#F5CBA7"/>
+      <circle cx="17" cy="8" r="1.2" fill="#2C2C2C"/>
+      <circle cx="21" cy="8" r="1.2" fill="#2C2C2C"/>
+      <path d="M14,6 Q19,2 24,6 L24,8 Q19,5 14,8 Z" fill="#6B4020"/>
+      {/* Bow */}
+      <path d="M27,8 Q32,17 27,26" fill="none" stroke="#8B6914" strokeWidth="2"/>
+      <line x1="27" y1="8" x2="27" y2="26" stroke="#6B4020" strokeWidth="1"/>
+    </svg>
+  );
+}
+
+function CentaurGrade1({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Horse body – dark armoured */}
+      <ellipse cx="21" cy="28" rx="14" ry="7" fill="#5D4037"/>
+      <rect x="4" y="24" width="4" height="12" rx="1.5" fill="#3E2723"/>
+      <rect x="32" y="24" width="4" height="12" rx="1.5" fill="#3E2723"/>
+      <path d="M35,26 Q40,30 37,36" fill="none" stroke="#2C1810" strokeWidth="2.5"/>
+      {/* Barding */}
+      <ellipse cx="21" cy="26" rx="12" ry="4" fill="#8D6E63" opacity="0.6"/>
+      {/* Human torso – armoured */}
+      <rect x="13" y="12" width="12" height="14" rx="3" fill="#B71C1C"/>
+      <rect x="13" y="12" width="12" height="5" rx="2" fill="#D32F2F"/>
+      {/* Head with helmet */}
+      <circle cx="19" cy="9" r="6" fill="#F5CBA7"/>
+      <path d="M13,9 Q13,2 19,1 Q25,2 25,9 Z" fill="#B0BEC5"/>
+      <rect x="15" y="8" width="8" height="2" rx="1" fill="#78909C"/>
+      <circle cx="17" cy="8" r="1.2" fill="#1A237E"/>
+      <circle cx="21" cy="8" r="1.2" fill="#1A237E"/>
+      {/* Ornate bow */}
+      <path d="M27,7 Q33,17 27,27" fill="none" stroke="#FFD700" strokeWidth="2"/>
+      <line x1="27" y1="7" x2="27" y2="27" stroke="#8B6914" strokeWidth="1"/>
+      <circle cx="27" cy="7" r="1.5" fill="#FFD700"/>
+      <circle cx="27" cy="27" r="1.5" fill="#FFD700"/>
+    </svg>
+  );
+}
+
+// ── Pegasus ───────────────────────────────────────────────────────────────────
+function PegasusGrade0({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Body */}
+      <ellipse cx="20" cy="24" rx="12" ry="8" fill="#FAFAFA"/>
+      {/* Legs */}
+      <rect x="12" y="28" width="3" height="8" rx="1.5" fill="#E0E0E0"/>
+      <rect x="25" y="28" width="3" height="8" rx="1.5" fill="#E0E0E0"/>
+      {/* Wings */}
+      <path d="M14,20 Q4,10 8,4 Q16,8 18,18" fill="#FFFFFF" opacity="0.95"/>
+      <path d="M26,20 Q36,10 32,4 Q24,8 22,18" fill="#FFFFFF" opacity="0.95"/>
+      <path d="M14,20 Q8,14 10,8" fill="none" stroke="#CFCFCF" strokeWidth="1"/>
+      <path d="M26,20 Q32,14 30,8" fill="none" stroke="#CFCFCF" strokeWidth="1"/>
+      {/* Neck & head */}
+      <path d="M13,18 Q11,10 16,7" fill="none" stroke="#FAFAFA" strokeWidth="6" strokeLinecap="round"/>
+      <ellipse cx="16" cy="6" rx="4" ry="3" fill="#FAFAFA"/>
+      {/* Mane */}
+      <path d="M13,10 Q10,8 12,4" fill="none" stroke="#8B6914" strokeWidth="1.5"/>
+      {/* Tail */}
+      <path d="M30,26 Q37,28 35,34" fill="none" stroke="#E0E0E0" strokeWidth="2.5"/>
+      {/* Eye */}
+      <circle cx="17" cy="6" r="0.8" fill="#2C2C2C"/>
+    </svg>
+  );
+}
+
+function PegasusGrade1({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Body – silver */}
+      <ellipse cx="20" cy="24" rx="12" ry="8" fill="#CFD8DC"/>
+      {/* Legs */}
+      <rect x="12" y="28" width="3" height="8" rx="1.5" fill="#90A4AE"/>
+      <rect x="25" y="28" width="3" height="8" rx="1.5" fill="#90A4AE"/>
+      {/* Wings – larger, silver-gold */}
+      <path d="M14,20 Q2,8 7,2 Q17,7 18,18" fill="#ECEFF1"/>
+      <path d="M26,20 Q38,8 33,2 Q23,7 22,18" fill="#ECEFF1"/>
+      <path d="M14,20 Q7,12 10,5" fill="none" stroke="#FFD700" strokeWidth="1"/>
+      <path d="M26,20 Q33,12 30,5" fill="none" stroke="#FFD700" strokeWidth="1"/>
+      {/* Neck & head */}
+      <path d="M13,18 Q11,10 16,7" fill="none" stroke="#CFD8DC" strokeWidth="6" strokeLinecap="round"/>
+      <ellipse cx="16" cy="6" rx="4" ry="3" fill="#CFD8DC"/>
+      {/* Golden mane */}
+      <path d="M13,10 Q9,8 12,3" fill="none" stroke="#FFD700" strokeWidth="1.8"/>
+      {/* Tail */}
+      <path d="M30,26 Q38,28 36,34" fill="none" stroke="#FFD700" strokeWidth="2.5"/>
+      {/* Horn-like crest */}
+      <path d="M16,3 L15,-1 L18,2" fill="#FFD700"/>
+      {/* Eye */}
+      <circle cx="17" cy="6" r="0.8" fill="#1A237E"/>
+    </svg>
+  );
+}
+
+// ── Dendroid ──────────────────────────────────────────────────────────────────
+function DendroidGrade0({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Trunk body */}
+      <rect x="13" y="16" width="14" height="18" rx="4" fill="#6D4C41"/>
+      {/* Bark texture */}
+      <path d="M16,18 L16,32 M20,16 L20,34 M24,18 L24,32" stroke="#4E342E" strokeWidth="1"/>
+      {/* Arms – branches */}
+      <path d="M13,20 Q4,16 3,10" fill="none" stroke="#6D4C41" strokeWidth="4" strokeLinecap="round"/>
+      <path d="M27,20 Q36,16 37,10" fill="none" stroke="#6D4C41" strokeWidth="4" strokeLinecap="round"/>
+      {/* Legs – roots */}
+      <path d="M16,34 Q13,38 9,38" fill="none" stroke="#4E342E" strokeWidth="4" strokeLinecap="round"/>
+      <path d="M24,34 Q27,38 31,38" fill="none" stroke="#4E342E" strokeWidth="4" strokeLinecap="round"/>
+      {/* Foliage head */}
+      <circle cx="20" cy="11" r="9" fill="#558B2F"/>
+      <circle cx="14" cy="8" r="5" fill="#689F38"/>
+      <circle cx="26" cy="8" r="5" fill="#689F38"/>
+      {/* Eyes */}
+      <circle cx="16" cy="13" r="1.3" fill="#FFEB3B"/>
+      <circle cx="24" cy="13" r="1.3" fill="#FFEB3B"/>
+    </svg>
+  );
+}
+
+function DendroidGrade1({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Trunk body – armoured bark */}
+      <rect x="12" y="16" width="16" height="18" rx="4" fill="#4E342E"/>
+      {/* Bark plates */}
+      <rect x="12" y="16" width="16" height="6" rx="2" fill="#3E2723"/>
+      <path d="M16,23 L16,32 M20,22 L20,34 M24,23 L24,32" stroke="#2C1810" strokeWidth="1"/>
+      {/* Thorny arms */}
+      <path d="M12,20 Q2,15 1,8" fill="none" stroke="#4E342E" strokeWidth="5" strokeLinecap="round"/>
+      <path d="M28,20 Q38,15 39,8" fill="none" stroke="#4E342E" strokeWidth="5" strokeLinecap="round"/>
+      <path d="M2,10 L-1,6 M3,13 L0,10" stroke="#2C1810" strokeWidth="1"/>
+      {/* Roots */}
+      <path d="M15,34 Q11,39 6,39" fill="none" stroke="#2C1810" strokeWidth="4.5" strokeLinecap="round"/>
+      <path d="M25,34 Q29,39 34,39" fill="none" stroke="#2C1810" strokeWidth="4.5" strokeLinecap="round"/>
+      {/* Foliage head – darker, battle-worn */}
+      <circle cx="20" cy="10" r="9" fill="#33691E"/>
+      <circle cx="13" cy="7" r="5" fill="#558B2F"/>
+      <circle cx="27" cy="7" r="5" fill="#558B2F"/>
+      {/* Glowing eyes */}
+      <circle cx="16" cy="12" r="1.5" fill="#FF6F00"/>
+      <circle cx="24" cy="12" r="1.5" fill="#FF6F00"/>
+    </svg>
+  );
+}
+
+// ── Unicorn ───────────────────────────────────────────────────────────────────
+function UnicornGrade0({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Body */}
+      <ellipse cx="20" cy="25" rx="12" ry="8" fill="#FFFFFF"/>
+      {/* Legs */}
+      <rect x="12" y="29" width="3" height="8" rx="1.5" fill="#F0F0F0"/>
+      <rect x="25" y="29" width="3" height="8" rx="1.5" fill="#F0F0F0"/>
+      {/* Neck & head */}
+      <path d="M13,19 Q11,10 17,6" fill="none" stroke="#FFFFFF" strokeWidth="7" strokeLinecap="round"/>
+      <ellipse cx="17" cy="5" rx="4.5" ry="3.5" fill="#FFFFFF"/>
+      {/* Horn */}
+      <path d="M17,1 L15,-4 L19,0 Z" fill="#FFECB3" stroke="#FFD700" strokeWidth="0.5"/>
+      {/* Rainbow mane */}
+      <path d="M13,10 Q9,8 11,3" fill="none" stroke="#BA68C8" strokeWidth="1.5"/>
+      <path d="M12,13 Q8,12 9,7" fill="none" stroke="#4FC3F7" strokeWidth="1.5"/>
+      {/* Tail */}
+      <path d="M30,27 Q38,29 36,35" fill="none" stroke="#BA68C8" strokeWidth="2.5"/>
+      {/* Eye */}
+      <circle cx="18" cy="5" r="0.8" fill="#2C2C2C"/>
+    </svg>
+  );
+}
+
+function UnicornGrade1({ s }: { s: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      {/* Body – armoured white */}
+      <ellipse cx="20" cy="25" rx="12" ry="8" fill="#FFFFFF"/>
+      <ellipse cx="20" cy="24" rx="10" ry="5" fill="#FFD700" opacity="0.25"/>
+      {/* Legs */}
+      <rect x="12" y="29" width="3" height="8" rx="1.5" fill="#F0F0F0"/>
+      <rect x="25" y="29" width="3" height="8" rx="1.5" fill="#F0F0F0"/>
+      {/* Neck & head */}
+      <path d="M13,19 Q11,10 17,6" fill="none" stroke="#FFFFFF" strokeWidth="7" strokeLinecap="round"/>
+      <ellipse cx="17" cy="5" rx="4.5" ry="3.5" fill="#FFFFFF"/>
+      {/* Golden horn */}
+      <path d="M17,1 L14,-5 L19,-1 Z" fill="#FFD700"/>
+      {/* Battle armour on head */}
+      <path d="M13,5 Q13,1 17,0 Q21,1 21,5" fill="none" stroke="#FFD700" strokeWidth="1"/>
+      {/* Rainbow mane – vivid */}
+      <path d="M13,10 Q8,8 10,2" fill="none" stroke="#AB47BC" strokeWidth="1.8"/>
+      <path d="M12,13 Q7,11 8,6" fill="none" stroke="#29B6F6" strokeWidth="1.8"/>
+      <path d="M12,16 Q7,15 7,10" fill="none" stroke="#FFCA28" strokeWidth="1.8"/>
+      {/* Tail */}
+      <path d="M30,27 Q40,29 38,36" fill="none" stroke="#AB47BC" strokeWidth="2.8"/>
+      {/* Eye */}
+      <circle cx="18" cy="5" r="0.8" fill="#1A237E"/>
+    </svg>
+  );
+}
+
 // ── Dragon ────────────────────────────────────────────────────────────────────
 function DragonGrade0({ s }: { s: number }) {
   return (
@@ -247,7 +458,11 @@ function DragonGrade1({ s }: { s: number }) {
 // ── Export ────────────────────────────────────────────────────────────────────
 export default function TowerIcon({ type, grade, size = 36 }: Props) {
   const s = size;
-  if (type === "dwarf") return grade === 0 ? <DwarfGrade0 s={s} /> : <DwarfGrade1 s={s} />;
-  if (type === "elf")   return grade === 0 ? <ElfGrade0   s={s} /> : <ElfGrade1   s={s} />;
+  if (type === "centaur")  return grade === 0 ? <CentaurGrade0  s={s} /> : <CentaurGrade1  s={s} />;
+  if (type === "dwarf")    return grade === 0 ? <DwarfGrade0    s={s} /> : <DwarfGrade1    s={s} />;
+  if (type === "elf")      return grade === 0 ? <ElfGrade0      s={s} /> : <ElfGrade1      s={s} />;
+  if (type === "pegasus")  return grade === 0 ? <PegasusGrade0  s={s} /> : <PegasusGrade1  s={s} />;
+  if (type === "dendroid") return grade === 0 ? <DendroidGrade0 s={s} /> : <DendroidGrade1 s={s} />;
+  if (type === "unicorn")  return grade === 0 ? <UnicornGrade0  s={s} /> : <UnicornGrade1  s={s} />;
   return grade === 0 ? <DragonGrade0 s={s} /> : <DragonGrade1 s={s} />;
 }

@@ -44,7 +44,9 @@ export function tickEnemyMovement(state: GameState, dt: number): GameState {
     // Slow (slow_resist ignores it)
     const slowTimer = Math.max(0, c.slowTimer - dt);
     const slowActive = slowTimer > 0 && !c.abilities.includes("slow_resist");
-    const effectiveSpeed = c.speed * (1 - (slowActive ? c.slowFactor : 0));
+    const vulnTimer = Math.max(0, c.vulnTimer - dt);
+    const rootTimer = Math.max(0, c.rootTimer - dt);
+    const effectiveSpeed = rootTimer > 0 ? 0 : c.speed * (1 - (slowActive ? c.slowFactor : 0));
     const newProgress = c.pathProgress + effectiveSpeed * dt;
 
     if (newProgress >= PATH.length - 1) {
@@ -57,6 +59,8 @@ export function tickEnemyMovement(state: GameState, dt: number): GameState {
       pathProgress: newProgress,
       position: positionAt(newProgress),
       slowTimer,
+      vulnTimer,
+      rootTimer,
     });
   }
 

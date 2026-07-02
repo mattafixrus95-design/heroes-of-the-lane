@@ -38,6 +38,19 @@ function sweepDead(
   return { creeps: alive, gold, killed, waveGold, texts };
 }
 
+function vulnMult(c: Creep): number {
+  return c.vulnTimer > 0 ? 1 + c.vulnPct : 1;
+}
+
+function applyDebuffs(c: Creep, pd: Projectile["pendingDamage"]): Creep {
+  if (!pd.vulnApply && !pd.rootApply) return c;
+  return {
+    ...c,
+    ...(pd.vulnApply ? { vulnPct: pd.vulnApply.pct, vulnTimer: pd.vulnApply.duration } : {}),
+    ...(pd.rootApply ? { rootTimer: pd.rootApply.duration } : {}),
+  };
+}
+
 function applyExpired(state: GameState, expired: Projectile[]): GameState {
   if (expired.length === 0) return state;
 
@@ -55,14 +68,14 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
       const hasTarget = creeps.some(c => c.id === pd.targetId);
       if (hasTarget) {
         creeps = creeps.map(c => c.id === pd.targetId
-          ? { ...c, hp: c.hp - pd.damage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }
+          ? applyDebuffs({ ...c, hp: c.hp - pd.damage * vulnMult(c), ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }, pd)
           : c,
         );
       }
       creeps = creeps.map(c => {
         if (c.id === pd.targetId) return c;
         const d = Math.hypot(p.toX - c.position.x, p.toY - c.position.y);
-        return d <= pd.explosionAoe! ? { ...c, hp: c.hp - pd.damage * pd.explosionDmgPct! } : c;
+        return d <= pd.explosionAoe! ? { ...c, hp: c.hp - pd.damage * pd.explosionDmgPct! * vulnMult(c) } : c;
       });
       const swept = sweepDead(creeps, gold, killed, waveGold, texts, state.gameTime);
       creeps = swept.creeps; gold = swept.gold; killed = swept.killed;
@@ -83,10 +96,10 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
 
       // Block: 20% chance — skip damage only (slow still applies)
       const blocked = target.abilities.includes("block") && Math.random() < 0.20;
-      const actualDamage = blocked ? 0 : pd.damage;
+      const actualDamage = blocked ? 0 : pd.damage * vulnMult(target);
 
       creeps = creeps.map(c => c.id === pd.targetId
-        ? { ...c, hp: c.hp - actualDamage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }
+        ? applyDebuffs({ ...c, hp: c.hp - actualDamage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }, pd)
         : c,
       );
       const swept = sweepDead(creeps, gold, killed, waveGold, texts, state.gameTime);
