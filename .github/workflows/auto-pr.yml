@@ -35,9 +35,10 @@ jobs:
           MINOR="${VERSION##*.}"
           NEW_VERSION="$MAJOR.$((MINOR + 1))"
           echo "{\"version\": \"$NEW_VERSION\"}" > src/version.json
+          echo "{\"version\": \"$NEW_VERSION\"}" > public/version.json
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/version.json
+          git add src/version.json public/version.json
           git commit -m "v$NEW_VERSION [skip ci]"
           git push origin master
           echo "Bumped $VERSION → $NEW_VERSION"
