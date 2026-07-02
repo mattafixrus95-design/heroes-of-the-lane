@@ -4,25 +4,29 @@ import type { GameState } from "./game/engine/gameState";
 import versionData from "./version.json";
 import { GameLoop } from "./game/engine/gameLoop";
 import HUD from "./ui/HUD";
-import TowerShop from "./ui/TowerShop";
+import BottomHUD from "./ui/BottomHUD";
+import type { BottomTab } from "./ui/BottomHUD";
 import type { ShopItem } from "./ui/TowerShop";
 import GameGrid from "./ui/GameGrid";
-import TowerMenu from "./ui/TowerMenu";
+import ContextMenu from "./ui/ContextMenu";
 import TowerInfoModal from "./ui/TowerInfoModal";
-import FarmPanel from "./ui/FarmPanel";
+import BuildingInfoModal from "./ui/BuildingInfoModal";
 import StatsOverlay from "./ui/StatsOverlay";
 import UpdateButton from "./ui/UpdateButton";
 import type { TowerType } from "./data/towers";
+import type { Selection } from "./ui/selection";
 import { audioManager } from "./audio/AudioManager";
 import "./index.css";
 
 export default function App() {
   const [state, setState] = useState<GameState>(createInitialState);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
-  const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
+  const [bottomTab, setBottomTab] = useState<BottomTab>("towers");
   const [volume, setVolume] = useState(0.7);
   const prevVolumeRef = useRef(0.7);
   const [infoTowerType, setInfoTowerType] = useState<TowerType | null>(null);
+  const [infoBuildingKind, setInfoBuildingKind] = useState<"farm" | "sawmill" | "town" | null>(null);
 
   const updateState = useCallback(
     (updater: (s: GameState) => GameState) => setState(updater),
@@ -58,18 +62,20 @@ export default function App() {
   function handleReset() {
     setState(createInitialState());
     setSelectedItem(null);
-    setSelectedTowerId(null);
+    setSelection(null);
     setInfoTowerType(null);
+    setInfoBuildingKind(null);
   }
 
-  function handleSelectTowerId(id: string) {
-    setSelectedTowerId(id);
+  function handleSelect(sel: Selection | null) {
+    setSelection(sel);
     setSelectedItem(null);
   }
 
-  const menuTower = selectedTowerId
-    ? state.towers.find(t => t.id === selectedTowerId) ?? null
-    : null;
+  function handleSelectShopItem(item: ShopItem | null) {
+    setSelectedItem(item);
+    setSelection(null);
+  }
 
   const showStats = state.phase === "defeat" || state.phase === "victory";
 
@@ -89,36 +95,36 @@ export default function App() {
       <GameGrid
         state={state}
         selectedItem={selectedItem}
+        selection={selection}
         onUpdateState={updateState}
-        onClearSelection={() => setSelectedItem(null)}
-        onSelectTowerId={handleSelectTowerId}
-        onCancelBuild={() => setSelectedItem(null)}
+        onExitBuildMode={() => setSelectedItem(null)}
+        onSelect={handleSelect}
       />
-      <TowerShop
-        gold={state.gold}
-        food={state.food}
-        selected={selectedItem}
-        waveActive={state.phase === "wave"}
-        onSelect={setSelectedItem}
+      <BottomHUD
+        state={state}
+        activeTab={bottomTab}
+        onTabChange={setBottomTab}
+        selectedShopItem={selectedItem}
+        onSelectShopItem={handleSelectShopItem}
         onInfo={setInfoTowerType}
+        selection={selection}
+        onSelectBuilding={handleSelect}
       />
-      <FarmPanel
-        farms={state.farms}
-        gold={state.gold}
-        onUpdateState={updateState}
-      />
-      {menuTower && !showStats && (
-        <TowerMenu
-          tower={menuTower}
-          gold={state.gold}
-          food={state.food}
-          waveActive={state.phase === "wave"}
+      {selection && !showStats && (
+        <ContextMenu
+          state={state}
+          selection={selection}
           onUpdateState={updateState}
-          onClose={() => setSelectedTowerId(null)}
+          onClose={() => setSelection(null)}
+          onShowTowerInfo={setInfoTowerType}
+          onShowBuildingInfo={setInfoBuildingKind}
         />
       )}
       {infoTowerType && (
         <TowerInfoModal type={infoTowerType} onClose={() => setInfoTowerType(null)} />
+      )}
+      {infoBuildingKind && (
+        <BuildingInfoModal kind={infoBuildingKind} onClose={() => setInfoBuildingKind(null)} />
       )}
       {showStats && (
         <StatsOverlay state={state} onReset={handleReset} />

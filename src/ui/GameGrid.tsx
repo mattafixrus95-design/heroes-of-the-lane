@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import type { GameState, Tower, FloatingText } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
-import { GRID_COLS, GRID_ROWS, isPathCell, ENTRY_CELL, EXIT_CELL } from "../data/map";
+import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL } from "../data/map";
 import GateSVG from "../assets/GateSVG";
-import CastleSVG from "../assets/CastleSVG";
 import TowerIcon from "./TowerIcon";
+import TownIcon from "./TownIcon";
 import { CREEP_DEFS } from "../data/waves";
 import type { ShopItem } from "./TowerShop";
+import type { Selection } from "./selection";
 
 const MAX_CELL = 56;
 
@@ -26,10 +27,10 @@ function useCell(): number {
 interface Props {
   state: GameState;
   selectedItem: ShopItem | null;
+  selection: Selection | null;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
-  onClearSelection: () => void;
-  onSelectTowerId: (id: string) => void;
-  onCancelBuild: () => void;
+  onExitBuildMode: () => void;
+  onSelect: (s: Selection | null) => void;
 }
 
 function placeTower(col: number, row: number, type: TowerType, state: GameState): GameState {
@@ -170,7 +171,7 @@ function FloatingTextView({ ft, gameTime, cell }: { ft: FloatingText; gameTime: 
 }
 
 export default function GameGrid({
-  state, selectedItem, onUpdateState, onClearSelection, onSelectTowerId, onCancelBuild,
+  state, selectedItem, selection, onUpdateState, onExitBuildMode, onSelect,
 }: Props) {
   const cell = useCell();
   const canBuild = state.phase !== "wave";
@@ -189,25 +190,49 @@ export default function GameGrid({
   for (let r = 0; r < GRID_ROWS; r++) {
     for (let c = 0; c < GRID_COLS; c++) {
       const isPath   = isPathCell(c, r);
+      const isTerritory = isTownTerritory(c, r);
       const tower    = state.towers.find(t => t.col === c && t.row === r);
       const isEntry  = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
       const isExit   = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
+      const isFarmCell    = c === FARM_CELL[0]    && r === FARM_CELL[1];
+      const isSawmillCell = c === SAWMILL_CELL[0] && r === SAWMILL_CELL[1];
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
+      const isSelectedTower = !!tower && selection?.kind === "tower" && selection.id === tower.id;
 
       // Состояние hover и подсветки
       const isHovered = !!selectedItem && hoveredCell?.col === c && hoveredCell?.row === r;
-      const canPlaceHere = !isPath && !tower && canBuild;
+      const canPlaceHere = !isPath && !isTerritory && !tower && canBuild;
       const highlightColor = isHovered
         ? (canPlaceHere ? "rgba(80,255,80,0.28)" : "rgba(255,60,60,0.32)")
         : undefined;
 
       const handleClick = () => {
         if (tower) {
-          onSelectTowerId(tower.id);
-          onClearSelection();
-        } else if (!isPath && canBuild && selectedItem) {
-          onUpdateState(s => placeTower(c, r, selectedItem, s));
+          const already = selection?.kind === "tower" && selection.id === tower.id;
+          onSelect(already ? null : { kind: "tower", id: tower.id });
+          onExitBuildMode();
+          return;
         }
+        if (isExit) {
+          onSelect(selection?.kind === "town" ? null : { kind: "town" });
+          onExitBuildMode();
+          return;
+        }
+        if (isFarmCell) {
+          onSelect(selection?.kind === "farm" ? null : { kind: "farm" });
+          onExitBuildMode();
+          return;
+        }
+        if (isSawmillCell) {
+          onSelect(selection?.kind === "sawmill" ? null : { kind: "sawmill" });
+          onExitBuildMode();
+          return;
+        }
+        if (!isPath && !isTerritory && canBuild && selectedItem) {
+          onUpdateState(s => placeTower(c, r, selectedItem, s));
+          return;
+        }
+        if (selection) onSelect(null);
       };
 
       cells.push(
@@ -223,8 +248,8 @@ export default function GameGrid({
             border: isPath
               ? "1px solid rgba(80,55,25,0.45)"
               : "1px solid rgba(25,70,35,0.35)",
-            cursor: tower ? "pointer"
-              : (isPath || !canBuild) ? "default"
+            cursor: (tower || isExit || isFarmCell || isSawmillCell) ? "pointer"
+              : (isPath || isTerritory || !canBuild) ? "default"
               : selectedItem ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
             position: "relative", overflow: "visible",
@@ -234,6 +259,7 @@ export default function GameGrid({
               ? "inset 0 0 0 2px rgba(80,255,80,0.7)"
               : "inset 0 0 0 2px rgba(255,60,60,0.7)"
             } : {}),
+            ...(isSelectedTower ? { boxShadow: "inset 0 0 0 2px rgba(80,220,255,0.85)" } : {}),
           }}
         >
           {/* Подсветка ячейки при hover в режиме строительства */}
@@ -246,7 +272,39 @@ export default function GameGrid({
           )}
 
           {isEntry && !tower && <GateSVG size={iconSize} />}
-          {isExit  && !tower && <CastleSVG size={iconSize} />}
+          {isExit  && !tower && <TownIcon level={state.townLevel} size={iconSize} />}
+
+          {isFarmCell && !tower && state.farm && (
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", fontSize: iconSize }}>
+              🌾
+              {state.farm.buildTimeRemaining > 0 && (
+                <span style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                  color: "#f0c040", flexDirection: "column", gap: 1,
+                }}>
+                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.farm.buildTimeRemaining)}с</span>
+                </span>
+              )}
+            </span>
+          )}
+
+          {isSawmillCell && !tower && state.sawmill && (
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", fontSize: iconSize }}>
+              🪵
+              {state.sawmill.buildTimeRemaining > 0 && (
+                <span style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                  color: "#f0c040", flexDirection: "column", gap: 1,
+                }}>
+                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.sawmill.buildTimeRemaining)}с</span>
+                </span>
+              )}
+            </span>
+          )}
 
           {/* Башня */}
           {tower && (
@@ -333,7 +391,7 @@ export default function GameGrid({
         borderRadius: 6, overflow: "hidden", touchAction: "none",
       }}
       onMouseLeave={() => setHoveredCell(null)}
-      onContextMenu={e => { e.preventDefault(); onCancelBuild(); }}
+      onContextMenu={e => { e.preventDefault(); onExitBuildMode(); }}
     >
       <div style={{
         display: "grid",

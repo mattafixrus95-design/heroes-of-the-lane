@@ -1,4 +1,5 @@
 import type { GameState } from "../game/engine/gameState";
+import { maxFood, usedFood } from "../game/engine/gameState";
 import { startWave, startWaveInternal } from "../game/entities/spawnWave";
 import { WAVE_DEFS } from "../data/waves";
 
@@ -19,7 +20,7 @@ function volumeEmoji(v: number) {
 }
 
 export default function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMute }: Props) {
-  const { phase, wave, gold, lives, food, spawnQueue, creeps } = state;
+  const { phase, wave, gold, wood, lives, maxLives, spawnQueue, creeps } = state;
   const remaining = creeps.length + spawnQueue.length;
   const isPrep = phase === "prep";
   const isWave = phase === "wave";
@@ -29,8 +30,10 @@ export default function HUD({ state, onUpdateState, onReset, volume, onVolumeCha
   const waveIdx = isWave
     ? Math.max(wave - 1, 0)
     : Math.min(wave, WAVE_DEFS.length - 1);
-  const waveName    = WAVE_DEFS[waveIdx]?.name ?? "";
-  const recommended = WAVE_DEFS[waveIdx]?.recommended ?? 0;
+  const waveDef      = WAVE_DEFS[waveIdx];
+  const waveName    = waveDef?.name ?? "";
+  const recommended = waveDef?.recommended ?? 0;
+  const mobCount    = isWave ? remaining : (waveDef?.entries.length ?? 0);
 
   // Текущая стоимость башен
   const towerValue = state.towers.reduce((s, t) => s + t.totalInvested, 0);
@@ -40,8 +43,9 @@ export default function HUD({ state, onUpdateState, onReset, volume, onVolumeCha
       {/* Строка 1: Ресурсы + стоимость башен + звук */}
       <div className="hud-row">
         <span className="hud-stat">💰 {gold}</span>
-        <span className="hud-stat">❤️ {lives}</span>
-        <span className="hud-stat">🌾 {food}</span>
+        <span className="hud-stat">🪵 {wood}</span>
+        <span className="hud-stat">🌾 {usedFood(state)}/{maxFood(state)}</span>
+        <span className="hud-stat">❤️ {lives}/{maxLives}</span>
         <span className="hud-stat hud-stat-dim">🏰 {towerValue}</span>
         <div className="hud-volume">
           <button className="hud-volume-icon" onClick={onToggleMute}>
@@ -62,6 +66,7 @@ export default function HUD({ state, onUpdateState, onReset, volume, onVolumeCha
           <span className="hud-stat">🌊 {wave}/20</span>
           {waveName && <span className="hud-wave-name">{waveName}</span>}
           <span className="hud-stat hud-stat-dim">Рек.{recommended}</span>
+          <span className="hud-stat hud-stat-dim">👾{mobCount}</span>
           {isPrep && (
             <>
               <span className="hud-stat" style={{ color: "#f0c040" }}>
@@ -75,9 +80,6 @@ export default function HUD({ state, onUpdateState, onReset, volume, onVolumeCha
                 ⚔️ Вперёд
               </button>
             </>
-          )}
-          {isWave && (
-            <span className="hud-stat">👾 {remaining}</span>
           )}
         </div>
 

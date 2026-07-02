@@ -45,8 +45,9 @@ body {
 .hud-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .hud-wave-info {
@@ -55,6 +56,7 @@ body {
   gap: 8px;
   flex: 1;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .hud-wave-name {
@@ -73,8 +75,8 @@ body {
   flex-shrink: 0;
 }
 
-.hud-stat { font-size: 0.9rem; font-weight: 700; }
-.hud-stat-dim { color: #999; font-size: 0.78rem; font-weight: 600; }
+.hud-stat { font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
+.hud-stat-dim { color: #999; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
 
 .hud-btn {
   background: #f0c040;
@@ -96,7 +98,40 @@ body {
   color: #eee;
 }
 
-/* ── Tower shop ── */
+/* ── Нижний HUD: тоггл Башни/Здания ── */
+.bottom-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.bottom-hud-tabs {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.bottom-hud-tab {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: #ccc;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 0.15s, background 0.15s;
+}
+.bottom-hud-tab.active {
+  border-color: #f0c040;
+  background: rgba(240,192,64,0.15);
+  color: #f0c040;
+}
+
+/* ── Tower / buildings shop ── */
 .shop {
   display: flex;
   gap: 3px;
@@ -134,23 +169,6 @@ body {
 .shop-name  { font-size: 0.56rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .shop-stat  { font-size: 0.75rem; color: #ccc; }
 .shop-cost  { font-size: 0.6rem; font-weight: 700; color: #f0c040; margin-top: 1px; white-space: nowrap; }
-
-.farm-build-btn {
-  background: rgba(139,195,74,0.18);
-  border: 1px solid rgba(139,195,74,0.4);
-  border-radius: 6px;
-  color: #c8e6a0;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  cursor: pointer;
-  touch-action: manipulation;
-  margin-top: 2px;
-  width: 100%;
-  transition: background 0.15s;
-}
-.farm-build-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-@media (hover: hover) { .farm-build-btn:not(:disabled):hover { background: rgba(139,195,74,0.32); } }
 
 /* Кнопка информации о башне в шопе */
 .shop-info-btn {
@@ -209,7 +227,83 @@ body {
   white-space: nowrap;
 }
 
-/* ── Tower menu ── */
+/* ── Контекстное меню (докнутое, под нижним HUD) ── */
+.context-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  width: 100%;
+}
+
+.cm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cm-title { font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 6px; }
+
+.cm-building-badge {
+  background: rgba(240,192,64,0.15);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  color: #f0c040;
+  text-align: center;
+}
+
+.cm-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+.cm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cm-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 40px;
+  touch-action: manipulation;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.cm-btn:active { transform: scale(0.98); }
+
+.cm-btn.upgrade { background: #f0c040; color: #1a1a2e; }
+.cm-btn.upgrade:disabled { background: rgba(240,192,64,0.25); color: #888; cursor: not-allowed; transform: none; }
+.cm-btn.sell    { background: rgba(255,255,255,0.1); color: #eee; }
+.cm-btn.sell:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.cm-btn.info    { background: rgba(255,255,255,0.08); color: #ccc; justify-content: center; }
+
+.cm-btn-cost { font-size: 0.78rem; opacity: 0.85; }
+
+.cm-maxed {
+  color: #f0c040;
+  font-size: 0.85rem;
+  text-align: center;
+  opacity: 0.8;
+  padding: 8px 0;
+}
+
+/* ── Tower / building info popup ── */
 .tower-menu-overlay {
   position: fixed;
   inset: 0;
@@ -228,6 +322,8 @@ body {
   padding: 16px 20px;
   width: 100%;
   max-width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -252,51 +348,6 @@ body {
   padding: 4px 8px;
   min-height: 36px;
   touch-action: manipulation;
-}
-
-.tm-stats {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 0.8rem;
-  color: #ccc;
-}
-
-.tm-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tm-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 11px 14px;
-  border: none;
-  border-radius: 9px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  min-height: 44px;
-  touch-action: manipulation;
-  transition: opacity 0.15s, transform 0.1s;
-}
-.tm-btn:active { transform: scale(0.98); }
-
-.tm-btn.upgrade { background: #f0c040; color: #1a1a2e; }
-.tm-btn.upgrade:disabled { background: rgba(240,192,64,0.25); color: #888; cursor: not-allowed; transform: none; }
-.tm-btn.sell    { background: rgba(255,255,255,0.1); color: #eee; }
-.tm-btn.sell:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-
-.tm-btn-cost { font-size: 0.8rem; opacity: 0.85; }
-
-.tm-maxed {
-  color: #f0c040;
-  font-size: 0.85rem;
-  text-align: center;
-  opacity: 0.8;
-  padding: 8px 0;
 }
 
 /* ── HUD reset btn ── */
@@ -336,8 +387,8 @@ body {
 /* ── Desktop enhancements (hover states only for non-touch) ── */
 @media (hover: hover) {
   .hud-btn:not(:disabled):hover { transform: scale(1.04); }
+  .bottom-hud-tab:hover { background: rgba(255,255,255,0.14); }
   .shop-item:hover:not(:disabled) { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
-  .tm-btn:hover { opacity: 0.88; transform: scale(1.02); }
-  .shop-cancel:hover { background: rgba(255,80,80,0.35); }
+  .cm-btn:hover { opacity: 0.88; transform: scale(1.02); }
   .tm-close:hover { color: #fff; }
 }
