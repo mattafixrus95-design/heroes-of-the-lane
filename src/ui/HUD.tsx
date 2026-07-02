@@ -6,9 +6,11 @@ interface Props {
   state: GameState;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onReset: () => void;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
 }
 
-export default function HUD({ state, onUpdateState, onReset }: Props) {
+export default function HUD({ state, onUpdateState, onReset, soundEnabled, onToggleSound }: Props) {
   const { phase, wave, gold, lives, food, spawnQueue, creeps } = state;
   const remaining = creeps.length + spawnQueue.length;
   const isPrep = phase === "prep";
@@ -27,12 +29,15 @@ export default function HUD({ state, onUpdateState, onReset }: Props) {
 
   return (
     <div className="hud">
-      {/* Строка 1: Ресурсы + стоимость башен */}
+      {/* Строка 1: Ресурсы + стоимость башен + звук */}
       <div className="hud-row">
         <span className="hud-stat">💰 {gold}</span>
         <span className="hud-stat">❤️ {lives}</span>
         <span className="hud-stat">🌾 {food}</span>
         <span className="hud-stat hud-stat-dim">🏰 {towerValue}</span>
+        <button className="hud-btn secondary hud-sound-btn" onClick={onToggleSound}>
+          {soundEnabled ? "🔊" : "🔇"}
+        </button>
       </div>
 
       {/* Строка 2: Инфо о волне + кнопки */}

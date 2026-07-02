@@ -8,15 +8,20 @@ import TowerShop from "./ui/TowerShop";
 import type { ShopItem } from "./ui/TowerShop";
 import GameGrid from "./ui/GameGrid";
 import TowerMenu from "./ui/TowerMenu";
+import TowerInfoModal from "./ui/TowerInfoModal";
 import FarmPanel from "./ui/FarmPanel";
 import StatsOverlay from "./ui/StatsOverlay";
 import UpdateButton from "./ui/UpdateButton";
+import type { TowerType } from "./data/towers";
+import { audioManager } from "./audio/AudioManager";
 import "./index.css";
 
 export default function App() {
   const [state, setState] = useState<GameState>(createInitialState);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [infoTowerType, setInfoTowerType] = useState<TowerType | null>(null);
 
   const updateState = useCallback(
     (updater: (s: GameState) => GameState) => setState(updater),
@@ -30,10 +35,30 @@ export default function App() {
     return () => loopRef.current?.stop();
   }, [updateState]);
 
+  // Звуки при появлении новых снарядов
+  const prevProjectileIds = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const current = new Set(state.projectiles.map(p => p.id));
+    if (soundEnabled) {
+      for (const p of state.projectiles) {
+        if (!prevProjectileIds.current.has(p.id)) {
+          if (p.kind === "arrow")    audioManager.playArrow();
+          else if (p.kind === "axe") audioManager.playAxe();
+          else                       audioManager.playFire();
+        }
+      }
+    }
+    prevProjectileIds.current = current;
+  }, [state.projectiles, soundEnabled]);
+
+  // Синхронизируем muted флаг AudioManager
+  useEffect(() => { audioManager.muted = !soundEnabled; }, [soundEnabled]);
+
   function handleReset() {
     setState(createInitialState());
     setSelectedItem(null);
     setSelectedTowerId(null);
+    setInfoTowerType(null);
   }
 
   function handleSelectTowerId(id: string) {
@@ -49,14 +74,20 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1 className="title">Heroes of the Lane</h1>
-      <HUD state={state} onUpdateState={updateState} onReset={handleReset} />
+      <HUD
+        state={state}
+        onUpdateState={updateState}
+        onReset={handleReset}
+        soundEnabled={soundEnabled}
+        onToggleSound={() => setSoundEnabled(v => !v)}
+      />
       <GameGrid
         state={state}
         selectedItem={selectedItem}
         onUpdateState={updateState}
         onClearSelection={() => setSelectedItem(null)}
         onSelectTowerId={handleSelectTowerId}
+        onCancelBuild={() => setSelectedItem(null)}
       />
       <TowerShop
         gold={state.gold}
@@ -64,6 +95,7 @@ export default function App() {
         selected={selectedItem}
         waveActive={state.phase === "wave"}
         onSelect={setSelectedItem}
+        onInfo={setInfoTowerType}
       />
       <FarmPanel
         farms={state.farms}
@@ -79,6 +111,9 @@ export default function App() {
           onUpdateState={updateState}
           onClose={() => setSelectedTowerId(null)}
         />
+      )}
+      {infoTowerType && (
+        <TowerInfoModal type={infoTowerType} onClose={() => setInfoTowerType(null)} />
       )}
       {showStats && (
         <StatsOverlay state={state} onReset={handleReset} />
