@@ -4,6 +4,8 @@ import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL } from "../data/map";
 import GateSVG from "../assets/GateSVG";
+import FarmSVG from "../assets/FarmSVG";
+import SawmillSVG from "../assets/SawmillSVG";
 import TowerIcon from "./TowerIcon";
 import TownIcon from "./TownIcon";
 import { CREEP_DEFS } from "../data/waves";
@@ -66,8 +68,8 @@ const PATH_CORNER   = new Set(["9,0","9,2","0,2","0,4","9,4","9,6","0,6","0,8"])
 const PATH_VERTICAL = new Set(["9,1","0,3","9,5","0,7"]);
 
 function cellBg(col: number, row: number, isPath: boolean): string {
-  if (col === ENTRY_CELL[0] && row === ENTRY_CELL[1]) return "#2a5c30";
-  if (col === EXIT_CELL[0]  && row === EXIT_CELL[1])  return "#502828";
+  if (col === ENTRY_CELL[0] && row === ENTRY_CELL[1]) return "#6a5038";
+  if (col === EXIT_CELL[0]  && row === EXIT_CELL[1])  return "#2a5c30";
   if (!isPath) {
     return (col + row) % 2 === 0
       ? "linear-gradient(145deg,#52965c 0%,#3d7a48 100%)"
@@ -275,8 +277,8 @@ export default function GameGrid({
           {isExit  && !tower && <TownIcon level={state.townLevel} size={iconSize} />}
 
           {isFarmCell && !tower && state.farm && (
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", fontSize: iconSize }}>
-              🌾
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <FarmSVG size={iconSize} />
               {state.farm.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -291,8 +293,8 @@ export default function GameGrid({
           )}
 
           {isSawmillCell && !tower && state.sawmill && (
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", fontSize: iconSize }}>
-              🪵
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <SawmillSVG size={iconSize} />
               {state.sawmill.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
