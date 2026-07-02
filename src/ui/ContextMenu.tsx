@@ -4,7 +4,7 @@ import { TOWER_DEFS } from "../data/towers";
 import type { TowerType } from "../data/towers";
 import {
   FARM_COST, FARM_BUILD_TIME,
-  SAWMILL_COST, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
+  sawmillCost, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
 } from "../data/buildings";
 import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../data/map";
@@ -279,21 +279,22 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
 
 // ── Лесопилка ─────────────────────────────────────────────────────────────────
 function buildOrUpgradeSawmill(state: GameState): GameState {
-  if (state.gold < SAWMILL_COST.gold || state.wood < SAWMILL_COST.wood) return state;
   if (state.sawmill && state.sawmill.buildTimeRemaining > 0) return state;
   const nextLevel = (state.sawmill?.level ?? 0) + 1;
   if (nextLevel > SAWMILL_MAX_LEVEL) return state;
+  const cost = sawmillCost(nextLevel);
+  if (state.gold < cost.gold || state.wood < cost.wood) return state;
   const texts = [
-    ft(`-${SAWMILL_COST.gold}💰`, SAWMILL_CELL[0], SAWMILL_CELL[1], "#ff8080", state.gameTime),
-    ft(`-${SAWMILL_COST.wood}🌲`, SAWMILL_CELL[0], SAWMILL_CELL[1] - 0.6, "#ff8080", state.gameTime),
+    ft(`-${cost.gold}💰`, SAWMILL_CELL[0], SAWMILL_CELL[1], "#ff8080", state.gameTime),
+    ft(`-${cost.wood}🌲`, SAWMILL_CELL[0], SAWMILL_CELL[1] - 0.6, "#ff8080", state.gameTime),
   ];
   return {
     ...state,
-    gold: state.gold - SAWMILL_COST.gold,
-    wood: state.wood - SAWMILL_COST.wood,
+    gold: state.gold - cost.gold,
+    wood: state.wood - cost.wood,
     sawmill: {
       level: nextLevel,
-      totalInvested: (state.sawmill?.totalInvested ?? 0) + SAWMILL_COST.gold,
+      totalInvested: (state.sawmill?.totalInvested ?? 0) + cost.gold,
       buildTimeRemaining: SAWMILL_BUILD_TIME,
       tickTimer: state.sawmill?.tickTimer ?? SAWMILL_TICK_INTERVAL,
     },
@@ -308,7 +309,8 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
   const level = sawmill?.level ?? 0;
   const isBuilding = !!sawmill && sawmill.buildTimeRemaining > 0;
   const isMaxed = level >= SAWMILL_MAX_LEVEL;
-  const canAfford = state.gold >= SAWMILL_COST.gold && state.wood >= SAWMILL_COST.wood;
+  const nextCost = isMaxed ? null : sawmillCost(level + 1);
+  const canAfford = !!nextCost && state.gold >= nextCost.gold && state.wood >= nextCost.wood;
   const canBuild = !isBuilding && !isMaxed && canAfford;
 
   return (
@@ -333,7 +335,7 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
           >
             {level > 0 ? "⬆ Улучшить" : "Построить"}
             <span className="cm-btn-cost">
-              💰 {SAWMILL_COST.gold} <span className="cost-icon"><WoodSVG size={13} /> {SAWMILL_COST.wood}</span>
+              💰 {nextCost!.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextCost!.wood}</span>
               {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
             </span>
           </button>

@@ -13,11 +13,17 @@ export const FARM_BUILD_TIME = 2; // секунд на каждый грейд
 export const FARM_FOOD_PER_LEVEL = 15;
 
 // ── Лесопилка ─────────────────────────────────────────────────────────────────
-export const SAWMILL_COST: ResourceCost = { gold: 30, wood: 75 };
+export const SAWMILL_GOLD_COST = 30; // золото — одинаково на каждом грейде
+export const SAWMILL_WOOD_COST_BY_LEVEL = [75, 100, 130, 160, 200, 250, 300]; // дерево — растёт с уровнем
 export const SAWMILL_BUILD_TIME = 5; // секунд, всегда одинаково
 export const SAWMILL_TICK_INTERVAL = 5; // секунд между тиками дохода
 export const SAWMILL_WOOD_PER_LEVEL = 5; // дерева за тик на уровень
-export const SAWMILL_MAX_LEVEL = 7;
+export const SAWMILL_MAX_LEVEL = SAWMILL_WOOD_COST_BY_LEVEL.length;
+
+// Стоимость постройки/апгрейда лесопилки ДО указанного уровня (1-based)
+export function sawmillCost(targetLevel: number): ResourceCost {
+  return { gold: SAWMILL_GOLD_COST, wood: SAWMILL_WOOD_COST_BY_LEVEL[targetLevel - 1] };
+}
 
 // ── Город ─────────────────────────────────────────────────────────────────────
 export interface TownLevelDef {
