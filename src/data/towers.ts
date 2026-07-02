@@ -105,7 +105,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Серебряный",
-        damage: 11, range: 4, attackSpeed: 2.30, slow: 0,
+        damage: 10, range: 4, attackSpeed: 2.30, slow: 0,
         ability: { kind: "vulnerability", pct: 0.30, duration: 3 },
         upgradeCost: 150, upgradeTime: 3, foodUpgradeCost: 3,
       },
@@ -120,7 +120,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Страж",
-        damage: 10, range: 2, attackSpeed: 0.80, slow: 0,
+        damage: 9, range: 2, attackSpeed: 0.80, slow: 0,
         ability: { kind: "root", everyNth: 3, duration: 0.75 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
@@ -135,21 +135,21 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   unicorn: {
     type: "unicorn", name: "Единорог",
     tier: 6,
-    purchaseCost: 165,
+    purchaseCost: 195,
     buildTime: 2,
     foodCost: 3,
     grades: [
       {
         gradeName: "Лесной",
-        damage: 12, range: 3, attackSpeed: 1.50, slow: 0,
+        damage: 10, range: 3, attackSpeed: 1.50, slow: 0,
         ability: { kind: "aura_haste", radius: 2, pct: 0.15 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Боевой",
-        damage: 20, range: 4, attackSpeed: 1.80, slow: 0,
+        damage: 18, range: 4, attackSpeed: 1.70, slow: 0,
         ability: { kind: "aura_haste", radius: 3, pct: 0.20 },
-        upgradeCost: 225, upgradeTime: 3, foodUpgradeCost: 3,
+        upgradeCost: 255, upgradeTime: 3, foodUpgradeCost: 3,
       },
     ],
   },
@@ -168,7 +168,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Золотой",
-        damage: 23, range: 5, attackSpeed: 1.20, slow: 0,
+        damage: 21, range: 5, attackSpeed: 1.20, slow: 0,
         ability: { kind: "aoe", radius: 2, dmgPct: 0.5 },
         upgradeCost: 330, upgradeTime: 3, foodUpgradeCost: 4,
       },
