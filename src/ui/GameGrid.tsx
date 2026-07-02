@@ -359,13 +359,22 @@ export default function GameGrid({
     const hpBarColor = e.regenPerSec > 0
       ? "#8bc34a"
       : hpPct > 0.5 ? "#4caf50" : "#f44336";
+    const isSelectedCreep = selection?.kind === "creep" && selection.id === e.id;
     return (
-      <div key={e.id} style={{
-        position: "absolute",
-        left: x - creepSize / 2, top: y - creepSize * 0.65,
-        width: creepSize, pointerEvents: "none",
-        display: "flex", flexDirection: "column", alignItems: "center",
-      }}>
+      <div
+        key={e.id}
+        onClick={() => {
+          onSelect(isSelectedCreep ? null : { kind: "creep", id: e.id });
+          onExitBuildMode();
+        }}
+        style={{
+          position: "absolute",
+          left: x - creepSize / 2, top: y - creepSize * 0.65,
+          width: creepSize, pointerEvents: "auto", cursor: "pointer",
+          display: "flex", flexDirection: "column", alignItems: "center",
+          borderRadius: 4,
+          boxShadow: isSelectedCreep ? "0 0 0 2px rgba(80,220,255,0.9)" : undefined,
+        }}>
         <div style={{ width: "100%", height: isBoss ? 4 : 3, background: "#333", borderRadius: 2, marginBottom: 1 }}>
           <div style={{ width: `${hpPct * 100}%`, height: "100%", borderRadius: 2, background: hpBarColor }}/>
         </div>

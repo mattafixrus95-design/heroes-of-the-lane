@@ -1,4 +1,4 @@
-import type { GameState, Tower, FloatingText } from "../game/engine/gameState";
+import type { GameState, Tower, Creep, FloatingText } from "../game/engine/gameState";
 import { SELL_RATE } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
 import type { TowerType } from "../data/towers";
@@ -8,6 +8,7 @@ import {
   TOWN_LEVELS,
 } from "../data/buildings";
 import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../data/map";
+import { CREEP_DEFS } from "../data/waves";
 import { auraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
 import WoodSVG from "../assets/WoodSVG";
@@ -73,6 +74,47 @@ function applySell(id: string, state: GameState): GameState {
   };
 }
 
+function applyCancelBuild(id: string, state: GameState): GameState {
+  const tower = state.towers.find(t => t.id === id);
+  if (!tower || tower.buildTimeRemaining <= 0) return state;
+  const def = TOWER_DEFS[tower.type];
+
+  if (tower.gradeIndex === 0) {
+    // Отмена самой первой постройки — полный возврат, башня удаляется
+    return {
+      ...state,
+      gold: state.gold + tower.totalInvested,
+      food: state.food + tower.foodSpent,
+      towers: state.towers.filter(t => t.id !== id),
+      floatingTexts: [...state.floatingTexts,
+        ft(`+${tower.totalInvested}💰`, tower.col, tower.row, "#f0c040", state.gameTime),
+      ],
+    };
+  }
+
+  // Отмена апгрейда — откат к предыдущему грейду, возврат стоимости апгрейда
+  const currentGradeDef = def.grades[tower.gradeIndex];
+  const prevGradeDef = def.grades[tower.gradeIndex - 1];
+  const reverted: Tower = {
+    ...tower,
+    gradeIndex: tower.gradeIndex - 1,
+    damage: prevGradeDef.damage, range: prevGradeDef.range, attackSpeed: prevGradeDef.attackSpeed,
+    ability: prevGradeDef.ability, slow: prevGradeDef.slow,
+    totalInvested: tower.totalInvested - currentGradeDef.upgradeCost,
+    foodSpent: tower.foodSpent - currentGradeDef.foodUpgradeCost,
+    buildTimeRemaining: 0,
+  };
+  return {
+    ...state,
+    gold: state.gold + currentGradeDef.upgradeCost,
+    food: state.food + currentGradeDef.foodUpgradeCost,
+    towers: state.towers.map(t => t.id === id ? reverted : t),
+    floatingTexts: [...state.floatingTexts,
+      ft(`+${currentGradeDef.upgradeCost}💰`, tower.col, tower.row, "#f0c040", state.gameTime),
+    ],
+  };
+}
+
 function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
   tower: Tower; state: GameState;
   onUpdateState: Props["onUpdateState"]; onClose: () => void; onShowTowerInfo: (t: TowerType) => void;
@@ -121,32 +163,48 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
       </div>
 
       <div className="cm-actions">
-        {nextGrade ? (
+        {isBuilding ? (
           <button
-            className="cm-btn upgrade"
-            disabled={!canUpgrade}
-            onClick={() => { onUpdateState(s => applyUpgrade(tower.id, s)); onClose(); }}
+            className="cm-btn cancel"
+            onClick={() => { onUpdateState(s => applyCancelBuild(tower.id, s)); onClose(); }}
           >
-            ⬆ {nextGrade.gradeName}
+            ✕ Отменить {tower.gradeIndex === 0 ? "постройку" : "апгрейд"}
             <span className="cm-btn-cost">
-              💰 {nextGrade.upgradeCost}
-              {nextGrade.foodUpgradeCost > 0 ? ` 🌾 ${nextGrade.foodUpgradeCost}` : ""}
-              {tierLocked ? " (город)" : isBuilding ? " (строится)" : !canAffordUpgrade ? " (недост.)" : ""}
+              {tower.gradeIndex === 0
+                ? `+${tower.totalInvested}💰${tower.foodSpent > 0 ? ` +${tower.foodSpent}🌾` : ""}`
+                : `+${currentGrade.upgradeCost}💰${currentGrade.foodUpgradeCost > 0 ? ` +${currentGrade.foodUpgradeCost}🌾` : ""}`}
             </span>
           </button>
         ) : (
-          <div className="cm-maxed">★ Макс. грейд</div>
-        )}
+          <>
+            {nextGrade ? (
+              <button
+                className="cm-btn upgrade"
+                disabled={!canUpgrade}
+                onClick={() => { onUpdateState(s => applyUpgrade(tower.id, s)); onClose(); }}
+              >
+                ⬆ {nextGrade.gradeName}
+                <span className="cm-btn-cost">
+                  💰 {nextGrade.upgradeCost}
+                  {nextGrade.foodUpgradeCost > 0 ? ` 🌾 ${nextGrade.foodUpgradeCost}` : ""}
+                  {tierLocked ? " (город)" : !canAffordUpgrade ? " (недост.)" : ""}
+                </span>
+              </button>
+            ) : (
+              <div className="cm-maxed">★ Макс. грейд</div>
+            )}
 
-        <button
-          className="cm-btn sell"
-          onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
-        >
-          Продать
-          <span className="cm-btn-cost">
-            {`+${sellValue}💰 +${tower.foodSpent}🌾`}
-          </span>
-        </button>
+            <button
+              className="cm-btn sell"
+              onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
+            >
+              Продать
+              <span className="cm-btn-cost">
+                {`+${sellValue}💰 +${tower.foodSpent}🌾`}
+              </span>
+            </button>
+          </>
+        )}
 
         <button className="cm-btn info" onClick={() => onShowTowerInfo(tower.type)}>
           Информация
@@ -352,6 +410,44 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
   );
 }
 
+// ── Крип ──────────────────────────────────────────────────────────────────────
+const ABILITY_LABEL: Record<string, string> = {
+  block: "🛡 Блок 20%",
+  dodge: "💨 Уклонение 20%",
+  slow_resist: "🧊 Иммунитет к замедлению",
+  self_heal: "💚 Самолечение при <50% HP",
+};
+
+function CreepPanel({ creep }: { creep: Creep }) {
+  const def = CREEP_DEFS[creep.kind];
+  const hpPct = Math.max(0, Math.min(1, creep.hp / creep.maxHp));
+  const hpBarColor = creep.regenPerSec > 0
+    ? "#8bc34a"
+    : hpPct > 0.5 ? "#4caf50" : "#f44336";
+
+  return (
+    <>
+      <div className="cm-header">
+        <span className="cm-title">{def.emoji} {def.name}</span>
+      </div>
+      <div className="cm-hp-bar-outer">
+        <div className="cm-hp-bar-inner" style={{ width: `${hpPct * 100}%`, background: hpBarColor }} />
+      </div>
+      <div className="cm-stats">
+        <span>❤️ {Math.ceil(creep.hp)}/{creep.maxHp}</span>
+        <span>🏃 {creep.speed}</span>
+        <span>💰 {creep.reward}</span>
+        <span>💔 −{creep.livesLost} жизней</span>
+        {creep.regenPerSec > 0 && <span>♻️ Реген {creep.regenPerSec}/с</span>}
+        {creep.slowTimer > 0 && <span>❄️ Замедлен</span>}
+        {creep.vulnTimer > 0 && <span>🔻 Уязвим +{Math.round(creep.vulnPct * 100)}%</span>}
+        {creep.rootTimer > 0 && <span>🌿 Скован</span>}
+        {creep.abilities.map(a => <span key={a}>{ABILITY_LABEL[a]}</span>)}
+      </div>
+    </>
+  );
+}
+
 export default function ContextMenu({ state, selection, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo }: Props) {
   if (selection.kind === "tower") {
     const tower = state.towers.find(t => t.id === selection.id);
@@ -359,6 +455,16 @@ export default function ContextMenu({ state, selection, onUpdateState, onClose, 
     return (
       <div className="context-menu">
         <TowerPanel tower={tower} state={state} onUpdateState={onUpdateState} onClose={onClose} onShowTowerInfo={onShowTowerInfo} />
+      </div>
+    );
+  }
+
+  if (selection.kind === "creep") {
+    const creep = state.creeps.find(c => c.id === selection.id);
+    if (!creep) return null;
+    return (
+      <div className="context-menu">
+        <CreepPanel creep={creep} />
       </div>
     );
   }

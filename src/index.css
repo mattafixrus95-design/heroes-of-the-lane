@@ -269,6 +269,18 @@ body {
   color: #ccc;
 }
 
+.cm-hp-bar-outer {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cm-hp-bar-inner {
+  height: 100%;
+  transition: width 0.15s linear;
+}
+
 .cm-actions {
   display: flex;
   flex-direction: column;
@@ -295,6 +307,7 @@ body {
 .cm-btn.upgrade:disabled { background: rgba(240,192,64,0.25); color: #888; cursor: not-allowed; transform: none; }
 .cm-btn.sell    { background: #4caf50; color: #fff; }
 .cm-btn.sell:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.cm-btn.cancel  { background: #ff7043; color: #fff; }
 .cm-btn.info    { background: rgba(255,255,255,0.08); color: #ccc; justify-content: center; }
 
 .cm-btn-cost { font-size: 0.78rem; opacity: 0.85; }
