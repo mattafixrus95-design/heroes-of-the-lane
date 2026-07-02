@@ -1,5 +1,6 @@
 import type { GameState } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
+import SawmillSVG from "../assets/SawmillSVG";
 
 interface Props {
   state: GameState;
@@ -93,7 +94,7 @@ export default function StatsOverlay({ state, onReset }: Props) {
             display: "flex", justifyContent: "space-between",
             fontSize: "0.8rem", color: "#ccc", padding: "2px 0",
           }}>
-            <span>🪵 Лесопилка</span>
+            <span className="cost-icon"><SawmillSVG size={16} /> Лесопилка</span>
             <span>ур. {state.sawmill.level}</span>
           </div>
         )}

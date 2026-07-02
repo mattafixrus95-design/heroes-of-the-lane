@@ -9,6 +9,8 @@ import {
 } from "../data/buildings";
 import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../data/map";
 import TowerIcon from "./TowerIcon";
+import WoodSVG from "../assets/WoodSVG";
+import SawmillSVG from "../assets/SawmillSVG";
 import type { Selection } from "./selection";
 
 interface Props {
@@ -159,7 +161,7 @@ function buildOrUpgradeFarm(state: GameState): GameState {
   const nextLevel = (state.farm?.level ?? 0) + 1;
   const texts = [
     ft(`-${FARM_COST.gold}💰`, FARM_CELL[0], FARM_CELL[1], "#ff8080", state.gameTime),
-    ft(`-${FARM_COST.wood}🪵`, FARM_CELL[0], FARM_CELL[1] - 0.6, "#ff8080", state.gameTime),
+    ft(`-${FARM_COST.wood}🌲`, FARM_CELL[0], FARM_CELL[1] - 0.6, "#ff8080", state.gameTime),
   ];
   return {
     ...state,
@@ -203,7 +205,7 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
         >
           {level > 0 ? "⬆ Улучшить" : "Построить"}
           <span className="cm-btn-cost">
-            💰 {FARM_COST.gold} 🪵 {FARM_COST.wood}
+            💰 {FARM_COST.gold} <span className="cost-icon"><WoodSVG size={13} /> {FARM_COST.wood}</span>
             {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
           </span>
         </button>
@@ -223,7 +225,7 @@ function buildOrUpgradeSawmill(state: GameState): GameState {
   if (nextLevel > SAWMILL_MAX_LEVEL) return state;
   const texts = [
     ft(`-${SAWMILL_COST.gold}💰`, SAWMILL_CELL[0], SAWMILL_CELL[1], "#ff8080", state.gameTime),
-    ft(`-${SAWMILL_COST.wood}🪵`, SAWMILL_CELL[0], SAWMILL_CELL[1] - 0.6, "#ff8080", state.gameTime),
+    ft(`-${SAWMILL_COST.wood}🌲`, SAWMILL_CELL[0], SAWMILL_CELL[1] - 0.6, "#ff8080", state.gameTime),
   ];
   return {
     ...state,
@@ -252,13 +254,13 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
   return (
     <>
       <div className="cm-header">
-        <span className="cm-title">🪵 Лесопилка{level > 0 ? ` ур.${level}` : ""}</span>
+        <span className="cm-title"><SawmillSVG size={22} /> Лесопилка{level > 0 ? ` ур.${level}` : ""}</span>
       </div>
       {isBuilding && (
         <div className="cm-building-badge">⚙️ Строится… {Math.ceil(sawmill!.buildTimeRemaining)}с</div>
       )}
       <div className="cm-stats">
-        <span>🪵 Доход: {level * SAWMILL_WOOD_PER_LEVEL}/{SAWMILL_TICK_INTERVAL}с</span>
+        <span className="cost-icon"><WoodSVG size={14} /> Доход: {level * SAWMILL_WOOD_PER_LEVEL}/{SAWMILL_TICK_INTERVAL}с</span>
       </div>
       <div className="cm-actions">
         {isMaxed ? (
@@ -271,7 +273,7 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
           >
             {level > 0 ? "⬆ Улучшить" : "Построить"}
             <span className="cm-btn-cost">
-              💰 {SAWMILL_COST.gold} 🪵 {SAWMILL_COST.wood}
+              💰 {SAWMILL_COST.gold} <span className="cost-icon"><WoodSVG size={13} /> {SAWMILL_COST.wood}</span>
               {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
             </span>
           </button>
@@ -293,7 +295,7 @@ function upgradeTown(state: GameState): GameState {
   const hpDelta = nextDef.maxHp - currentDef.maxHp;
   const texts = [
     ft(`-${nextDef.upgradeCost.gold}💰`, EXIT_CELL[0], EXIT_CELL[1], "#ff8080", state.gameTime),
-    ft(`-${nextDef.upgradeCost.wood}🪵`, EXIT_CELL[0], EXIT_CELL[1] - 0.6, "#ff8080", state.gameTime),
+    ft(`-${nextDef.upgradeCost.wood}🌲`, EXIT_CELL[0], EXIT_CELL[1] - 0.6, "#ff8080", state.gameTime),
     ft(`+${hpDelta}❤️`, EXIT_CELL[0], EXIT_CELL[1] - 1.2, "#8bc34a", state.gameTime),
   ];
   return {
@@ -333,7 +335,7 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
           >
             ⬆ {nextDef.name}
             <span className="cm-btn-cost">
-              💰 {nextDef.upgradeCost!.gold} 🪵 {nextDef.upgradeCost!.wood}
+              💰 {nextDef.upgradeCost!.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextDef.upgradeCost!.wood}</span>
               {!canAfford ? " (недост.)" : ""}
             </span>
           </button>
