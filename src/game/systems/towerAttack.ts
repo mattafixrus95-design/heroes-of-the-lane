@@ -28,7 +28,7 @@ function findTarget(tower: Tower, creeps: Creep[]): Creep | null {
 }
 
 // Суммарный бонус к скорости атаки от аур соседних единорогов
-function auraBonus(tower: Tower, towers: Tower[]): number {
+export function auraBonus(tower: Tower, towers: Tower[]): number {
   let bonus = 0;
   for (const t of towers) {
     if (t.id === tower.id) continue;
