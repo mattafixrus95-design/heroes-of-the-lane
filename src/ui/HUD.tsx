@@ -1,5 +1,5 @@
 import type { GameState } from "../game/engine/gameState";
-import { startWave } from "../game/entities/spawnWave";
+import { startWave, startWaveInternal } from "../game/entities/spawnWave";
 import { WAVE_DEFS } from "../data/waves";
 
 interface Props {
@@ -47,9 +47,18 @@ export default function HUD({ state, onUpdateState, onReset, soundEnabled, onTog
           {waveName && <span className="hud-wave-name">{waveName}</span>}
           <span className="hud-stat hud-stat-dim">Рек.{recommended}</span>
           {isPrep && (
-            <span className="hud-stat" style={{ color: "#f0c040" }}>
-              ⏱ {Math.ceil(state.prepTimer)}с
-            </span>
+            <>
+              <span className="hud-stat" style={{ color: "#f0c040" }}>
+                ⏱ {Math.ceil(state.prepTimer)}с
+              </span>
+              <button
+                className="hud-btn"
+                style={{ padding: "4px 10px", fontSize: "0.78rem", minHeight: 28 }}
+                onClick={() => onUpdateState(startWaveInternal)}
+              >
+                ⚔️ Вперёд
+              </button>
+            </>
           )}
           {isWave && (
             <span className="hud-stat">👾 {remaining}</span>
