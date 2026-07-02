@@ -1,6 +1,6 @@
 import type { GameState, FloatingText } from "../engine/gameState";
-import { FARM_FOOD_PER_LEVEL, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL } from "../../data/buildings";
-import { FARM_CELL, SAWMILL_CELL } from "../../data/map";
+import { FARM_FOOD_PER_LEVEL, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL, TOWN_LEVELS } from "../../data/buildings";
+import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../../data/map";
 
 let ftCounter = 0;
 
@@ -59,7 +59,32 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
     }
   }
 
-  const townBuildTimeRemaining = Math.max(0, state.townBuildTimeRemaining - dt);
+  let townLevel = state.townLevel;
+  let maxLives = state.maxLives;
+  let lives = state.lives;
+  let townBuildTimeRemaining = state.townBuildTimeRemaining;
+  if (townBuildTimeRemaining > 0) {
+    const newTime = townBuildTimeRemaining - dt;
+    if (newTime <= 0) {
+      const oldDef = TOWN_LEVELS[townLevel - 1];
+      const newDef = TOWN_LEVELS[townLevel];
+      const hpDelta = newDef.maxHp - oldDef.maxHp;
+      townLevel = newDef.level;
+      maxLives += hpDelta;
+      lives += hpDelta;
+      townBuildTimeRemaining = 0;
+      newTexts.push({
+        id: `ft-town-${++ftCounter}`,
+        text: `+${hpDelta}❤️`,
+        x: EXIT_CELL[0], y: EXIT_CELL[1],
+        color: "#8bc34a",
+        spawnTime: state.gameTime,
+        duration: 1.4,
+      });
+    } else {
+      townBuildTimeRemaining = newTime;
+    }
+  }
 
   return {
     ...state,
@@ -68,6 +93,9 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
     sawmill,
     food,
     wood,
+    townLevel,
+    maxLives,
+    lives,
     townBuildTimeRemaining,
     floatingTexts: newTexts.length > 0 ? [...state.floatingTexts, ...newTexts] : state.floatingTexts,
   };

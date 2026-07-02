@@ -356,21 +356,17 @@ function upgradeTown(state: GameState): GameState {
   const nextDef = TOWN_LEVELS[state.townLevel];
   if (!nextDef || !nextDef.upgradeCost) return state;
   if (state.gold < nextDef.upgradeCost.gold || state.wood < nextDef.upgradeCost.wood) return state;
-  const currentDef = TOWN_LEVELS[state.townLevel - 1];
-  const hpDelta = nextDef.maxHp - currentDef.maxHp;
   const texts = [
     ft(`-${nextDef.upgradeCost.gold}💰`, EXIT_CELL[0], EXIT_CELL[1], "#ff8080", state.gameTime),
     ft(`-${nextDef.upgradeCost.wood}🌲`, EXIT_CELL[0], EXIT_CELL[1] - 0.6, "#ff8080", state.gameTime),
-    ft(`+${hpDelta}❤️`, EXIT_CELL[0], EXIT_CELL[1] - 1.2, "#8bc34a", state.gameTime),
   ];
+  // Уровень/HP применяются по завершении стройки (tickBuildTimer),
+  // чтобы новый tier башен не открывался до окончания апгрейда.
   return {
     ...state,
     gold: state.gold - nextDef.upgradeCost.gold,
     wood: state.wood - nextDef.upgradeCost.wood,
-    townLevel: nextDef.level,
     townBuildTimeRemaining: nextDef.buildTime,
-    maxLives: state.maxLives + hpDelta,
-    lives: state.lives + hpDelta,
     floatingTexts: [...state.floatingTexts, ...texts],
   };
 }
