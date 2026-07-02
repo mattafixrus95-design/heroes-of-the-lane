@@ -133,6 +133,7 @@ export interface GameState {
   lives: number;
   maxLives: number;
   townLevel: 1 | 2 | 3;
+  townBuildTimeRemaining: number; // > 0 = город строится (апгрейд ещё не завершён)
   food: number;
   creeps: Creep[];
   towers: Tower[];
@@ -175,6 +176,7 @@ export function createInitialState(): GameState {
     lives: STARTING_LIVES,
     maxLives: STARTING_LIVES,
     townLevel: STARTING_TOWN_LEVEL,
+    townBuildTimeRemaining: 0,
     food: BASE_FOOD_CAPACITY + FARM_FOOD_PER_LEVEL,
     creeps: [],
     towers: [],

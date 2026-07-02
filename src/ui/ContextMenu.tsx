@@ -3,7 +3,7 @@ import { SELL_RATE } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
 import type { TowerType } from "../data/towers";
 import {
-  FARM_COST, FARM_BUILD_TIME,
+  farmCost, FARM_BUILD_TIME,
   sawmillCost, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
 } from "../data/buildings";
@@ -216,21 +216,22 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
 
 // ── Ферма ─────────────────────────────────────────────────────────────────────
 function buildOrUpgradeFarm(state: GameState): GameState {
-  if (state.gold < FARM_COST.gold || state.wood < FARM_COST.wood) return state;
   if (state.farm && state.farm.buildTimeRemaining > 0) return state;
   const nextLevel = (state.farm?.level ?? 0) + 1;
+  const cost = farmCost(nextLevel);
+  if (state.gold < cost.gold || state.wood < cost.wood) return state;
   const texts = [
-    ft(`-${FARM_COST.gold}💰`, FARM_CELL[0], FARM_CELL[1], "#ff8080", state.gameTime),
-    ft(`-${FARM_COST.wood}🌲`, FARM_CELL[0], FARM_CELL[1] - 0.6, "#ff8080", state.gameTime),
+    ft(`-${cost.gold}💰`, FARM_CELL[0], FARM_CELL[1], "#ff8080", state.gameTime),
+    ft(`-${cost.wood}🌲`, FARM_CELL[0], FARM_CELL[1] - 0.6, "#ff8080", state.gameTime),
   ];
   return {
     ...state,
-    gold: state.gold - FARM_COST.gold,
-    wood: state.wood - FARM_COST.wood,
+    gold: state.gold - cost.gold,
+    wood: state.wood - cost.wood,
     farm: {
       level: nextLevel,
       foodProduced: state.farm?.foodProduced ?? 0,
-      totalInvested: (state.farm?.totalInvested ?? 0) + FARM_COST.gold,
+      totalInvested: (state.farm?.totalInvested ?? 0) + cost.gold,
       buildTimeRemaining: FARM_BUILD_TIME,
     },
     floatingTexts: [...state.floatingTexts, ...texts],
@@ -243,7 +244,8 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
   const farm = state.farm;
   const level = farm?.level ?? 0;
   const isBuilding = !!farm && farm.buildTimeRemaining > 0;
-  const canAfford = state.gold >= FARM_COST.gold && state.wood >= FARM_COST.wood;
+  const nextCost = farmCost(level + 1);
+  const canAfford = state.gold >= nextCost.gold && state.wood >= nextCost.wood;
   const canBuild = !isBuilding && canAfford;
 
   return (
@@ -265,7 +267,7 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
         >
           {level > 0 ? "⬆ Улучшить" : "Построить"}
           <span className="cm-btn-cost">
-            💰 {FARM_COST.gold} <span className="cost-icon"><WoodSVG size={13} /> {FARM_COST.wood}</span>
+            💰 {nextCost.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextCost.wood}</span>
             {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
           </span>
         </button>
@@ -350,6 +352,7 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
 
 // ── Город ─────────────────────────────────────────────────────────────────────
 function upgradeTown(state: GameState): GameState {
+  if (state.townBuildTimeRemaining > 0) return state;
   const nextDef = TOWN_LEVELS[state.townLevel];
   if (!nextDef || !nextDef.upgradeCost) return state;
   if (state.gold < nextDef.upgradeCost.gold || state.wood < nextDef.upgradeCost.wood) return state;
@@ -365,6 +368,7 @@ function upgradeTown(state: GameState): GameState {
     gold: state.gold - nextDef.upgradeCost.gold,
     wood: state.wood - nextDef.upgradeCost.wood,
     townLevel: nextDef.level,
+    townBuildTimeRemaining: nextDef.buildTime,
     maxLives: state.maxLives + hpDelta,
     lives: state.lives + hpDelta,
     floatingTexts: [...state.floatingTexts, ...texts],
@@ -376,15 +380,20 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
 }) {
   const currentDef = TOWN_LEVELS[state.townLevel - 1];
   const nextDef = TOWN_LEVELS[state.townLevel] ?? null;
+  const isBuilding = state.townBuildTimeRemaining > 0;
   const canAfford = nextDef?.upgradeCost
     ? state.gold >= nextDef.upgradeCost.gold && state.wood >= nextDef.upgradeCost.wood
     : false;
+  const canUpgrade = canAfford && !isBuilding;
 
   return (
     <>
       <div className="cm-header">
         <span className="cm-title">🏘️ {currentDef.name}</span>
       </div>
+      {isBuilding && (
+        <div className="cm-building-badge">⚙️ Строится… {Math.ceil(state.townBuildTimeRemaining)}с</div>
+      )}
       <div className="cm-stats">
         <span>❤️ {state.lives}/{state.maxLives}</span>
       </div>
@@ -392,13 +401,13 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
         {nextDef ? (
           <button
             className="cm-btn upgrade"
-            disabled={!canAfford}
+            disabled={!canUpgrade}
             onClick={() => onUpdateState(upgradeTown)}
           >
             ⬆ {nextDef.name}
             <span className="cm-btn-cost">
               💰 {nextDef.upgradeCost!.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextDef.upgradeCost!.wood}</span>
-              {!canAfford ? " (недост.)" : ""}
+              {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
             </span>
           </button>
         ) : (
