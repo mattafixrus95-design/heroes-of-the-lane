@@ -9,6 +9,7 @@ import type { BottomTab } from "./ui/BottomHUD";
 import type { ShopItem } from "./ui/TowerShop";
 import GameGrid from "./ui/GameGrid";
 import ContextMenu from "./ui/ContextMenu";
+import ShopPreviewPanel from "./ui/ShopPreviewPanel";
 import TowerInfoModal from "./ui/TowerInfoModal";
 import BuildingInfoModal from "./ui/BuildingInfoModal";
 import StatsOverlay from "./ui/StatsOverlay";
@@ -120,6 +121,9 @@ export default function App() {
           onShowTowerInfo={setInfoTowerType}
           onShowBuildingInfo={setInfoBuildingKind}
         />
+      )}
+      {!selection && selectedItem && !showStats && (
+        <ShopPreviewPanel type={selectedItem} onShowInfo={setInfoTowerType} />
       )}
       {infoTowerType && (
         <TowerInfoModal type={infoTowerType} onClose={() => setInfoTowerType(null)} />
