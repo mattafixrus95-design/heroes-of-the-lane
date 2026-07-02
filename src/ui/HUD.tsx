@@ -6,11 +6,19 @@ interface Props {
   state: GameState;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onReset: () => void;
-  soundEnabled: boolean;
-  onToggleSound: () => void;
+  volume: number;
+  onVolumeChange: (v: number) => void;
+  onToggleMute: () => void;
 }
 
-export default function HUD({ state, onUpdateState, onReset, soundEnabled, onToggleSound }: Props) {
+function volumeEmoji(v: number) {
+  if (v === 0)   return "🔇";
+  if (v < 0.35)  return "🔈";
+  if (v < 0.70)  return "🔉";
+  return "🔊";
+}
+
+export default function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMute }: Props) {
   const { phase, wave, gold, lives, food, spawnQueue, creeps } = state;
   const remaining = creeps.length + spawnQueue.length;
   const isPrep = phase === "prep";
@@ -35,9 +43,17 @@ export default function HUD({ state, onUpdateState, onReset, soundEnabled, onTog
         <span className="hud-stat">❤️ {lives}</span>
         <span className="hud-stat">🌾 {food}</span>
         <span className="hud-stat hud-stat-dim">🏰 {towerValue}</span>
-        <button className="hud-btn secondary hud-sound-btn" onClick={onToggleSound}>
-          {soundEnabled ? "🔊" : "🔇"}
-        </button>
+        <div className="hud-volume">
+          <button className="hud-volume-icon" onClick={onToggleMute}>
+            {volumeEmoji(volume)}
+          </button>
+          <input
+            type="range" min="0" max="1" step="0.05"
+            value={volume}
+            onChange={e => onVolumeChange(+e.target.value)}
+            className="hud-volume-slider"
+          />
+        </div>
       </div>
 
       {/* Строка 2: Инфо о волне + кнопки */}

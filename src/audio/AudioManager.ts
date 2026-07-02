@@ -1,6 +1,7 @@
 class AudioManager {
+  volume = 0.7; // 0.0 – 1.0
+
   private ctx: AudioContext | null = null;
-  muted = false;
 
   private get ac(): AudioContext {
     if (!this.ctx) this.ctx = new AudioContext();
@@ -9,7 +10,7 @@ class AudioManager {
   }
 
   playArrow() {
-    if (this.muted) return;
+    if (this.volume === 0) return;
     const ctx = this.ac;
     const t = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -17,7 +18,7 @@ class AudioManager {
     osc.type = "triangle";
     osc.frequency.setValueAtTime(520, t);
     osc.frequency.exponentialRampToValueAtTime(160, t + 0.2);
-    gain.gain.setValueAtTime(0.22, t);
+    gain.gain.setValueAtTime(0.22 * this.volume, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -26,7 +27,7 @@ class AudioManager {
   }
 
   playAxe() {
-    if (this.muted) return;
+    if (this.volume === 0) return;
     const ctx = this.ac;
     const t = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -34,7 +35,7 @@ class AudioManager {
     osc.type = "sawtooth";
     osc.frequency.setValueAtTime(300, t);
     osc.frequency.exponentialRampToValueAtTime(55, t + 0.15);
-    gain.gain.setValueAtTime(0.18, t);
+    gain.gain.setValueAtTime(0.18 * this.volume, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -43,7 +44,7 @@ class AudioManager {
   }
 
   playFire() {
-    if (this.muted) return;
+    if (this.volume === 0) return;
     const ctx = this.ac;
     const t = ctx.currentTime;
     const dur = 0.28;
@@ -60,7 +61,7 @@ class AudioManager {
     filter.frequency.setValueAtTime(900, t);
     filter.frequency.exponentialRampToValueAtTime(180, t + dur);
     const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.38, t);
+    gain.gain.setValueAtTime(0.38 * this.volume, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
     src.connect(filter);
     filter.connect(gain);

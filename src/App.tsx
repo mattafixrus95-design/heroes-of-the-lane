@@ -20,7 +20,8 @@ export default function App() {
   const [state, setState] = useState<GameState>(createInitialState);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [volume, setVolume] = useState(0.7);
+  const prevVolumeRef = useRef(0.7);
   const [infoTowerType, setInfoTowerType] = useState<TowerType | null>(null);
 
   const updateState = useCallback(
@@ -35,11 +36,14 @@ export default function App() {
     return () => loopRef.current?.stop();
   }, [updateState]);
 
+  // Синхронизируем громкость AudioManager
+  useEffect(() => { audioManager.volume = volume; }, [volume]);
+
   // Звуки при появлении новых снарядов
   const prevProjectileIds = useRef<Set<string>>(new Set());
   useEffect(() => {
     const current = new Set(state.projectiles.map(p => p.id));
-    if (soundEnabled) {
+    if (volume > 0) {
       for (const p of state.projectiles) {
         if (!prevProjectileIds.current.has(p.id)) {
           if (p.kind === "arrow")    audioManager.playArrow();
@@ -49,10 +53,7 @@ export default function App() {
       }
     }
     prevProjectileIds.current = current;
-  }, [state.projectiles, soundEnabled]);
-
-  // Синхронизируем muted флаг AudioManager
-  useEffect(() => { audioManager.muted = !soundEnabled; }, [soundEnabled]);
+  }, [state.projectiles, volume]);
 
   function handleReset() {
     setState(createInitialState());
@@ -78,8 +79,12 @@ export default function App() {
         state={state}
         onUpdateState={updateState}
         onReset={handleReset}
-        soundEnabled={soundEnabled}
-        onToggleSound={() => setSoundEnabled(v => !v)}
+        volume={volume}
+        onVolumeChange={v => {
+          if (v > 0) prevVolumeRef.current = v;
+          setVolume(v);
+        }}
+        onToggleMute={() => setVolume(v => v > 0 ? (prevVolumeRef.current = v, 0) : prevVolumeRef.current)}
       />
       <GameGrid
         state={state}
