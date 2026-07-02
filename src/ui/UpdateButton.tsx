@@ -22,10 +22,41 @@ export default function UpdateButton({ currentVersion }: { currentVersion: strin
 
       if (data.version !== currentVersion) {
         setStatus("updating");
+
         if ("serviceWorker" in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map(r => r.unregister()));
+          const reg = await navigator.serviceWorker.getRegistration();
+          if (reg) {
+            // Когда новый SW возьмёт управление — перезагружаем.
+            // Это гарантирует, что новый SW сам отдаст свежие файлы,
+            // минуя HTTP-кэш браузера (критично для PWA-приложения).
+            navigator.serviceWorker.addEventListener(
+              "controllerchange",
+              () => window.location.reload(),
+              { once: true }
+            );
+
+            await reg.update();
+
+            // Если новый SW уже установлен и ждёт — подталкиваем его
+            reg.waiting?.postMessage({ type: "SKIP_WAITING" });
+
+            // Подталкиваем SW который только начал устанавливаться
+            reg.addEventListener("updatefound", () => {
+              const sw = reg.installing;
+              if (!sw) return;
+              sw.addEventListener("statechange", () => {
+                if (sw.state === "installed") {
+                  reg.waiting?.postMessage({ type: "SKIP_WAITING" });
+                }
+              });
+            }, { once: true });
+
+            // Фолбэк: если controllerchange не сработал за 4с — просто reload
+            setTimeout(() => window.location.reload(), 4000);
+            return;
+          }
         }
+
         window.location.reload();
       } else {
         setStatus("uptodate");
