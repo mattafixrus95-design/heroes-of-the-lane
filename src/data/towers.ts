@@ -61,7 +61,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   dragon: {
     type: "dragon", name: "Дракон",
-    purchaseCost: 195,
+    purchaseCost: 205,
     buildTime: 2,
     foodCost: 3,
     grades: [
