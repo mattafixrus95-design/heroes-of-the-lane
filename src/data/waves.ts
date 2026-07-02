@@ -50,25 +50,31 @@ function group(kind: CreepKind, count: number, interval: number): SpawnEntry[] {
   return Array.from({ length: count }, (_, i) => ({ kind, delay: i === 0 ? 0 : interval }));
 }
 
+// Все крипы выходят за первые 7 секунд волны
+function wave(kind: CreepKind, count: number): SpawnEntry[] {
+  const interval = count > 1 ? +(7 / (count - 1)).toFixed(3) : 0;
+  return group(kind, count, interval);
+}
+
 export const WAVE_DEFS: WaveDef[] = [
-  { entries: group("imp",           50, 0.22), recommended: 150,  name: "Бесы" },
-  { entries: group("goblin",        50, 0.22), recommended: 200,  name: "Гоблины" },
-  { entries: group("pikeman",       50, 0.30), recommended: 250,  name: "Копейщики" },
-  { entries: group("wolf_rider",    50, 0.25), recommended: 350,  name: "Волчьи Всадники" },
-  { entries: group("zombie",        40, 0.55), recommended: 400,  name: "Зомби" },
-  { entries: group("orc",           40, 0.45), recommended: 450,  name: "Орки" },
-  { entries: group("wight",         40, 0.45), recommended: 500,  name: "Призраки" },
-  { entries: group("minotaur",      40, 0.55), recommended: 550,  name: "Минотавры" },
-  { entries: group("golem",         40, 0.90), recommended: 650,  name: "Голем" },
-  { entries: group("angel",          3, 3.00), recommended: 750,  name: "Ангелы" },
-  { entries: group("ogr",           50, 0.40), recommended: 750,  name: "Огры" },
-  { entries: group("crusader",      40, 0.70), recommended: 800,  name: "Крестоносцы" },
-  { entries: group("vampire_lord",  40, 0.75), recommended: 850,  name: "Вампиры" },
-  { entries: group("pit_lord",      25, 0.90), recommended: 900,  name: "Властелины" },
-  { entries: group("roc",           30, 0.85), recommended: 950,  name: "Роки" },
-  { entries: group("lich",          25, 1.00), recommended: 1000, name: "Личи" },
-  { entries: group("devil",         20, 1.20), recommended: 1050, name: "Дьяволы" },
-  { entries: group("titan",         15, 1.50), recommended: 1100, name: "Титаны" },
-  { entries: group("black_dragon",  20, 1.60), recommended: 1150, name: "Чёрные Драконы" },
-  { entries: group("archangel",      5, 3.00), recommended: 1200, name: "Архангелы" },
+  { entries: wave("imp",           50), recommended: 150,  name: "Бесы" },
+  { entries: wave("goblin",        50), recommended: 200,  name: "Гоблины" },
+  { entries: wave("pikeman",       50), recommended: 250,  name: "Копейщики" },
+  { entries: wave("wolf_rider",    50), recommended: 350,  name: "Волчьи Всадники" },
+  { entries: wave("zombie",        40), recommended: 400,  name: "Зомби" },
+  { entries: wave("orc",           40), recommended: 450,  name: "Орки" },
+  { entries: wave("wight",         40), recommended: 500,  name: "Призраки" },
+  { entries: wave("minotaur",      40), recommended: 550,  name: "Минотавры" },
+  { entries: wave("golem",         40), recommended: 650,  name: "Голем" },
+  { entries: group("angel",         3, 3.00), recommended: 750,  name: "Ангелы" },
+  { entries: wave("ogr",           50), recommended: 750,  name: "Огры" },
+  { entries: wave("crusader",      40), recommended: 800,  name: "Крестоносцы" },
+  { entries: wave("vampire_lord",  40), recommended: 850,  name: "Вампиры" },
+  { entries: wave("pit_lord",      25), recommended: 900,  name: "Властелины" },
+  { entries: wave("roc",           30), recommended: 950,  name: "Роки" },
+  { entries: wave("lich",          25), recommended: 1000, name: "Личи" },
+  { entries: wave("devil",         20), recommended: 1050, name: "Дьяволы" },
+  { entries: wave("titan",         15), recommended: 1100, name: "Титаны" },
+  { entries: wave("black_dragon",  20), recommended: 1150, name: "Чёрные Драконы" },
+  { entries: group("archangel",     5, 3.00), recommended: 1200, name: "Архангелы" },
 ];
