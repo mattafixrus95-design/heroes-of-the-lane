@@ -1,6 +1,5 @@
 import type { GameState, Tower, Creep, Projectile } from "../engine/gameState";
 
-// Tile-units per second for each projectile type
 const ARROW_SPEED    = 12;
 const FIREBALL_SPEED = 10;
 
@@ -31,8 +30,8 @@ function makeProjectile(
   damage: number,
   slow: number,
   kind: "arrow" | "axe" | "fireball",
-  aoeDmgPct: number,
-  explosionAoe: number,
+  explosionAoe = 0,
+  explosionDmgPct = 0,
 ): Projectile {
   const speed = kind === "fireball" ? FIREBALL_SPEED : ARROW_SPEED;
   return {
@@ -49,7 +48,7 @@ function makeProjectile(
       targetId: target.id,
       damage,
       slow,
-      ...(explosionAoe > 0 ? { explosionAoe, explosionDmgPct: aoeDmgPct } : {}),
+      ...(explosionAoe > 0 ? { explosionAoe, explosionDmgPct } : {}),
     },
   };
 }
@@ -65,38 +64,39 @@ export function tickTowerAttack(state: GameState): GameState {
     const target = findTarget(tower, state.creeps);
     if (!target) return tower;
 
+    const ab = tower.ability;
+
     if (tower.type === "dragon") {
+      const radius = ab?.kind === "aoe" ? ab.radius : 0;
+      const dmgPct = ab?.kind === "aoe" ? ab.dmgPct : 0;
       newProjectiles.push(makeProjectile(
         tower, target, state.gameTime,
         tower.damage, tower.slow,
-        "fireball", tower.aoeDmgPct, tower.aoe,
+        "fireball", radius, dmgPct,
       ));
     } else if (tower.type === "dwarf") {
-      // Гном бросает топор (одиночный, без AoE)
       newProjectiles.push(makeProjectile(
         tower, target, state.gameTime,
         tower.damage, tower.slow,
-        "axe", 0, 0,
+        "axe",
       ));
     } else {
-      // Эльф: стрела к основной цели + веерные стрелы по AoE
-      newProjectiles.push(makeProjectile(
-        tower, target, state.gameTime,
-        tower.damage, tower.slow,
-        "arrow", 0, 0,
-      ));
-      if (tower.aoe > 0) {
-        for (const c of state.creeps) {
-          if (c.id === target.id) continue;
-          const d = Math.hypot(target.position.x - c.position.x, target.position.y - c.position.y);
-          if (d <= tower.aoe) {
-            newProjectiles.push(makeProjectile(
-              tower, c, state.gameTime,
-              tower.damage * tower.aoeDmgPct, 0,
-              "arrow", 0, 0,
-            ));
-          }
+      // Эльф: базовый — одна стрела; Благородный — мультишот N стрел
+      if (ab?.kind === "multishot") {
+        const inRange = state.creeps
+          .filter(c => dist(tower, c) <= tower.range)
+          .sort((a, b) => b.pathProgress - a.pathProgress)
+          .slice(0, ab.arrows);
+        const dmg = tower.damage * ab.dmgPct;
+        for (const c of inRange) {
+          newProjectiles.push(makeProjectile(tower, c, state.gameTime, dmg, 0, "arrow"));
         }
+      } else {
+        newProjectiles.push(makeProjectile(
+          tower, target, state.gameTime,
+          tower.damage, tower.slow,
+          "arrow",
+        ));
       }
     }
 

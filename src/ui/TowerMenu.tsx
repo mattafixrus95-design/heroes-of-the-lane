@@ -28,7 +28,7 @@ function applyUpgrade(id: string, state: GameState): GameState {
     ...tower,
     gradeIndex: nextIdx,
     damage: g.damage, range: g.range, attackSpeed: g.attackSpeed,
-    aoe: g.aoe, aoeDmgPct: g.aoeDmgPct, slow: g.slow,
+    ability: g.ability, slow: g.slow,
     totalInvested: tower.totalInvested + g.upgradeCost,
     foodSpent: tower.foodSpent + g.foodUpgradeCost,
     buildTimeRemaining: g.upgradeTime,
@@ -97,7 +97,8 @@ export default function TowerMenu({ tower, gold, food, waveActive, onUpdateState
           <span>⚔️ {tower.damage}</span>
           <span>🎯 {tower.range}</span>
           <span>⚡ {tower.attackSpeed}/с</span>
-          {tower.aoe > 0 && <span>💥 AoE {tower.aoe}</span>}
+          {tower.ability?.kind === "aoe"       && <span>💥 AoE r{tower.ability.radius}</span>}
+          {tower.ability?.kind === "multishot" && <span>🏹 ×{tower.ability.arrows}</span>}
           {tower.slow > 0 && <span>❄️ {tower.slow * 100}%</span>}
         </div>
 

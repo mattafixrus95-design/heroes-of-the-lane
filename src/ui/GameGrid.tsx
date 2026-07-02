@@ -42,7 +42,7 @@ function placeTower(col: number, row: number, type: TowerType, state: GameState)
     type, col, row,
     gradeIndex: 0,
     damage: g.damage, range: g.range, attackSpeed: g.attackSpeed,
-    aoe: g.aoe, aoeDmgPct: g.aoeDmgPct, slow: g.slow,
+    ability: g.ability, slow: g.slow,
     totalInvested: def.purchaseCost,
     foodSpent: def.foodCost,
     lastAttackTime: -999,
