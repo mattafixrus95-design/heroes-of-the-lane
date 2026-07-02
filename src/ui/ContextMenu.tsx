@@ -415,6 +415,7 @@ const ABILITY_LABEL: Record<string, string> = {
   block: "🛡 Блок 20%",
   dodge: "💨 Уклонение 20%",
   slow_resist: "🧊 Иммунитет к замедлению",
+  root_resist: "🧱 Иммунитет к сковыванию",
   self_heal: "💚 Самолечение при <50% HP",
 };
 

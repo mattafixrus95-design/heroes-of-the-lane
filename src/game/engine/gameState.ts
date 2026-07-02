@@ -14,7 +14,7 @@ export type CreepKind =
   | "ogr" | "crusader" | "vampire_lord" | "pit_lord" | "roc"
   | "lich" | "devil" | "titan" | "black_dragon" | "archangel";
 
-export type AbilityKind = "block" | "dodge" | "slow_resist" | "self_heal";
+export type AbilityKind = "block" | "dodge" | "slow_resist" | "self_heal" | "root_resist";
 
 export interface SpawnEntry {
   kind: CreepKind;
