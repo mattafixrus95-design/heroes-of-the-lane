@@ -35,6 +35,9 @@ export interface Creep {
   position: Point;
   slowFactor: number;
   slowTimer: number;
+  vulnPct: number;
+  vulnTimer: number;
+  rootTimer: number;
   abilities: AbilityKind[];
   selfHealUsed: boolean;
   healTimer: number;
@@ -54,6 +57,7 @@ export interface Tower {
   totalInvested: number;
   foodSpent: number;
   lastAttackTime: number;
+  attackCount: number;
   buildTimeRemaining: number; // > 0 = строится, атаковать нельзя
 }
 
@@ -70,6 +74,8 @@ export interface PendingDamage {
   slow: number;
   explosionAoe?: number;
   explosionDmgPct?: number;
+  vulnApply?: { pct: number; duration: number };
+  rootApply?: { duration: number };
 }
 
 export interface Projectile {

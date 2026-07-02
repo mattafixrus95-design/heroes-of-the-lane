@@ -46,6 +46,7 @@ function placeTower(col: number, row: number, type: TowerType, state: GameState)
     totalInvested: def.purchaseCost,
     foodSpent: def.foodCost,
     lastAttackTime: -999,
+    attackCount: 0,
     buildTimeRemaining: def.buildTime,
   };
   return {

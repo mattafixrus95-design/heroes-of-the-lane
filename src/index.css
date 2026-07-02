@@ -99,30 +99,27 @@ body {
 /* ── Tower shop ── */
 .shop {
   display: flex;
-  gap: 6px;
+  gap: 3px;
   align-items: stretch;
   flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   width: 100%;
-  padding: 2px 2px 4px;
-  scrollbar-width: none;
+  padding: 2px 1px 4px;
 }
-.shop::-webkit-scrollbar { display: none; }
 
 .shop-item {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: center;
+  gap: 1px;
   background: rgba(255,255,255,0.08);
   border: 2px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: 6px 10px;
+  border-radius: 8px;
+  padding: 4px 2px;
   cursor: pointer;
   color: #eee;
-  min-width: 80px;
-  flex-shrink: 0;
+  min-width: 0;
+  flex: 1 1 0;
   touch-action: manipulation;
   transition: border-color 0.15s, background 0.15s, transform 0.1s;
 }
@@ -134,9 +131,9 @@ body {
 .shop-item.unaffordable { opacity: 0.4; cursor: not-allowed; }
 
 .shop-emoji { font-size: 1.6rem; line-height: 1; }
-.shop-name  { font-size: 0.72rem; font-weight: 700; }
+.shop-name  { font-size: 0.56rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .shop-stat  { font-size: 0.75rem; color: #ccc; }
-.shop-cost  { font-size: 0.8rem; font-weight: 700; color: #f0c040; margin-top: 2px; }
+.shop-cost  { font-size: 0.6rem; font-weight: 700; color: #f0c040; margin-top: 1px; white-space: nowrap; }
 
 .farm-build-btn {
   background: rgba(139,195,74,0.18);
@@ -159,15 +156,18 @@ body {
 .shop-info-btn {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 5px;
+  border-radius: 4px;
   color: #aaa;
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   font-weight: 700;
-  padding: 2px 5px;
+  padding: 0px 3px;
   cursor: pointer;
-  line-height: 1.4;
+  line-height: 1.3;
   touch-action: manipulation;
   flex-shrink: 0;
+  position: absolute;
+  top: 2px;
+  right: 2px;
   transition: background 0.12s, color 0.12s;
 }
 @media (hover: hover) {

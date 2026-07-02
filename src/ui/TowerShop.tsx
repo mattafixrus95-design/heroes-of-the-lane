@@ -27,19 +27,17 @@ export default function TowerShop({ gold, food, selected, waveActive, onSelect, 
             style={{ cursor: clickable ? "pointer" : waveActive ? "default" : "not-allowed" }}
             onClick={() => clickable && onSelect(isSelected ? null : def.type)}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-              <span className="shop-emoji">
-                <TowerIcon type={def.type} grade={0} size={36} />
-              </span>
-              <button
-                className="shop-info-btn"
-                onClick={e => { e.stopPropagation(); onInfo(def.type); }}
-              >
-                ℹ
-              </button>
-            </div>
+            <button
+              className="shop-info-btn"
+              onClick={e => { e.stopPropagation(); onInfo(def.type); }}
+            >
+              ℹ
+            </button>
+            <span className="shop-emoji">
+              <TowerIcon type={def.type} grade={0} size={26} />
+            </span>
             <span className="shop-name">{def.name}</span>
-            <span className="shop-cost">💰 {def.purchaseCost} &nbsp; 🌾 {def.foodCost}</span>
+            <span className="shop-cost">💰{def.purchaseCost} 🌾{def.foodCost}</span>
           </div>
         );
       })}
