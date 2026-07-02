@@ -23,6 +23,7 @@ export interface TowerGrade {
 export interface TowerDef {
   type: TowerType;
   name: string;
+  tier: number; // 1-7, определяет доступность по уровню города
   purchaseCost: number;
   buildTime: number;
   foodCost: number;
@@ -32,6 +33,7 @@ export interface TowerDef {
 export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   centaur: {
     type: "centaur", name: "Кентавр",
+    tier: 1,
     purchaseCost: 10,
     buildTime: 1,
     foodCost: 1,
@@ -51,6 +53,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   dwarf: {
     type: "dwarf", name: "Гном",
+    tier: 2,
     purchaseCost: 20,
     buildTime: 1,
     foodCost: 1,
@@ -69,6 +72,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   elf: {
     type: "elf", name: "Эльф",
+    tier: 3,
     purchaseCost: 45,
     buildTime: 1,
     foodCost: 1,
@@ -88,6 +92,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   pegasus: {
     type: "pegasus", name: "Пегас",
+    tier: 4,
     purchaseCost: 80,
     buildTime: 2,
     foodCost: 2,
@@ -108,6 +113,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   dendroid: {
     type: "dendroid", name: "Дендроид",
+    tier: 5,
     purchaseCost: 100,
     buildTime: 2,
     foodCost: 2,
@@ -128,6 +134,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   unicorn: {
     type: "unicorn", name: "Единорог",
+    tier: 6,
     purchaseCost: 165,
     buildTime: 2,
     foodCost: 3,
@@ -148,6 +155,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   },
   dragon: {
     type: "dragon", name: "Дракон",
+    tier: 7,
     purchaseCost: 215,
     buildTime: 2,
     foodCost: 3,

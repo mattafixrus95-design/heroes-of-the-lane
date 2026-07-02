@@ -9,21 +9,23 @@ interface Props {
   food: number;
   selected: ShopItem | null;
   waveActive: boolean;
+  maxBuildTier: number;
   onSelect: (item: ShopItem | null) => void;
   onInfo: (type: TowerType) => void;
 }
 
-export default function TowerShop({ gold, food, selected, waveActive, onSelect, onInfo }: Props) {
+export default function TowerShop({ gold, food, selected, waveActive, maxBuildTier, onSelect, onInfo }: Props) {
   return (
     <div className="shop">
       {Object.values(TOWER_DEFS).map(def => {
+        const locked = def.tier > maxBuildTier;
         const canAfford = gold >= def.purchaseCost && food >= def.foodCost;
         const isSelected = selected === def.type;
-        const clickable = !waveActive && (canAfford || isSelected);
+        const clickable = !waveActive && !locked && (canAfford || isSelected);
         return (
           <div
             key={def.type}
-            className={`shop-item${isSelected ? " selected" : ""}${!canAfford ? " unaffordable" : ""}`}
+            className={`shop-item${isSelected ? " selected" : ""}${!canAfford || locked ? " unaffordable" : ""}`}
             style={{ cursor: clickable ? "pointer" : waveActive ? "default" : "not-allowed" }}
             onClick={() => clickable && onSelect(isSelected ? null : def.type)}
           >
@@ -37,7 +39,7 @@ export default function TowerShop({ gold, food, selected, waveActive, onSelect, 
               <TowerIcon type={def.type} grade={0} size={26} />
             </span>
             <span className="shop-name">{def.name}</span>
-            <span className="shop-cost">💰{def.purchaseCost} 🌾{def.foodCost}</span>
+            <span className="shop-cost">{locked ? `🔒 T${def.tier}` : `💰${def.purchaseCost} 🌾${def.foodCost}`}</span>
           </div>
         );
       })}

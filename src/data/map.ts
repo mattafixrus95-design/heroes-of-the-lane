@@ -1,7 +1,7 @@
 export const GRID_COLS = 10;
-export const GRID_ROWS = 9;
+export const GRID_ROWS = 10;
 
-// Visual layout (G=entry, C=exit, P=path, .=buildable):
+// Visual layout (G=entry, C=exit, P=path, .=buildable, T=территория города):
 //      0  1  2  3  4  5  6  7  8  9
 // r0 [ G  P  P  P  P  P  P  P  P  P ]
 // r1 [ .  .  .  .  .  .  .  .  .  P ]
@@ -12,6 +12,7 @@ export const GRID_ROWS = 9;
 // r6 [ P  P  P  P  P  P  P  P  P  P ]
 // r7 [ P  .  .  .  .  .  .  .  .  . ]
 // r8 [ P  P  P  P  P  P  P  P  P  C ]
+// r9 [ .  .  .  .  .  .  .  .  T  T ]  ← новый ряд, полностью зелёный кроме территории города
 
 export const ENTRY_CELL: [number, number] = [0, 0];
 export const EXIT_CELL:  [number, number] = [9, 8];
@@ -41,4 +42,15 @@ export const PATH_SET = new Set(PATH.map(([c, r]) => `${c},${r}`));
 
 export function isPathCell(col: number, row: number): boolean {
   return PATH_SET.has(`${col},${row}`);
+}
+
+// Территория города: нижние правые 2×2 клетки карты.
+// (9,8) — замок (конечная точка пути), (8,8) — часть дороги.
+// (8,9) — слот фермы, (9,9) — слот лесопилки.
+export const FARM_CELL:    [number, number] = [8, 9];
+export const SAWMILL_CELL: [number, number] = [9, 9];
+export const TOWN_TERRITORY = new Set(["8,8", "9,8", "8,9", "9,9"]);
+
+export function isTownTerritory(col: number, row: number): boolean {
+  return TOWN_TERRITORY.has(`${col},${row}`);
 }

@@ -1,4 +1,5 @@
 import type { TowerType, TowerAbility } from "../../data/towers";
+import { TOWN_LEVELS, STARTING_TOWN_LEVEL, STARTING_WOOD, BASE_FOOD_CAPACITY } from "../../data/buildings";
 
 export type Phase = "idle" | "prep" | "wave" | "defeat" | "victory";
 
@@ -62,10 +63,17 @@ export interface Tower {
 }
 
 export interface Farm {
-  id: string;
-  foodProduced: number;    // суммарно еды выдано
-  totalInvested: number;   // суммарно потрачено золота
+  level: number;              // 1, 2, 3... (0 = ещё не построена)
+  foodProduced: number;       // суммарный вклад в макс. еду = level * FARM_FOOD_PER_LEVEL
+  totalInvested: number;
   buildTimeRemaining: number; // > 0 = строится
+}
+
+export interface Sawmill {
+  level: number;              // 1..SAWMILL_MAX_LEVEL (0 = ещё не построена)
+  totalInvested: number;
+  buildTimeRemaining: number; // > 0 = строится
+  tickTimer: number;          // секунд до следующего тика дохода
 }
 
 export interface PendingDamage {
@@ -121,11 +129,15 @@ export interface GameState {
   phase: Phase;
   wave: number;
   gold: number;
+  wood: number;
   lives: number;
+  maxLives: number;
+  townLevel: 1 | 2 | 3;
   food: number;
   creeps: Creep[];
   towers: Tower[];
-  farms: Farm[];
+  farm: Farm | null;
+  sawmill: Sawmill | null;
   projectiles: Projectile[];
   splashEffects: SplashEffect[];
   floatingTexts: FloatingText[];
@@ -139,26 +151,35 @@ export interface GameState {
   currentWaveGold: number;
 }
 
-export const STARTING_GOLD        = 200;
-export const STARTING_LIVES       = 50;
-export const STARTING_FOOD        = 15;
-export const SLOW_DURATION        = 1.5;
-export const SELL_RATE            = 0.7;
-export const PREP_DURATION        = 15;
-export const FARM_COST            = 50;
-export const FARM_FOOD_PER_LEVEL  = 15;
-export const FARM_UPGRADE_COST    = 50;
+export const STARTING_GOLD  = 200;
+export const STARTING_LIVES = TOWN_LEVELS[0].maxHp;
+export const SLOW_DURATION  = 1.5;
+export const SELL_RATE      = 0.7;
+export const PREP_DURATION  = 15;
+
+// Максимальный запас еды: база (без фермы) + вклад фермы
+export function maxFood(state: GameState): number {
+  return BASE_FOOD_CAPACITY + (state.farm?.foodProduced ?? 0);
+}
+
+export function usedFood(state: GameState): number {
+  return maxFood(state) - state.food;
+}
 
 export function createInitialState(): GameState {
   return {
     phase: "idle",
     wave: 0,
     gold: STARTING_GOLD,
+    wood: STARTING_WOOD,
     lives: STARTING_LIVES,
-    food: STARTING_FOOD,
+    maxLives: STARTING_LIVES,
+    townLevel: STARTING_TOWN_LEVEL,
+    food: BASE_FOOD_CAPACITY,
     creeps: [],
     towers: [],
-    farms: [{ id: "farm-default", foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: FARM_COST, buildTimeRemaining: 0 }],
+    farm: null,
+    sawmill: null,
     projectiles: [],
     splashEffects: [],
     floatingTexts: [],

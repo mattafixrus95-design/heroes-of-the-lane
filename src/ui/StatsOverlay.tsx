@@ -19,7 +19,10 @@ export default function StatsOverlay({ state, onReset }: Props) {
   const totalKilled = state.waveStats.reduce((s, w) => s + w.killed, 0);
   const totalGold   = state.waveStats.reduce((s, w) => s + w.goldEarned, 0);
 
-  const towerNames: Record<string, string> = { dwarf: "Гном", elf: "Эльф", dragon: "Дракон" };
+  const towerNames: Record<string, string> = {
+    centaur: "Кентавр", dwarf: "Гном", elf: "Эльф", pegasus: "Пегас",
+    dendroid: "Дендроид", unicorn: "Единорог", dragon: "Дракон",
+  };
 
   return (
     <div className="overlay" style={{ gap: 12, textAlign: "center" }}>
@@ -76,16 +79,25 @@ export default function StatsOverlay({ state, onReset }: Props) {
             </div>
           );
         })}
-        {state.farms.length > 0 && (
+        {state.farm && (
           <div style={{
             display: "flex", justifyContent: "space-between",
             fontSize: "0.8rem", color: "#ccc", padding: "2px 0",
           }}>
             <span>🌾 Ферма</span>
-            <span>{state.farms.length} шт.</span>
+            <span>ур. {state.farm.level}</span>
           </div>
         )}
-        {state.towers.length === 0 && state.farms.length === 0 && (
+        {state.sawmill && (
+          <div style={{
+            display: "flex", justifyContent: "space-between",
+            fontSize: "0.8rem", color: "#ccc", padding: "2px 0",
+          }}>
+            <span>🪵 Лесопилка</span>
+            <span>ур. {state.sawmill.level}</span>
+          </div>
+        )}
+        {state.towers.length === 0 && !state.farm && !state.sawmill && (
           <div style={{ fontSize: "0.78rem", color: "#666" }}>нет башен</div>
         )}
       </div>
