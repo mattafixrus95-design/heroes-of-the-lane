@@ -47,11 +47,11 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
       wood += gain;
       newTexts.push({
         id: `ft-sawmill-${++ftCounter}`,
-        text: `+${gain}🌲`,
+        text: `+${gain} 🌲`,
         x: SAWMILL_CELL[0] + 0.5, y: SAWMILL_CELL[1],
         color: "#8bc34a",
         spawnTime: state.gameTime,
-        duration: 1,
+        duration: 1.4,
       });
       sawmill = { ...sawmill, tickTimer: tickTimer + SAWMILL_TICK_INTERVAL };
     } else {
