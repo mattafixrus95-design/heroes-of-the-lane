@@ -14,7 +14,7 @@ export interface CreepDef {
 
 export const CREEP_DEFS: Record<CreepKind, CreepDef> = {
   // ── Волны 1–5: T1-T2 ─────────────────────────────────────────────────────
-  imp:          { kind: "imp",          name: "Бес",            hp:   12, speed: 1.2, regenPerSec:  0, reward:   2, livesLost: 1, abilities: [],                       emoji: "😈" },
+  imp:          { kind: "imp",          name: "Бес",            hp:   11, speed: 1.2, regenPerSec:  0, reward:   2, livesLost: 1, abilities: [],                       emoji: "😈" },
   goblin:       { kind: "goblin",       name: "Гоблин",         hp:   16, speed: 1.3, regenPerSec:  0, reward:   2, livesLost: 1, abilities: [],                       emoji: "👺" },
   pikeman:      { kind: "pikeman",      name: "Копейщик",       hp:   22, speed: 1.1, regenPerSec:  0, reward:   2, livesLost: 1, abilities: [],                       emoji: "🛡" },
   wolf_rider:   { kind: "wolf_rider",   name: "Волч. Всадник",  hp:   25, speed: 1.8, regenPerSec:  0, reward:   2, livesLost: 1, abilities: [],                       emoji: "🐺" },
