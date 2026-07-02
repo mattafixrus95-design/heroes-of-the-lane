@@ -2,6 +2,7 @@ import type { GameState } from "../game/engine/gameState";
 import { maxFood, usedFood } from "../game/engine/gameState";
 import { startWave, startWaveInternal } from "../game/entities/spawnWave";
 import { WAVE_DEFS } from "../data/waves";
+import WoodSVG from "../assets/WoodSVG";
 
 interface Props {
   state: GameState;
@@ -43,7 +44,7 @@ export default function HUD({ state, onUpdateState, onReset, volume, onVolumeCha
       {/* Строка 1: Ресурсы + стоимость башен + звук */}
       <div className="hud-row">
         <span className="hud-stat">💰 {gold}</span>
-        <span className="hud-stat">🪵 {wood}</span>
+        <span className="hud-stat hud-stat-icon"><WoodSVG size={16} /> {wood}</span>
         <span className="hud-stat">🌾 {usedFood(state)}/{maxFood(state)}</span>
         <span className="hud-stat">❤️ {lives}/{maxLives}</span>
         <span className="hud-stat hud-stat-dim">🏰 {towerValue}</span>

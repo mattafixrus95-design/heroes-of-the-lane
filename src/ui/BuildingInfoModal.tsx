@@ -1,15 +1,18 @@
+import type { ReactNode } from "react";
 import {
   FARM_COST, FARM_BUILD_TIME, FARM_FOOD_PER_LEVEL,
   SAWMILL_COST, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
 } from "../data/buildings";
+import WoodSVG from "../assets/WoodSVG";
+import SawmillSVG from "../assets/SawmillSVG";
 
 interface Props {
   kind: "farm" | "sawmill" | "town";
   onClose: () => void;
 }
 
-function Row({ label, value }: { label: string; value: string | number }) {
+function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "#ddd" }}>
       <span style={{ color: "#999" }}>{label}</span>
@@ -25,7 +28,7 @@ export default function BuildingInfoModal({ kind, onClose }: Props) {
         <div className="tm-header">
           <div className="tm-title">
             {kind === "farm" && "🌾 Ферма"}
-            {kind === "sawmill" && "🪵 Лесопилка"}
+            {kind === "sawmill" && <span className="cost-icon"><SawmillSVG size={22} /> Лесопилка</span>}
             {kind === "town" && "🏘️ Город"}
           </div>
           <button className="tm-close" onClick={onClose}>✕</button>
@@ -38,7 +41,7 @@ export default function BuildingInfoModal({ kind, onClose }: Props) {
             </div>
             <Row label="Стройка"        value={`${FARM_BUILD_TIME}с на грейд`} />
             <Row label="+еды за грейд"  value={FARM_FOOD_PER_LEVEL} />
-            <Row label="Стоимость"      value={`💰${FARM_COST.gold} 🪵${FARM_COST.wood}`} />
+            <Row label="Стоимость"      value={<span className="cost-icon">💰{FARM_COST.gold} <WoodSVG size={13} />{FARM_COST.wood}</span>} />
           </div>
         )}
 
@@ -49,7 +52,7 @@ export default function BuildingInfoModal({ kind, onClose }: Props) {
             </div>
             <Row label="Стройка"          value={`${SAWMILL_BUILD_TIME}с`} />
             <Row label="+дерева/уровень"  value={`${SAWMILL_WOOD_PER_LEVEL} каждые ${SAWMILL_TICK_INTERVAL}с`} />
-            <Row label="Стоимость"        value={`💰${SAWMILL_COST.gold} 🪵${SAWMILL_COST.wood}`} />
+            <Row label="Стоимость"        value={<span className="cost-icon">💰{SAWMILL_COST.gold} <WoodSVG size={13} />{SAWMILL_COST.wood}</span>} />
           </div>
         )}
 
@@ -61,7 +64,7 @@ export default function BuildingInfoModal({ kind, onClose }: Props) {
                 <Row label="HP"                  value={lvl.maxHp} />
                 <Row label="Башни: постройка"     value={`T1–T${lvl.maxBuildTier}`} />
                 <Row label="Башни: улучшение"     value={`T1–T${lvl.maxUpgradeTier}`} />
-                {lvl.upgradeCost && <Row label="Цена перехода" value={`💰${lvl.upgradeCost.gold} 🪵${lvl.upgradeCost.wood}`} />}
+                {lvl.upgradeCost && <Row label="Цена перехода" value={<span className="cost-icon">💰{lvl.upgradeCost.gold} <WoodSVG size={13} />{lvl.upgradeCost.wood}</span>} />}
               </div>
             ))}
           </div>
