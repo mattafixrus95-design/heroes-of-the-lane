@@ -108,7 +108,6 @@ export default function App() {
         onTabChange={setBottomTab}
         selectedShopItem={selectedItem}
         onSelectShopItem={handleSelectShopItem}
-        onInfo={setInfoTowerType}
         selection={selection}
         onSelectBuilding={handleSelect}
       />

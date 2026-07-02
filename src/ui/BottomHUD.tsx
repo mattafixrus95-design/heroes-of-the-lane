@@ -4,7 +4,6 @@ import TowerShop from "./TowerShop";
 import type { ShopItem } from "./TowerShop";
 import BuildingsShop from "./BuildingsShop";
 import type { Selection } from "./selection";
-import type { TowerType } from "../data/towers";
 
 export type BottomTab = "towers" | "buildings" | null;
 
@@ -14,14 +13,13 @@ interface Props {
   onTabChange: (tab: BottomTab) => void;
   selectedShopItem: ShopItem | null;
   onSelectShopItem: (item: ShopItem | null) => void;
-  onInfo: (type: TowerType) => void;
   selection: Selection | null;
   onSelectBuilding: (s: Selection | null) => void;
 }
 
 export default function BottomHUD({
   state, activeTab, onTabChange,
-  selectedShopItem, onSelectShopItem, onInfo,
+  selectedShopItem, onSelectShopItem,
   selection, onSelectBuilding,
 }: Props) {
   const maxBuildTier = TOWN_LEVELS[state.townLevel - 1].maxBuildTier;
@@ -50,7 +48,6 @@ export default function BottomHUD({
           selected={selectedShopItem}
           maxBuildTier={maxBuildTier}
           onSelect={onSelectShopItem}
-          onInfo={onInfo}
         />
       )}
 
