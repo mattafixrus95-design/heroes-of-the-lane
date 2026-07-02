@@ -44,10 +44,11 @@ function vulnMult(c: Creep): number {
 
 function applyDebuffs(c: Creep, pd: Projectile["pendingDamage"]): Creep {
   if (!pd.vulnApply && !pd.rootApply) return c;
+  const rootResist = c.abilities.includes("root_resist");
   return {
     ...c,
     ...(pd.vulnApply ? { vulnPct: pd.vulnApply.pct, vulnTimer: pd.vulnApply.duration } : {}),
-    ...(pd.rootApply ? { rootTimer: pd.rootApply.duration } : {}),
+    ...(pd.rootApply && !rootResist ? { rootTimer: pd.rootApply.duration } : {}),
   };
 }
 
