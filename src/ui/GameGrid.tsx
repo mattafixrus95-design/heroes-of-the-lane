@@ -201,6 +201,9 @@ export default function GameGrid({
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
       const isSelectedTower = !!tower && selection?.kind === "tower" && selection.id === tower.id;
       const isSelectedGate = isEntry && selection?.kind === "wave";
+      const isSelectedFarm = isFarmCell && selection?.kind === "farm";
+      const isSelectedSawmill = isSawmillCell && selection?.kind === "sawmill";
+      const isSelectedTown = isExit && selection?.kind === "town";
 
       // Состояние hover и подсветки
       const isHovered = !!selectedItem && hoveredCell?.col === c && hoveredCell?.row === r;
@@ -267,7 +270,8 @@ export default function GameGrid({
               ? "inset 0 0 0 2px rgba(80,255,80,0.7)"
               : "inset 0 0 0 2px rgba(255,60,60,0.7)"
             } : {}),
-            ...(isSelectedTower || isSelectedGate ? { boxShadow: "inset 0 0 0 2px rgba(80,220,255,0.85)" } : {}),
+            ...(isSelectedTower || isSelectedGate || isSelectedFarm || isSelectedSawmill || isSelectedTown
+              ? { boxShadow: "inset 0 0 0 2px rgba(80,220,255,0.85)" } : {}),
           }}
         >
           {/* Подсветка ячейки при hover в режиме строительства */}
@@ -393,11 +397,18 @@ export default function GameGrid({
     );
   });
 
-  // Радиус атаки выбранной башни при hover
+  // Радиус атаки выбранной башни при hover в режиме строительства
   const buildRange = selectedItem && hoveredCell
     ? TOWER_DEFS[selectedItem].grades[0].range
     : null;
   const radiusPx = buildRange !== null ? buildRange * cell : 0;
+
+  // Круги радиуса атаки и ауры у уже поставленной выбранной башни
+  const selectedTower = selection?.kind === "tower" ? state.towers.find(t => t.id === selection.id) : null;
+  const selectedTowerRangePx = selectedTower ? selectedTower.range * cell : 0;
+  const selectedTowerAuraPx = selectedTower?.ability?.kind === "aura_haste"
+    ? selectedTower.ability.radius * cell
+    : 0;
 
   return (
     <div
@@ -431,6 +442,34 @@ export default function GameGrid({
             border: "2px solid rgba(255,230,80,0.55)",
             background: "rgba(255,230,80,0.06)",
           }}/>
+        )}
+
+        {/* Радиус атаки и ауры выбранной (уже стоящей) башни */}
+        {selectedTower && (
+          <>
+            <div style={{
+              position: "absolute",
+              left: (selectedTower.col + 0.5) * cell - selectedTowerRangePx,
+              top:  (selectedTower.row + 0.5) * cell - selectedTowerRangePx,
+              width:  selectedTowerRangePx * 2,
+              height: selectedTowerRangePx * 2,
+              borderRadius: "50%",
+              border: "2px solid rgba(255,230,80,0.6)",
+              background: "rgba(255,230,80,0.07)",
+            }}/>
+            {selectedTowerAuraPx > 0 && (
+              <div style={{
+                position: "absolute",
+                left: (selectedTower.col + 0.5) * cell - selectedTowerAuraPx,
+                top:  (selectedTower.row + 0.5) * cell - selectedTowerAuraPx,
+                width:  selectedTowerAuraPx * 2,
+                height: selectedTowerAuraPx * 2,
+                borderRadius: "50%",
+                border: "2px dashed rgba(120,180,255,0.75)",
+                background: "rgba(120,180,255,0.08)",
+              }}/>
+            )}
+          </>
         )}
 
         {creepMarkers}
