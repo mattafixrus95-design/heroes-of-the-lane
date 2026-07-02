@@ -1,4 +1,4 @@
-import type { TowerType } from "../../data/towers";
+import type { TowerType, TowerAbility } from "../../data/towers";
 
 export type Phase = "idle" | "prep" | "wave" | "defeat" | "victory";
 
@@ -49,8 +49,7 @@ export interface Tower {
   damage: number;
   range: number;
   attackSpeed: number;
-  aoe: number;
-  aoeDmgPct: number;
+  ability?: TowerAbility;
   slow: number;
   totalInvested: number;
   foodSpent: number;
