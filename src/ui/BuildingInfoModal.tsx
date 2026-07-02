@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import {
-  FARM_COST, FARM_BUILD_TIME, FARM_FOOD_PER_LEVEL,
+  farmCost, FARM_GOLD_COST, FARM_BUILD_TIME, FARM_FOOD_PER_LEVEL, FARM_WOOD_COST_BY_LEVEL,
   sawmillCost, SAWMILL_GOLD_COST, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
 } from "../data/buildings";
@@ -38,10 +38,17 @@ export default function BuildingInfoModal({ kind, onClose }: Props) {
           <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 5 }}>
             <div style={{ fontSize: "0.78rem", color: "#aaa", lineHeight: 1.3, marginBottom: 4 }}>
               Увеличивает максимальный запас еды. Уровней неограниченно.
+              Золото за грейд всегда {FARM_GOLD_COST}, дерево растёт с уровнем
+              (после {FARM_WOOD_COST_BY_LEVEL.length}-го держится на месте).
             </div>
             <Row label="Стройка"        value={`${FARM_BUILD_TIME}с на грейд`} />
             <Row label="+еды за грейд"  value={FARM_FOOD_PER_LEVEL} />
-            <Row label="Стоимость"      value={<span className="cost-icon">💰{FARM_COST.gold} <WoodSVG size={13} />{FARM_COST.wood}</span>} />
+            {FARM_WOOD_COST_BY_LEVEL.map((_, i) => {
+              const cost = farmCost(i + 1);
+              return (
+                <Row key={i} label={`Ур. ${i + 1}${i === FARM_WOOD_COST_BY_LEVEL.length - 1 ? "+" : ""}`} value={<span className="cost-icon">💰{cost.gold} <WoodSVG size={13} />{cost.wood}</span>} />
+              );
+            })}
           </div>
         )}
 
@@ -71,6 +78,7 @@ export default function BuildingInfoModal({ kind, onClose }: Props) {
                 <Row label="Башни: постройка"     value={`T1–T${lvl.maxBuildTier}`} />
                 <Row label="Башни: улучшение"     value={`T1–T${lvl.maxUpgradeTier}`} />
                 {lvl.upgradeCost && <Row label="Цена перехода" value={<span className="cost-icon">💰{lvl.upgradeCost.gold} <WoodSVG size={13} />{lvl.upgradeCost.wood}</span>} />}
+                {lvl.buildTime > 0 && <Row label="Стройка" value={`${lvl.buildTime}с`} />}
               </div>
             ))}
           </div>

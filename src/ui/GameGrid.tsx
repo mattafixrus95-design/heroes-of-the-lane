@@ -284,7 +284,21 @@ export default function GameGrid({
           )}
 
           {isEntry && !tower && <GateSVG size={iconSize} />}
-          {isExit  && !tower && <TownIcon level={state.townLevel} size={iconSize} />}
+          {isExit && !tower && (
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <TownIcon level={state.townLevel} size={iconSize} />
+              {state.townBuildTimeRemaining > 0 && (
+                <span style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                  color: "#f0c040", flexDirection: "column", gap: 1,
+                }}>
+                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.townBuildTimeRemaining)}с</span>
+                </span>
+              )}
+            </span>
+          )}
 
           {isFarmCell && !tower && state.farm && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>

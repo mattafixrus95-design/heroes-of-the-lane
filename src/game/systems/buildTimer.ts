@@ -59,6 +59,8 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
     }
   }
 
+  const townBuildTimeRemaining = Math.max(0, state.townBuildTimeRemaining - dt);
+
   return {
     ...state,
     towers,
@@ -66,6 +68,7 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
     sawmill,
     food,
     wood,
+    townBuildTimeRemaining,
     floatingTexts: newTexts.length > 0 ? [...state.floatingTexts, ...newTexts] : state.floatingTexts,
   };
 }
