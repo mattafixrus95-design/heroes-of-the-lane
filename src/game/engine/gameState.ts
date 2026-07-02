@@ -1,5 +1,5 @@
 import type { TowerType, TowerAbility } from "../../data/towers";
-import { TOWN_LEVELS, STARTING_TOWN_LEVEL, STARTING_WOOD, BASE_FOOD_CAPACITY } from "../../data/buildings";
+import { TOWN_LEVELS, STARTING_TOWN_LEVEL, STARTING_WOOD, BASE_FOOD_CAPACITY, FARM_FOOD_PER_LEVEL } from "../../data/buildings";
 
 export type Phase = "idle" | "prep" | "wave" | "defeat" | "victory";
 
@@ -175,10 +175,10 @@ export function createInitialState(): GameState {
     lives: STARTING_LIVES,
     maxLives: STARTING_LIVES,
     townLevel: STARTING_TOWN_LEVEL,
-    food: BASE_FOOD_CAPACITY,
+    food: BASE_FOOD_CAPACITY + FARM_FOOD_PER_LEVEL,
     creeps: [],
     towers: [],
-    farm: null,
+    farm: { level: 1, foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: 0, buildTimeRemaining: 0 },
     sawmill: null,
     projectiles: [],
     splashEffects: [],
