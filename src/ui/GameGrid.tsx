@@ -29,6 +29,7 @@ interface Props {
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onClearSelection: () => void;
   onSelectTowerId: (id: string) => void;
+  onCancelBuild: () => void;
 }
 
 function placeTower(col: number, row: number, type: TowerType, state: GameState): GameState {
@@ -59,8 +60,6 @@ function placeTower(col: number, row: number, type: TowerType, state: GameState)
   };
 }
 
-
-// Ячейки дороги с особым направлением (из PATH в map.ts)
 const PATH_CORNER   = new Set(["9,0","9,2","0,2","0,4","9,4","9,6","0,6","0,8"]);
 const PATH_VERTICAL = new Set(["9,1","0,3","9,5","0,7"]);
 
@@ -68,12 +67,10 @@ function cellBg(col: number, row: number, isPath: boolean): string {
   if (col === ENTRY_CELL[0] && row === ENTRY_CELL[1]) return "#2a5c30";
   if (col === EXIT_CELL[0]  && row === EXIT_CELL[1])  return "#502828";
   if (!isPath) {
-    // Трава — шахматный паттерн для текстуры
     return (col + row) % 2 === 0
       ? "linear-gradient(145deg,#52965c 0%,#3d7a48 100%)"
       : "linear-gradient(145deg,#3d7a48 0%,#4d8e58 100%)";
   }
-  // Дорога с эффектом обочины (тёмные края, светлая середина)
   const key = `${col},${row}`;
   if (PATH_CORNER.has(key))   return "#8a7050";
   if (PATH_VERTICAL.has(key)) return "linear-gradient(to right,#6a5038 0%,#a08860 30%,#aa9468 50%,#a08860 70%,#6a5038 100%)";
@@ -100,17 +97,14 @@ function ArrowMarker({ angle, towerType }: { angle: number; towerType: string })
 }
 
 function AxeMarker({ angle, progress }: { angle: number; progress: number }) {
-  const spin = angle + progress * 540; // 1.5 оборота в полёте
+  const spin = angle + progress * 540;
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" style={{
       position: "absolute", left: -9, top: -9, overflow: "visible",
       transform: `rotate(${spin}deg)`, transformOrigin: "9px 9px", pointerEvents: "none",
     }}>
-      {/* рукоять */}
       <line x1="9" y1="15" x2="9" y2="7" stroke="#7a4520" strokeWidth="2" strokeLinecap="round"/>
-      {/* лезвие левое */}
       <path d="M9,7 L4,2 L4,9 Z" fill="#b8b8c8" stroke="#888" strokeWidth="0.6"/>
-      {/* лезвие правое */}
       <path d="M9,7 L14,2 L14,9 Z" fill="#d0d0e0" stroke="#aaa" strokeWidth="0.6"/>
     </svg>
   );
@@ -174,22 +168,37 @@ function FloatingTextView({ ft, gameTime, cell }: { ft: FloatingText; gameTime: 
   );
 }
 
-export default function GameGrid({ state, selectedItem, onUpdateState, onClearSelection, onSelectTowerId }: Props) {
+export default function GameGrid({
+  state, selectedItem, onUpdateState, onClearSelection, onSelectTowerId, onCancelBuild,
+}: Props) {
   const cell = useCell();
-  const waveActive = state.phase === "wave";
-  const canBuild = state.phase !== "wave"; // разрешено и в idle и в prep
+  const canBuild = state.phase !== "wave";
 
-  const iconSize = Math.round(cell * 0.72);
+  const iconSize  = Math.round(cell * 0.72);
   const towerSize = Math.round(cell * 0.71);
+
+  const [hoveredCell, setHoveredCell] = useState<{ col: number; row: number } | null>(null);
+
+  // Очищаем hover когда выходим из режима строительства
+  useEffect(() => {
+    if (!selectedItem) setHoveredCell(null);
+  }, [selectedItem]);
 
   const cells = [];
   for (let r = 0; r < GRID_ROWS; r++) {
     for (let c = 0; c < GRID_COLS; c++) {
-      const isPath  = isPathCell(c, r);
-      const tower   = state.towers.find(t => t.col === c && t.row === r);
-      const isEntry = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
-      const isExit  = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
+      const isPath   = isPathCell(c, r);
+      const tower    = state.towers.find(t => t.col === c && t.row === r);
+      const isEntry  = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
+      const isExit   = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
+
+      // Состояние hover и подсветки
+      const isHovered = !!selectedItem && hoveredCell?.col === c && hoveredCell?.row === r;
+      const canPlaceHere = !isPath && !tower && canBuild;
+      const highlightColor = isHovered
+        ? (canPlaceHere ? "rgba(80,255,80,0.28)" : "rgba(255,60,60,0.32)")
+        : undefined;
 
       const handleClick = () => {
         if (tower) {
@@ -204,20 +213,37 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
         <div
           key={`${c}-${r}`}
           onClick={handleClick}
+          onMouseEnter={() => selectedItem && setHoveredCell({ col: c, row: r })}
           style={{
             width: cell, height: cell,
-            background: cellBg(c, r, isPath),
+            background: highlightColor
+              ? `${highlightColor}`
+              : cellBg(c, r, isPath),
             border: isPath
               ? "1px solid rgba(80,55,25,0.45)"
               : "1px solid rgba(25,70,35,0.35)",
             cursor: tower ? "pointer"
-              : (isPath || waveActive) ? "default"
+              : (isPath || !canBuild) ? "default"
               : selectedItem ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
             position: "relative", overflow: "visible",
             touchAction: "manipulation",
+            // Подсветка поверх фона ячейки
+            ...(isHovered ? { boxShadow: canPlaceHere
+              ? "inset 0 0 0 2px rgba(80,255,80,0.7)"
+              : "inset 0 0 0 2px rgba(255,60,60,0.7)"
+            } : {}),
           }}
         >
+          {/* Подсветка ячейки при hover в режиме строительства */}
+          {isHovered && (
+            <div style={{
+              position: "absolute", inset: 0,
+              background: canPlaceHere ? "rgba(80,255,80,0.18)" : "rgba(255,60,60,0.22)",
+              pointerEvents: "none",
+            }}/>
+          )}
+
           {isEntry && !tower && <GateSVG size={iconSize} />}
           {isExit  && !tower && <CastleSVG size={iconSize} />}
 
@@ -225,7 +251,6 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
           {tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <TowerIcon type={tower.type} grade={tower.gradeIndex} size={towerSize} />
-              {/* Индикатор строительства */}
               {tower.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -236,7 +261,6 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
                   ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(tower.buildTimeRemaining)}с</span>
                 </span>
               )}
-              {/* Значок апгрейда */}
               {!isMaxGrade && tower.buildTimeRemaining === 0 && (
                 <span style={{
                   position: "absolute", top: -6, right: -8,
@@ -247,7 +271,16 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
             </span>
           )}
 
-
+          {/* Призрак башни при строительстве */}
+          {isHovered && !tower && canBuild && selectedItem && (
+            <div style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              opacity: 0.55, pointerEvents: "none",
+            }}>
+              <TowerIcon type={selectedItem} grade={0} size={towerSize} />
+            </div>
+          )}
         </div>
       );
     }
@@ -273,10 +306,7 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
         display: "flex", flexDirection: "column", alignItems: "center",
       }}>
         <div style={{ width: "100%", height: isBoss ? 4 : 3, background: "#333", borderRadius: 2, marginBottom: 1 }}>
-          <div style={{
-            width: `${hpPct * 100}%`, height: "100%", borderRadius: 2,
-            background: hpBarColor,
-          }}/>
+          <div style={{ width: `${hpPct * 100}%`, height: "100%", borderRadius: 2, background: hpBarColor }}/>
         </div>
         <span style={{
           fontSize: `${Math.max(0.6, (isBoss ? cell * 1.3 : cell) / 56)}rem`,
@@ -287,13 +317,23 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
     );
   });
 
+  // Радиус атаки выбранной башни при hover
+  const buildRange = selectedItem && hoveredCell
+    ? TOWER_DEFS[selectedItem].grades[0].range
+    : null;
+  const radiusPx = buildRange !== null ? buildRange * cell : 0;
+
   return (
-    <div style={{
-      position: "relative",
-      width: GRID_COLS * cell, height: GRID_ROWS * cell,
-      border: "2px solid rgba(255,255,255,0.15)",
-      borderRadius: 6, overflow: "hidden", touchAction: "none",
-    }}>
+    <div
+      style={{
+        position: "relative",
+        width: GRID_COLS * cell, height: GRID_ROWS * cell,
+        border: "2px solid rgba(255,255,255,0.15)",
+        borderRadius: 6, overflow: "hidden", touchAction: "none",
+      }}
+      onMouseLeave={() => setHoveredCell(null)}
+      onContextMenu={e => { e.preventDefault(); onCancelBuild(); }}
+    >
       <div style={{
         display: "grid",
         gridTemplateColumns: `repeat(${GRID_COLS}, ${cell}px)`,
@@ -301,9 +341,23 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
       }}>
         {cells}
       </div>
+
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        {/* Круг радиуса атаки */}
+        {hoveredCell && buildRange !== null && (
+          <div style={{
+            position: "absolute",
+            left: (hoveredCell.col + 0.5) * cell - radiusPx,
+            top:  (hoveredCell.row + 0.5) * cell - radiusPx,
+            width:  radiusPx * 2,
+            height: radiusPx * 2,
+            borderRadius: "50%",
+            border: "2px solid rgba(255,230,80,0.55)",
+            background: "rgba(255,230,80,0.06)",
+          }}/>
+        )}
+
         {creepMarkers}
-        {/* Projectiles & splash */}
         {state.splashEffects.map(e =>
           <SplashRing key={e.id} effect={e} gameTime={state.gameTime} cell={cell} />
         )}
@@ -323,7 +377,6 @@ export default function GameGrid({ state, selectedItem, onUpdateState, onClearSe
             </div>
           );
         })}
-        {/* Floating texts */}
         {state.floatingTexts.map(ft =>
           <FloatingTextView key={ft.id} ft={ft} gameTime={state.gameTime} cell={cell} />
         )}

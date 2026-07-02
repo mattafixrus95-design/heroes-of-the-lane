@@ -10,37 +10,39 @@ interface Props {
   selected: ShopItem | null;
   waveActive: boolean;
   onSelect: (item: ShopItem | null) => void;
+  onInfo: (type: TowerType) => void;
 }
 
-export default function TowerShop({ gold, food, selected, waveActive, onSelect }: Props) {
+export default function TowerShop({ gold, food, selected, waveActive, onSelect, onInfo }: Props) {
   return (
-    <div
-      className="shop"
-      style={waveActive ? { pointerEvents: "none", opacity: 0.45 } : undefined}
-    >
+    <div className="shop">
       {Object.values(TOWER_DEFS).map(def => {
-        const base = def.grades[0];
-        const canAffordGold = gold >= def.purchaseCost;
-        const canAffordFood = food >= def.foodCost;
-        const canAfford = canAffordGold && canAffordFood;
+        const canAfford = gold >= def.purchaseCost && food >= def.foodCost;
         const isSelected = selected === def.type;
+        const clickable = !waveActive && (canAfford || isSelected);
         return (
-          <button
+          <div
             key={def.type}
             className={`shop-item${isSelected ? " selected" : ""}${!canAfford ? " unaffordable" : ""}`}
-            onClick={() => canAfford && onSelect(isSelected ? null : def.type)}
-            disabled={!canAfford && !isSelected}
+            style={{ cursor: clickable ? "pointer" : waveActive ? "default" : "not-allowed" }}
+            onClick={() => clickable && onSelect(isSelected ? null : def.type)}
           >
-            <span className="shop-emoji"><TowerIcon type={def.type} grade={0} size={40} /></span>
-            <span className="shop-name">{def.name} · {base.gradeName}</span>
-            <span className="shop-stat">⚔️ {base.damage} &nbsp; 🎯 {base.range} &nbsp; ⚡ {base.attackSpeed}/с</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+              <span className="shop-emoji">
+                <TowerIcon type={def.type} grade={0} size={36} />
+              </span>
+              <button
+                className="shop-info-btn"
+                onClick={e => { e.stopPropagation(); onInfo(def.type); }}
+              >
+                ℹ
+              </button>
+            </div>
+            <span className="shop-name">{def.name}</span>
             <span className="shop-cost">💰 {def.purchaseCost} &nbsp; 🌾 {def.foodCost}</span>
-          </button>
+          </div>
         );
       })}
-      {selected && (
-        <button className="shop-cancel" onClick={() => onSelect(null)}>✕</button>
-      )}
     </div>
   );
 }
