@@ -7,16 +7,21 @@ export const STARTING_WOOD = 100;
 
 // ── Ферма ─────────────────────────────────────────────────────────────────────
 // Количество уровней не ограничено. После последнего значения в таблице
-// цена дерева больше не растёт — держится на последнем уровне вечно.
-export const FARM_GOLD_COST = 20; // золото — одинаково на каждом грейде
-export const FARM_WOOD_COST_BY_LEVEL = [50, 65, 90, 120, 150]; // дерево — растёт с уровнем, дальше держится на 150
+// цена (и золото, и дерево) больше не растёт — держится на последнем уровне вечно.
+export const FARM_COST_BY_LEVEL: ResourceCost[] = [
+  { gold: 20, wood: 50 },
+  { gold: 30, wood: 70 },
+  { gold: 40, wood: 100 },
+  { gold: 50, wood: 125 },
+  { gold: 65, wood: 150 },
+];
 export const FARM_BUILD_TIME = 2; // секунд на каждый грейд
 export const FARM_FOOD_PER_LEVEL = 15;
 
 // Стоимость постройки/апгрейда фермы ДО указанного уровня (1-based)
 export function farmCost(targetLevel: number): ResourceCost {
-  const idx = Math.min(targetLevel - 1, FARM_WOOD_COST_BY_LEVEL.length - 1);
-  return { gold: FARM_GOLD_COST, wood: FARM_WOOD_COST_BY_LEVEL[idx] };
+  const idx = Math.min(targetLevel - 1, FARM_COST_BY_LEVEL.length - 1);
+  return FARM_COST_BY_LEVEL[idx];
 }
 
 // ── Лесопилка ─────────────────────────────────────────────────────────────────
@@ -46,8 +51,8 @@ export interface TownLevelDef {
 // HP форта/цитадели/замка не были явно заданы в ТЗ — выбраны как
 // разумная прогрессия между Деревней (20) и старым значением Замка (65)
 export const TOWN_LEVELS: TownLevelDef[] = [
-  { level: 1, name: "Деревня",  maxHp: 20, upgradeCost: null,                     buildTime: 0, maxBuildTier: 4, maxUpgradeTier: 2 },
-  { level: 2, name: "Форт",     maxHp: 35, upgradeCost: { gold: 50,  wood: 100 }, buildTime: 4, maxBuildTier: 6, maxUpgradeTier: 4 },
+  { level: 1, name: "Деревня",  maxHp: 20, upgradeCost: null,                     buildTime: 0, maxBuildTier: 3, maxUpgradeTier: 3 },
+  { level: 2, name: "Форт",     maxHp: 35, upgradeCost: { gold: 30,  wood: 100 }, buildTime: 4, maxBuildTier: 5, maxUpgradeTier: 3 },
   { level: 3, name: "Цитадель", maxHp: 50, upgradeCost: { gold: 100, wood: 200 }, buildTime: 5, maxBuildTier: 7, maxUpgradeTier: 5 },
   { level: 4, name: "Замок",    maxHp: 70, upgradeCost: { gold: 150, wood: 350 }, buildTime: 6, maxBuildTier: 7, maxUpgradeTier: 7 },
 ];

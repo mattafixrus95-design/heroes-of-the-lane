@@ -1,6 +1,6 @@
 import type { TowerType, TowerAbility } from "../../data/towers";
 import type { HeroType } from "../../data/heroes";
-import { TOWN_LEVELS, STARTING_TOWN_LEVEL, STARTING_WOOD, BASE_FOOD_CAPACITY, FARM_FOOD_PER_LEVEL } from "../../data/buildings";
+import { TOWN_LEVELS, STARTING_TOWN_LEVEL, STARTING_WOOD, BASE_FOOD_CAPACITY, FARM_FOOD_PER_LEVEL, SAWMILL_TICK_INTERVAL } from "../../data/buildings";
 
 export type Phase = "idle" | "prep" | "wave" | "defeat" | "victory";
 
@@ -207,8 +207,8 @@ export function createInitialState(): GameState {
     towers: [],
     heroes: [],
     farm: { level: 1, foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: 0, buildTimeRemaining: 0 },
-    sawmill: null,
-    tavern: null,
+    sawmill: { level: 1, totalInvested: 0, buildTimeRemaining: 0, tickTimer: SAWMILL_TICK_INTERVAL },
+    tavern: { buildTimeRemaining: 0, offers: [{ type: "ivor" }] },
     projectiles: [],
     splashEffects: [],
     floatingTexts: [],

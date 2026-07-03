@@ -1,5 +1,5 @@
 import type { GameState, Hero, Creep, Projectile } from "../engine/gameState";
-import { HERO_DEFS, heroDamage, heroRange } from "../../data/heroes";
+import { HERO_DEFS, heroDamage, heroRange, heroAttackSpeed } from "../../data/heroes";
 
 const ARROW_SPEED = 12;
 
@@ -32,7 +32,8 @@ export function tickHeroAttack(state: GameState): GameState {
   const heroes = state.heroes.map(hero => {
     if (hero.buildTimeRemaining > 0) return hero;
     const def = HERO_DEFS[hero.type];
-    if (state.gameTime - hero.lastAttackTime < 1 / def.attackSpeed) return hero;
+    const attackSpeed = heroAttackSpeed(hero.level, def);
+    if (state.gameTime - hero.lastAttackTime < 1 / attackSpeed) return hero;
     const range = heroRange(hero.level, def);
     const target = findTarget(hero, range, state.creeps);
     if (!target) return hero;

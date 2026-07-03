@@ -22,7 +22,7 @@ export const HERO_DEFS: Record<HeroType, HeroDef> = {
   ivor: {
     type: "ivor", name: "Ивор",
     race: "Оплот", className: "Лучник",
-    damage: 4, range: 3, attackSpeed: 1.0,
+    damage: 4, range: 3.5, attackSpeed: 1.20,
     foodCost: 1, buildTime: 1,
     ability: { kind: "aura_damage", radius: 3, basePct: 0.05, perLevelPct: 0.01 },
   },
@@ -41,4 +41,9 @@ export function heroDamage(level: number, def: { damage: number }): number {
 // На максимальном уровне герой получает +1 к радиусу атаки
 export function heroRange(level: number, def: { range: number }): number {
   return def.range + (level >= HERO_MAX_LEVEL ? 1 : 0);
+}
+
+// На максимальном уровне герой также получает +0.8 к скорости атаки
+export function heroAttackSpeed(level: number, def: { attackSpeed: number }): number {
+  return def.attackSpeed + (level >= HERO_MAX_LEVEL ? 0.8 : 0);
 }
