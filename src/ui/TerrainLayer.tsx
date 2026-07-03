@@ -8,8 +8,17 @@ interface Props {
   cell: number;
 }
 
+// Простой перемешивающий хэш (не линейная комбинация координат) — исключает
+// видимые диагональные полосы/повторяющиеся паттерны при небольшой сетке.
+function hash2(col: number, row: number): number {
+  let h = col * 374761393 + row * 668265263;
+  h = (h ^ (h >>> 13)) * 1274126177;
+  h = h ^ (h >>> 16);
+  return Math.abs(h);
+}
+
 function grassVariant(col: number, row: number): GrassVariant {
-  return (Math.abs(col * 31 + row * 17 + col * row * 7) % 5) as GrassVariant;
+  return (hash2(col, row) % 6) as GrassVariant;
 }
 
 // Статичный фон карты (дорога + трава) — не зависит от игрового state,
@@ -22,9 +31,13 @@ function TerrainLayer({ cell }: Props) {
         const segment = roadSegmentAt(c, r);
         items.push(
           <div key={`${c}-${r}`} style={{ position: "absolute", left: c * cell, top: r * cell, width: cell, height: cell }}>
-            {segment
-              ? <RoadTile segment={segment} size={cell} />
-              : <GrassTile variant={grassVariant(c, r)} size={cell} />}
+            {/* Трава всегда есть под дорогой — её мягкие размытые края просвечивают траву снизу */}
+            <GrassTile variant={grassVariant(c, r)} size={cell} />
+            {segment && (
+              <div style={{ position: "absolute", inset: 0 }}>
+                <RoadTile segment={segment} size={cell} />
+              </div>
+            )}
           </div>,
         );
       }

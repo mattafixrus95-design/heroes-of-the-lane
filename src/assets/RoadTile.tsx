@@ -22,7 +22,11 @@ const PEBBLES: Record<RoadSegment, [number, number][]> = {
   sw: [[30, 70], [45, 45]],
 };
 
+// Прозрачность фона в этом месте занята травой (рисуется отдельным слоем под тропой),
+// поэтому у полотна дороги нет чёткой обводки — края размыты и подсвечивают траву снизу,
+// что даёт мягкий переход вместо ощущения "квадрата".
 export default function RoadTile({ segment, size = 56 }: { segment: RoadSegment; size?: number }) {
+  const path = SEGMENT_PATH[segment];
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -31,10 +35,19 @@ export default function RoadTile({ segment, size = 56 }: { segment: RoadSegment;
           <stop offset="50%" stopColor="#9c8259"/>
           <stop offset="100%" stopColor="#8a7050"/>
         </linearGradient>
+        <filter id={`road-soft-${segment}`} x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="4.5"/>
+        </filter>
       </defs>
-      <path d={SEGMENT_PATH[segment]} fill={`url(#road-grad-${segment})`} stroke="#6a5038" strokeWidth="1.5" strokeOpacity="0.5"/>
+
+      {/* Мягкий размытый ореол — смешивает край дороги с травой под ней */}
+      <path d={path} fill="#8a7050" opacity="0.5" filter={`url(#road-soft-${segment})`}/>
+
+      {/* Основное полотно — без резкой обводки */}
+      <path d={path} fill={`url(#road-grad-${segment})`}/>
+
       {PEBBLES[segment].map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r={i === 0 ? 3.2 : 2.2} fill="#6f5a3e" opacity="0.55"/>
+        <circle key={i} cx={x} cy={y} r={i === 0 ? 3.2 : 2.2} fill="#6f5a3e" opacity="0.5"/>
       ))}
     </svg>
   );

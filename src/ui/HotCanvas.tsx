@@ -3,14 +3,6 @@ import type { GameState } from "../game/engine/gameState";
 import { CREEP_DEFS } from "../data/waves";
 import type { Selection } from "./selection";
 
-interface Props {
-  state: GameState;
-  cell: number;
-  selection: Selection | null;
-  width: number;
-  height: number;
-}
-
 type ArrowStyle = "default" | "elf" | "ivor";
 
 function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angleDeg: number, style: ArrowStyle) {
@@ -150,6 +142,20 @@ function drawSplash(ctx: CanvasRenderingContext2D, x: number, y: number, maxR: n
   ctx.restore();
 }
 
+// Мягкая эллиптическая тень со смещением вниз-вправо — та же логика,
+// что и для DOM-объектов (ObjectShadow.tsx), но на canvas для крипов.
+function drawShadow(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number) {
+  ctx.save();
+  const grad = ctx.createRadialGradient(x + 2, y + 2, 0, x + 2, y + 2, rx);
+  grad.addColorStop(0, "rgba(0,0,0,0.4)");
+  grad.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(x + 2, y + 2, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
 function fillRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   if (w <= 0) return;
   if (typeof ctx.roundRect === "function") {
@@ -161,26 +167,41 @@ function fillRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: n
   }
 }
 
-export default function HotCanvas({ state, cell, selection, width, height }: Props) {
+function setupCanvas(canvas: HTMLCanvasElement, width: number, height: number): CanvasRenderingContext2D | null {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  const dpr = window.devicePixelRatio || 1;
+  const targetW = Math.round(width * dpr);
+  const targetH = Math.round(height * dpr);
+  if (canvas.width !== targetW || canvas.height !== targetH) {
+    canvas.width = targetW;
+    canvas.height = targetH;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  return ctx;
+}
+
+interface EffectsProps {
+  state: GameState;
+  cell: number;
+  selection: Selection | null;
+  width: number;
+  height: number;
+}
+
+// Крипы, снаряды и splash-эффекты — рисуются НИЖЕ построек (слой "эффекты/крипы"
+// в порядке земля → дорога → эффекты → крипы → башни → здания → UI).
+export function EffectsCanvas({ state, cell, selection, width, height }: EffectsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || width <= 0 || height <= 0) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = setupCanvas(canvas, width, height);
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const targetW = Math.round(width * dpr);
-    const targetH = Math.round(height * dpr);
-    if (canvas.width !== targetW || canvas.height !== targetH) {
-      canvas.width = targetW;
-      canvas.height = targetH;
-    }
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-
-    // Крипы: HP-бар + эмодзи
+    // Крипы: тень + HP-бар + эмодзи
     const baseCreepSize = Math.max(16, Math.round(cell * 0.5));
     for (const c of state.creeps) {
       const x = c.position.x * cell + cell / 2;
@@ -197,6 +218,8 @@ export default function HotCanvas({ state, cell, selection, width, height }: Pro
       const barH = isBoss ? 4 : 3;
       const barX = x - barW / 2;
       const barY = y - size * 0.65;
+
+      drawShadow(ctx, x, y + size * 0.28, size * 0.3, size * 0.12);
 
       if (isSelected) {
         ctx.save();
@@ -239,8 +262,34 @@ export default function HotCanvas({ state, cell, selection, width, height }: Pro
       else if (p.kind === "axe") drawAxe(ctx, x, y, angle, progress);
       else drawArrow(ctx, x, y, angle, p.towerType === "ivor" ? "ivor" : p.towerType === "elf" ? "elf" : "default");
     }
+  });
 
-    // Всплывающий текст
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ position: "absolute", inset: 0, zIndex: 1, width, height, pointerEvents: "none" }}
+    />
+  );
+}
+
+interface TextsProps {
+  state: GameState;
+  cell: number;
+  width: number;
+  height: number;
+}
+
+// Всплывающий текст (урон/золото/левелап) — самый верхний слой, поверх
+// построек и UI-подсветки, чтобы всегда оставаться читаемым.
+export function TextsCanvas({ state, cell, width, height }: TextsProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || width <= 0 || height <= 0) return;
+    const ctx = setupCanvas(canvas, width, height);
+    if (!ctx) return;
+
     for (const ft of state.floatingTexts) {
       const age = state.gameTime - ft.spawnTime;
       const t = Math.min(1, age / ft.duration);
@@ -264,7 +313,7 @@ export default function HotCanvas({ state, cell, selection, width, height }: Pro
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", inset: 0, zIndex: 3, width, height, pointerEvents: "none" }}
+      style={{ position: "absolute", inset: 0, zIndex: 4, width, height, pointerEvents: "none" }}
     />
   );
 }
