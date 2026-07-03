@@ -57,7 +57,7 @@ function applyUpgrade(id: string, state: GameState): GameState {
   const texts: FloatingText[] = [
     ft(`-${g.upgradeCost}💰`, tower.col, tower.row, "#ff8080", state.gameTime),
   ];
-  if (g.foodUpgradeCost > 0) texts.push(ft(`-${g.foodUpgradeCost}🌾`, tower.col, tower.row - 0.6, "#ff8080", state.gameTime));
+  if (g.foodUpgradeCost > 0) texts.push(ft(`-${g.foodUpgradeCost}🍖`, tower.col, tower.row - 0.6, "#ff8080", state.gameTime));
   return {
     ...state,
     gold: state.gold - g.upgradeCost,
@@ -179,8 +179,8 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
             ✕ Отменить {tower.gradeIndex === 0 ? "постройку" : "апгрейд"}
             <span className="cm-btn-cost">
               {tower.gradeIndex === 0
-                ? `+${tower.totalInvested}💰${tower.foodSpent > 0 ? ` +${tower.foodSpent}🌾` : ""}`
-                : `+${currentGrade.upgradeCost}💰${currentGrade.foodUpgradeCost > 0 ? ` +${currentGrade.foodUpgradeCost}🌾` : ""}`}
+                ? `+${tower.totalInvested}💰${tower.foodSpent > 0 ? ` +${tower.foodSpent}🍖` : ""}`
+                : `+${currentGrade.upgradeCost}💰${currentGrade.foodUpgradeCost > 0 ? ` +${currentGrade.foodUpgradeCost}🍖` : ""}`}
             </span>
           </button>
         ) : (
@@ -194,7 +194,7 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
                 ⬆ {nextGrade.gradeName}
                 <span className="cm-btn-cost">
                   💰 {nextGrade.upgradeCost}
-                  {nextGrade.foodUpgradeCost > 0 ? ` 🌾 ${nextGrade.foodUpgradeCost}` : ""}
+                  {nextGrade.foodUpgradeCost > 0 ? ` 🍖 ${nextGrade.foodUpgradeCost}` : ""}
                   {tierLocked ? " (город)" : !canAffordUpgrade ? " (недост.)" : ""}
                 </span>
               </button>
@@ -208,7 +208,7 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
             >
               Продать
               <span className="cm-btn-cost">
-                {`+${sellValue}💰 +${tower.foodSpent}🌾`}
+                {`+${sellValue}💰 +${tower.foodSpent}🍖`}
               </span>
             </button>
           </>
@@ -246,6 +246,24 @@ function buildOrUpgradeFarm(state: GameState): GameState {
   };
 }
 
+function applyCancelFarmBuild(state: GameState): GameState {
+  const farm = state.farm;
+  if (!farm || farm.buildTimeRemaining <= 0) return state;
+  const cost = farmCost(farm.level);
+  const prevLevel = farm.level - 1;
+  const texts = [
+    ft(`+${cost.gold}💰`, FARM_CELL[0], FARM_CELL[1], "#f0c040", state.gameTime),
+    ft(`+${cost.wood}🌲`, FARM_CELL[0], FARM_CELL[1] - 0.6, "#f0c040", state.gameTime),
+  ];
+  return {
+    ...state,
+    gold: state.gold + cost.gold,
+    wood: state.wood + cost.wood,
+    farm: prevLevel > 0 ? { ...farm, level: prevLevel, totalInvested: farm.totalInvested - cost.gold, buildTimeRemaining: 0 } : null,
+    floatingTexts: [...state.floatingTexts, ...texts],
+  };
+}
+
 function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
   state: GameState; onUpdateState: Props["onUpdateState"]; onShowBuildingInfo: Props["onShowBuildingInfo"];
 }) {
@@ -253,35 +271,50 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
   const level = farm?.level ?? 0;
   const isBuilding = !!farm && farm.buildTimeRemaining > 0;
   const nextCost = farmCost(level + 1);
+  const cancelCost = isBuilding ? farmCost(farm!.level) : null;
   const canAfford = state.gold >= nextCost.gold && state.wood >= nextCost.wood;
   const canBuild = !isBuilding && canAfford;
 
   return (
     <>
       <div className="cm-header">
-        <span className="cm-title">🌾 Ферма{level > 0 ? ` ур.${level}` : ""}</span>
+        <span className="cm-title">🍖 Ферма{level > 0 ? ` ур.${level}` : ""}</span>
       </div>
       {isBuilding && (
         <div className="cm-building-badge">⚙️ Строится… {Math.ceil(farm!.buildTimeRemaining)}с</div>
       )}
       <div className="cm-stats">
-        <span>🌾 Макс. еда: +{farm?.foodProduced ?? 0}</span>
+        <span>🍖 Макс. еда: +{farm?.foodProduced ?? 0}</span>
       </div>
       <div className="cm-actions">
-        <button
-          className="cm-btn upgrade"
-          disabled={!canBuild}
-          onClick={() => onUpdateState(buildOrUpgradeFarm)}
-        >
-          {level > 0 ? "⬆ Улучшить" : "Построить"}
-          <span className="cm-btn-cost">
-            💰 {nextCost.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextCost.wood}</span>
-            {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
-          </span>
-        </button>
-        <button className="cm-btn info" onClick={() => onShowBuildingInfo("farm")}>
-          Информация
-        </button>
+        {isBuilding ? (
+          <button
+            className="cm-btn cancel"
+            onClick={() => onUpdateState(applyCancelFarmBuild)}
+          >
+            ✕ Отменить строительство
+            <span className="cm-btn-cost">
+              +{cancelCost!.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{cancelCost!.wood}</span>
+            </span>
+          </button>
+        ) : (
+          <>
+            <button
+              className="cm-btn upgrade"
+              disabled={!canBuild}
+              onClick={() => onUpdateState(buildOrUpgradeFarm)}
+            >
+              {level > 0 ? "⬆ Улучшить" : "Построить"}
+              <span className="cm-btn-cost">
+                💰 {nextCost.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextCost.wood}</span>
+                {!canAfford ? " (недост.)" : ""}
+              </span>
+            </button>
+            <button className="cm-btn info" onClick={() => onShowBuildingInfo("farm")}>
+              Информация
+            </button>
+          </>
+        )}
       </div>
     </>
   );
@@ -312,6 +345,24 @@ function buildOrUpgradeSawmill(state: GameState): GameState {
   };
 }
 
+function applyCancelSawmillBuild(state: GameState): GameState {
+  const sawmill = state.sawmill;
+  if (!sawmill || sawmill.buildTimeRemaining <= 0) return state;
+  const cost = sawmillCost(sawmill.level);
+  const prevLevel = sawmill.level - 1;
+  const texts = [
+    ft(`+${cost.gold}💰`, SAWMILL_CELL[0], SAWMILL_CELL[1], "#f0c040", state.gameTime),
+    ft(`+${cost.wood}🌲`, SAWMILL_CELL[0], SAWMILL_CELL[1] - 0.6, "#f0c040", state.gameTime),
+  ];
+  return {
+    ...state,
+    gold: state.gold + cost.gold,
+    wood: state.wood + cost.wood,
+    sawmill: prevLevel > 0 ? { ...sawmill, level: prevLevel, totalInvested: sawmill.totalInvested - cost.gold, buildTimeRemaining: 0 } : null,
+    floatingTexts: [...state.floatingTexts, ...texts],
+  };
+}
+
 function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
   state: GameState; onUpdateState: Props["onUpdateState"]; onShowBuildingInfo: Props["onShowBuildingInfo"];
 }) {
@@ -320,6 +371,7 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
   const isBuilding = !!sawmill && sawmill.buildTimeRemaining > 0;
   const isMaxed = level >= SAWMILL_MAX_LEVEL;
   const nextCost = isMaxed ? null : sawmillCost(level + 1);
+  const cancelCost = isBuilding ? sawmillCost(sawmill!.level) : null;
   const canAfford = !!nextCost && state.gold >= nextCost.gold && state.wood >= nextCost.wood;
   const canBuild = !isBuilding && !isMaxed && canAfford;
 
@@ -335,7 +387,17 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
         <span className="cost-icon"><WoodSVG size={14} /> Доход: {level * SAWMILL_WOOD_PER_LEVEL}/{SAWMILL_TICK_INTERVAL}с</span>
       </div>
       <div className="cm-actions">
-        {isMaxed ? (
+        {isBuilding ? (
+          <button
+            className="cm-btn cancel"
+            onClick={() => onUpdateState(applyCancelSawmillBuild)}
+          >
+            ✕ Отменить строительство
+            <span className="cm-btn-cost">
+              +{cancelCost!.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{cancelCost!.wood}</span>
+            </span>
+          </button>
+        ) : isMaxed ? (
           <div className="cm-maxed">★ Макс. уровень</div>
         ) : (
           <button
@@ -346,7 +408,7 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
             {level > 0 ? "⬆ Улучшить" : "Построить"}
             <span className="cm-btn-cost">
               💰 {nextCost!.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextCost!.wood}</span>
-              {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
+              {!canAfford ? " (недост.)" : ""}
             </span>
           </button>
         )}
@@ -379,6 +441,23 @@ function upgradeTown(state: GameState): GameState {
   };
 }
 
+function applyCancelTownBuild(state: GameState): GameState {
+  if (state.townBuildTimeRemaining <= 0) return state;
+  const nextDef = TOWN_LEVELS[state.townLevel];
+  if (!nextDef || !nextDef.upgradeCost) return state;
+  const texts = [
+    ft(`+${nextDef.upgradeCost.gold}💰`, EXIT_CELL[0], EXIT_CELL[1], "#f0c040", state.gameTime),
+    ft(`+${nextDef.upgradeCost.wood}🌲`, EXIT_CELL[0], EXIT_CELL[1] - 0.6, "#f0c040", state.gameTime),
+  ];
+  return {
+    ...state,
+    gold: state.gold + nextDef.upgradeCost.gold,
+    wood: state.wood + nextDef.upgradeCost.wood,
+    townBuildTimeRemaining: 0,
+    floatingTexts: [...state.floatingTexts, ...texts],
+  };
+}
+
 function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
   state: GameState; onUpdateState: Props["onUpdateState"]; onShowBuildingInfo: Props["onShowBuildingInfo"];
 }) {
@@ -402,7 +481,17 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
         <span>❤️ {state.lives}/{state.maxLives}</span>
       </div>
       <div className="cm-actions">
-        {nextDef ? (
+        {isBuilding ? (
+          <button
+            className="cm-btn cancel"
+            onClick={() => onUpdateState(applyCancelTownBuild)}
+          >
+            ✕ Отменить строительство
+            <span className="cm-btn-cost">
+              +{nextDef!.upgradeCost!.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{nextDef!.upgradeCost!.wood}</span>
+            </span>
+          </button>
+        ) : nextDef ? (
           <button
             className="cm-btn upgrade"
             disabled={!canUpgrade}
@@ -411,7 +500,7 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
             ⬆ {nextDef.name}
             <span className="cm-btn-cost">
               💰 {nextDef.upgradeCost!.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextDef.upgradeCost!.wood}</span>
-              {isBuilding ? " (строится)" : !canAfford ? " (недост.)" : ""}
+              {!canAfford ? " (недост.)" : ""}
             </span>
           </button>
         ) : (
@@ -438,6 +527,22 @@ function buildTavern(state: GameState): GameState {
     gold: state.gold - TAVERN_COST.gold,
     wood: state.wood - TAVERN_COST.wood,
     tavern: { buildTimeRemaining: TAVERN_BUILD_TIME, offers: [] },
+    floatingTexts: [...state.floatingTexts, ...texts],
+  };
+}
+
+function applyCancelTavernBuild(state: GameState): GameState {
+  const tavern = state.tavern;
+  if (!tavern || tavern.buildTimeRemaining <= 0) return state;
+  const texts = [
+    ft(`+${TAVERN_COST.gold}💰`, TAVERN_CELL[0], TAVERN_CELL[1], "#f0c040", state.gameTime),
+    ft(`+${TAVERN_COST.wood}🌲`, TAVERN_CELL[0], TAVERN_CELL[1] - 0.6, "#f0c040", state.gameTime),
+  ];
+  return {
+    ...state,
+    gold: state.gold + TAVERN_COST.gold,
+    wood: state.wood + TAVERN_COST.wood,
+    tavern: null,
     floatingTexts: [...state.floatingTexts, ...texts],
   };
 }
@@ -470,7 +575,7 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
             return (
               <div key={i} className="cm-stats" style={{ flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
                 <span><HeroIcon type={offer.type} size={20} /> {def.name} · {def.race} {def.className}</span>
-                <span>⚔️ {def.damage} 🎯 {def.range} ⚡ {def.attackSpeed}/с 🌾 {def.foodCost}</span>
+                <span>⚔️ {def.damage} 🎯 {def.range} ⚡ {def.attackSpeed}/с 🍖 {def.foodCost}</span>
                 {def.ability.kind === "aura_damage" && (
                   <span>✨ Аура +{Math.round(def.ability.basePct * 100)}% урона башням в радиусе {def.ability.radius} (растёт с уровнем)</span>
                 )}
@@ -483,7 +588,17 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
       )}
 
       <div className="cm-actions">
-        {!tavern ? (
+        {isBuilding ? (
+          <button
+            className="cm-btn cancel"
+            onClick={() => onUpdateState(applyCancelTavernBuild)}
+          >
+            ✕ Отменить строительство
+            <span className="cm-btn-cost">
+              +{TAVERN_COST.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{TAVERN_COST.wood}</span>
+            </span>
+          </button>
+        ) : !tavern ? (
           <button
             className="cm-btn upgrade"
             disabled={!canBuild}
@@ -495,7 +610,7 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
               {!canAffordBuild ? " (недост.)" : ""}
             </span>
           </button>
-        ) : !isBuilding && tavern.offers.length > 0 ? (
+        ) : tavern.offers.length > 0 ? (
           <button
             className="cm-btn upgrade"
             disabled={hasHeroInPlay || !canAffordHire}
@@ -537,7 +652,7 @@ function HeroPanel({ hero }: { hero: Hero }) {
         <span>⚔️ {def.damage}</span>
         <span>🎯 {def.range}</span>
         <span>⚡ {def.attackSpeed}/с</span>
-        <span>🌾 {def.foodCost}</span>
+        <span>🍖 {def.foodCost}</span>
         {def.ability.kind === "aura_damage" && (
           <span>✨ Аура +{Math.round(auraPct * 100)}% урона · r{def.ability.radius}</span>
         )}

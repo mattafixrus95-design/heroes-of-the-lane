@@ -31,7 +31,7 @@ export default function TowerShop({ gold, food, selected, maxBuildTier, onSelect
               <TowerIcon type={def.type} grade={0} size={26} />
             </span>
             <span className="shop-name">{def.name}</span>
-            <span className="shop-cost">{locked ? `🔒 T${def.tier}` : `💰${def.purchaseCost} 🌾${def.foodCost}`}</span>
+            <span className="shop-cost">{locked ? `🔒 T${def.tier}` : `💰${def.purchaseCost} 🍖${def.foodCost}`}</span>
           </div>
         );
       })}

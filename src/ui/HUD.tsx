@@ -46,7 +46,7 @@ function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMu
       <div className="hud-row">
         <span className="hud-stat">💰 {gold}</span>
         <span className="hud-stat hud-stat-icon"><WoodSVG size={16} /> {wood}</span>
-        <span className="hud-stat">🌾 {usedFood(state)}/{maxFood(state)}</span>
+        <span className="hud-stat">🍖 {usedFood(state)}/{maxFood(state)}</span>
         <span className="hud-stat">❤️ {lives}/{maxLives}</span>
         <span className="hud-stat hud-stat-dim">🏰 {towerValue}</span>
         <div className="hud-volume">

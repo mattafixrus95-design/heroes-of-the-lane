@@ -86,7 +86,7 @@ function StatsOverlay({ state, onReset }: Props) {
             display: "flex", justifyContent: "space-between",
             fontSize: "0.8rem", color: "#ccc", padding: "2px 0",
           }}>
-            <span>🌾 Ферма</span>
+            <span>🍖 Ферма</span>
             <span>ур. {state.farm.level}</span>
           </div>
         )}

@@ -36,7 +36,7 @@ function ShopPreviewPanel({ type, onShowInfo }: Props) {
 
       <div className="cm-stats">
         <span>💰 {def.purchaseCost}</span>
-        <span>🌾 {def.foodCost}</span>
+        <span>🍖 {def.foodCost}</span>
         <span>⏱ {def.buildTime}с</span>
       </div>
 
