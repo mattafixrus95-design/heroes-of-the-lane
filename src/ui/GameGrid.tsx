@@ -13,6 +13,7 @@ import TowerIcon from "./TowerIcon";
 import TownIcon from "./TownIcon";
 import HeroIcon from "./HeroIcon";
 import HotCanvas from "./HotCanvas";
+import TerrainLayer from "./TerrainLayer";
 import type { ShopItem } from "./TowerShop";
 import type { Selection } from "./selection";
 
@@ -91,23 +92,6 @@ function placeHero(col: number, row: number, type: HeroType, state: GameState): 
     food: state.food - def.foodCost,
     heroes: [...state.heroes, hero],
   };
-}
-
-const PATH_CORNER   = new Set(["9,0","9,2","0,2","0,4","9,4","9,6","0,6","0,8"]);
-const PATH_VERTICAL = new Set(["9,1","0,3","9,5","0,7"]);
-
-function cellBg(col: number, row: number, isPath: boolean): string {
-  if (col === ENTRY_CELL[0] && row === ENTRY_CELL[1]) return "#6a5038";
-  if (col === EXIT_CELL[0]  && row === EXIT_CELL[1])  return "#2a5c30";
-  if (!isPath) {
-    return (col + row) % 2 === 0
-      ? "linear-gradient(145deg,#52965c 0%,#3d7a48 100%)"
-      : "linear-gradient(145deg,#3d7a48 0%,#4d8e58 100%)";
-  }
-  const key = `${col},${row}`;
-  if (PATH_CORNER.has(key))   return "#8a7050";
-  if (PATH_VERTICAL.has(key)) return "linear-gradient(to right,#6a5038 0%,#a08860 30%,#aa9468 50%,#a08860 70%,#6a5038 100%)";
-  return                              "linear-gradient(to bottom,#6a5038 0%,#a08860 30%,#aa9468 50%,#a08860 70%,#6a5038 100%)";
 }
 
 export default function GameGrid({
@@ -239,12 +223,7 @@ export default function GameGrid({
           onMouseEnter={() => buildModeActive && setHoveredCell({ col: c, row: r })}
           style={{
             width: cell, height: cell,
-            background: highlightColor
-              ? `${highlightColor}`
-              : cellBg(c, r, isPath),
-            border: isPath
-              ? "1px solid rgba(80,55,25,0.45)"
-              : "1px solid rgba(25,70,35,0.35)",
+            background: highlightColor ?? "transparent",
             cursor: (tower || hero || isEntry || isExit || isFarmCell || isSawmillCell || isTavernCell) ? "pointer"
               : (isPath || isTerritory || !canBuild) ? "default"
               : buildModeActive ? "crosshair" : "default",
@@ -269,7 +248,7 @@ export default function GameGrid({
             }}/>
           )}
 
-          {isEntry && !tower && <GateSVG size={iconSize} />}
+          {isEntry && !tower && <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />}
           {isExit && !tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <TownIcon level={state.townLevel} size={iconSize} />
@@ -440,7 +419,10 @@ export default function GameGrid({
       onContextMenu={e => { e.preventDefault(); pendingHero ? onCancelPendingHero() : onExitBuildMode(); }}
       onClickCapture={handleContainerClickCapture}
     >
+      <TerrainLayer cell={cell} />
+
       <div style={{
+        position: "relative", zIndex: 1,
         display: "grid",
         gridTemplateColumns: `repeat(${GRID_COLS}, ${cell}px)`,
         gridTemplateRows: `repeat(${GRID_ROWS}, ${cell}px)`,
@@ -448,7 +430,7 @@ export default function GameGrid({
         {cells}
       </div>
 
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none" }}>
         {/* Круг радиуса атаки при постройке */}
         {hoveredCell && buildRange !== null && (
           <div style={{
