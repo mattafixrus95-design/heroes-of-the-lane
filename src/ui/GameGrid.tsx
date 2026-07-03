@@ -251,12 +251,11 @@ export default function GameGrid({
           )}
 
           {isEntry && !tower && (
-            <span style={{
-              position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
-              transform: `translateY(-${Math.round(cell * 0.14)}px)`,
-            }}>
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
-              {/* Разворот в сторону дороги нарисован внутри самого спрайта (боковые грани) */}
+              {/* Без вертикального сдвига: проём нарисован так, чтобы совпадать
+                  с центром клетки — именно там появляются крипы. Разворот в
+                  сторону дороги нарисован внутри самого спрайта (боковые грани). */}
               <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
                 <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
               </span>
