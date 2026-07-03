@@ -159,25 +159,46 @@ function ElfGrade1({ s }: { s: number }) {
 }
 
 // ── Centaur ───────────────────────────────────────────────────────────────────
+// Лесной воин ближнего боя: копьё + деревянный щит, свет условно сверху-слева
+// (светлый блик на крупе/торсе слева, тень справа) для ощущения объёма.
 function CentaurGrade0({ s }: { s: number }) {
   return (
     <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      {/* Horse body */}
-      <ellipse cx="21" cy="28" rx="14" ry="7" fill="#8B6914"/>
-      <rect x="4" y="24" width="4" height="12" rx="1.5" fill="#6B4020"/>
-      <rect x="32" y="24" width="4" height="12" rx="1.5" fill="#6B4020"/>
-      {/* Tail */}
-      <path d="M35,26 Q40,30 37,36" fill="none" stroke="#4a3000" strokeWidth="2.5"/>
-      {/* Human torso */}
-      <rect x="13" y="12" width="12" height="14" rx="3" fill="#4a7c59"/>
-      {/* Head */}
-      <circle cx="19" cy="9" r="6" fill="#F5CBA7"/>
-      <circle cx="17" cy="8" r="1.2" fill="#2C2C2C"/>
-      <circle cx="21" cy="8" r="1.2" fill="#2C2C2C"/>
-      <path d="M14,6 Q19,2 24,6 L24,8 Q19,5 14,8 Z" fill="#6B4020"/>
-      {/* Bow */}
-      <path d="M27,8 Q32,17 27,26" fill="none" stroke="#8B6914" strokeWidth="2"/>
-      <line x1="27" y1="8" x2="27" y2="26" stroke="#6B4020" strokeWidth="1"/>
+      {/* Контактная тень */}
+      <ellipse cx="20" cy="37.5" rx="15" ry="2.2" fill="rgba(0,0,0,0.28)"/>
+
+      {/* Конское тело */}
+      <ellipse cx="20" cy="27" rx="13" ry="7" fill="#8B6914"/>
+      <ellipse cx="23" cy="29.5" rx="9" ry="4" fill="#6B4020" opacity="0.4"/>
+      <ellipse cx="15" cy="24" rx="7" ry="3" fill="#A67D2E" opacity="0.55"/>
+      <rect x="6" y="26" width="4" height="11" rx="1.5" fill="#6B4020"/>
+      <rect x="30" y="26" width="4" height="11" rx="1.5" fill="#5a3518"/>
+      {/* Хвост */}
+      <path d="M33,25 Q39,29 36,35" fill="none" stroke="#4a3000" strokeWidth="2.5"/>
+
+      {/* Кожаный доспех торса */}
+      <path d="M12,12 L26,12 L27,25 L11,25 Z" fill="#5b7a4a"/>
+      <line x1="13" y1="14" x2="24" y2="22" stroke="#3f5934" strokeWidth="1.3"/>
+      <rect x="12" y="20" width="14" height="2.3" fill="#6B4020"/>
+      <ellipse cx="12" cy="13" rx="3" ry="2.2" fill="#4a6339"/>
+      <ellipse cx="26" cy="13" rx="3" ry="2.2" fill="#4a6339"/>
+
+      {/* Голова, без шлема */}
+      <rect x="16" y="8" width="4" height="5" fill="#F5CBA7"/>
+      <circle cx="18" cy="7" r="5.5" fill="#F5CBA7"/>
+      <path d="M13,5 Q18,1 23,5 L23,7 Q18,4 13,7 Z" fill="#6B4020"/>
+      <circle cx="16" cy="7" r="1" fill="#2C2C2C"/>
+      <circle cx="20" cy="7" r="1" fill="#2C2C2C"/>
+
+      {/* Деревянный круглый щит на дальней руке */}
+      <rect x="8" y="14" width="4" height="8" rx="2" fill="#5b7a4a"/>
+      <circle cx="8" cy="18" r="5" fill="#8B6914" stroke="#4a3000" strokeWidth="1"/>
+      <circle cx="8" cy="18" r="3.2" fill="none" stroke="#6B4020" strokeWidth="0.8"/>
+      <circle cx="8" cy="18" r="1.3" fill="#4a3000"/>
+
+      {/* Копьё */}
+      <line x1="24" y1="30" x2="36" y2="4" stroke="#6B4020" strokeWidth="1.7"/>
+      <polygon points="36,4 32.5,10.5 39,9.5" fill="#B0BEC5"/>
     </svg>
   );
 }
@@ -185,27 +206,53 @@ function CentaurGrade0({ s }: { s: number }) {
 function CentaurGrade1({ s }: { s: number }) {
   return (
     <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      {/* Horse body – dark armoured */}
-      <ellipse cx="21" cy="28" rx="14" ry="7" fill="#5D4037"/>
-      <rect x="4" y="24" width="4" height="12" rx="1.5" fill="#3E2723"/>
-      <rect x="32" y="24" width="4" height="12" rx="1.5" fill="#3E2723"/>
-      <path d="M35,26 Q40,30 37,36" fill="none" stroke="#2C1810" strokeWidth="2.5"/>
-      {/* Barding */}
-      <ellipse cx="21" cy="26" rx="12" ry="4" fill="#8D6E63" opacity="0.6"/>
-      {/* Human torso – armoured */}
-      <rect x="13" y="12" width="12" height="14" rx="3" fill="#B71C1C"/>
-      <rect x="13" y="12" width="12" height="5" rx="2" fill="#D32F2F"/>
-      {/* Head with helmet */}
-      <circle cx="19" cy="9" r="6" fill="#F5CBA7"/>
-      <path d="M13,9 Q13,2 19,1 Q25,2 25,9 Z" fill="#B0BEC5"/>
-      <rect x="15" y="8" width="8" height="2" rx="1" fill="#78909C"/>
-      <circle cx="17" cy="8" r="1.2" fill="#1A237E"/>
-      <circle cx="21" cy="8" r="1.2" fill="#1A237E"/>
-      {/* Ornate bow */}
-      <path d="M27,7 Q33,17 27,27" fill="none" stroke="#FFD700" strokeWidth="2"/>
-      <line x1="27" y1="7" x2="27" y2="27" stroke="#8B6914" strokeWidth="1"/>
-      <circle cx="27" cy="7" r="1.5" fill="#FFD700"/>
-      <circle cx="27" cy="27" r="1.5" fill="#FFD700"/>
+      {/* Контактная тень */}
+      <ellipse cx="20" cy="37.5" rx="15" ry="2.2" fill="rgba(0,0,0,0.3)"/>
+
+      {/* Плащ/знамя за спиной */}
+      <path d="M25,13 Q34,18 30,32 Q25,26 24,16 Z" fill="#8E1F1F"/>
+
+      {/* Конское тело — тёмный окрас + металлическая попона */}
+      <ellipse cx="20" cy="27" rx="13" ry="7" fill="#4a3520"/>
+      <ellipse cx="23" cy="29.5" rx="9" ry="4" fill="#2f2213" opacity="0.5"/>
+      <ellipse cx="20" cy="25" rx="11" ry="3.4" fill="#90A4AE" opacity="0.7"/>
+      <circle cx="14" cy="24.5" r="0.7" fill="#546E7A"/>
+      <circle cx="20" cy="23.8" r="0.7" fill="#546E7A"/>
+      <circle cx="26" cy="24.5" r="0.7" fill="#546E7A"/>
+      <rect x="6" y="26" width="4" height="11" rx="1.5" fill="#3E2723"/>
+      <rect x="30" y="26" width="4" height="11" rx="1.5" fill="#2C1B14"/>
+      <rect x="6" y="34" width="4" height="2.4" rx="1" fill="#B0BEC5"/>
+      <rect x="30" y="34" width="4" height="2.4" rx="1" fill="#B0BEC5"/>
+      <path d="M33,25 Q39,29 36,35" fill="none" stroke="#2C1810" strokeWidth="2.5"/>
+
+      {/* Серебряные латы торса */}
+      <path d="M12,12 L26,12 L27,25 L11,25 Z" fill="#B0BEC5"/>
+      <path d="M12,12 L26,12 L26.5,17 L11.5,17 Z" fill="#CFD8DC"/>
+      <line x1="19" y1="12" x2="19" y2="25" stroke="#78909C" strokeWidth="0.8"/>
+      <circle cx="19" cy="19" r="2" fill="#FFD700"/>
+      <ellipse cx="12" cy="13" rx="3.4" ry="2.6" fill="#CFD8DC"/>
+      <ellipse cx="26" cy="13" rx="3.4" ry="2.6" fill="#CFD8DC"/>
+
+      {/* Голова в шлеме с гребнем */}
+      <rect x="16" y="8" width="4" height="5" fill="#F5CBA7"/>
+      <circle cx="18" cy="7" r="5.5" fill="#F5CBA7"/>
+      <path d="M12,8 Q12,0 18,-1 Q24,0 24,8 Z" fill="#90A4AE"/>
+      <rect x="14" y="7" width="8" height="2.2" rx="1" fill="#607D8B"/>
+      <path d="M17,-2 Q18,-6 19,-2 L19,4 Q18,4.6 17,4 Z" fill="#B71C1C"/>
+      <circle cx="16" cy="7.2" r="1" fill="#1A237E"/>
+      <circle cx="20" cy="7.2" r="1" fill="#1A237E"/>
+
+      {/* Металлический щит на дальней руке */}
+      <rect x="8" y="14" width="4" height="8" rx="2" fill="#90A4AE"/>
+      <circle cx="8" cy="18" r="5.2" fill="#CFD8DC" stroke="#607D8B" strokeWidth="1"/>
+      <circle cx="8" cy="18" r="3.2" fill="none" stroke="#90A4AE" strokeWidth="0.8"/>
+      <circle cx="8" cy="18" r="1.4" fill="#B71C1C"/>
+
+      {/* Более длинное и качественное копьё */}
+      <line x1="24" y1="30" x2="37" y2="2" stroke="#8D6E63" strokeWidth="1.8"/>
+      <rect x="22.5" y="27" width="4.5" height="2.4" rx="1" fill="#FFD700" transform="rotate(-65 24.7 28.2)"/>
+      <polygon points="37,2 32.8,9.5 40,8.5" fill="#ECEFF1"/>
+      <polygon points="37,2 34.5,7 38.5,7.3" fill="#B0BEC5"/>
     </svg>
   );
 }
