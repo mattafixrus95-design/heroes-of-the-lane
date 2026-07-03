@@ -208,7 +208,7 @@ export default function HotCanvas({ state, cell, selection, width, height }: Pro
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", inset: 0, width, height, pointerEvents: "none" }}
+      style={{ position: "absolute", inset: 0, zIndex: 3, width, height, pointerEvents: "none" }}
     />
   );
 }
