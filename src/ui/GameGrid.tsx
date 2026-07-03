@@ -251,7 +251,7 @@ export default function GameGrid({
           )}
 
           {isEntry && !tower && (
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(-${Math.round(cell * 0.14)}px)` }}>
               <ObjectShadow size={iconSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
                 <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
@@ -259,7 +259,7 @@ export default function GameGrid({
             </span>
           )}
           {isExit && !tower && (
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(-${Math.round(cell * 0.14)}px)` }}>
               <ObjectShadow size={iconSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
                 <TownIcon level={state.townLevel} size={iconSize} />
