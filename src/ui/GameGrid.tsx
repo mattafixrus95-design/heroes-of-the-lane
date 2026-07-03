@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { GameState, Tower, FloatingText } from "../game/engine/gameState";
+import type { GameState, Tower } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL } from "../data/map";
@@ -8,7 +8,7 @@ import FarmSVG from "../assets/FarmSVG";
 import SawmillSVG from "../assets/SawmillSVG";
 import TowerIcon from "./TowerIcon";
 import TownIcon from "./TownIcon";
-import { CREEP_DEFS } from "../data/waves";
+import HotCanvas from "./HotCanvas";
 import type { ShopItem } from "./TowerShop";
 import type { Selection } from "./selection";
 
@@ -81,97 +81,6 @@ function cellBg(col: number, row: number, isPath: boolean): string {
   return                              "linear-gradient(to bottom,#6a5038 0%,#a08860 30%,#aa9468 50%,#a08860 70%,#6a5038 100%)";
 }
 
-function ArrowMarker({ angle, towerType }: { angle: number; towerType: string }) {
-  const isElf = towerType === "elf";
-  const shaft = isElf ? "#8B6914" : "#5C3A1E";
-  const feather = isElf ? "#2a9d2a" : "#9d5a2a";
-  return (
-    <svg width="28" height="8" viewBox="0 0 28 8" style={{
-      position: "absolute", left: -14, top: -4, overflow: "visible",
-      transform: `rotate(${angle}deg)`, transformOrigin: "14px 4px", pointerEvents: "none",
-    }}>
-      <line x1="2" y1="4" x2="22" y2="4" stroke={shaft} strokeWidth={isElf ? 1.5 : 2}/>
-      <polygon points="20,1 28,4 20,7" fill={shaft}/>
-      <line x1="4" y1="4" x2="1" y2="1" stroke={feather} strokeWidth="1.2"/>
-      <line x1="4" y1="4" x2="1" y2="7" stroke={feather} strokeWidth="1.2"/>
-      {isElf && <line x1="7" y1="4" x2="4" y2="1" stroke={feather} strokeWidth="1"/>}
-      {isElf && <line x1="7" y1="4" x2="4" y2="7" stroke={feather} strokeWidth="1"/>}
-    </svg>
-  );
-}
-
-function AxeMarker({ angle, progress }: { angle: number; progress: number }) {
-  const spin = angle + progress * 540;
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" style={{
-      position: "absolute", left: -9, top: -9, overflow: "visible",
-      transform: `rotate(${spin}deg)`, transformOrigin: "9px 9px", pointerEvents: "none",
-    }}>
-      <line x1="9" y1="15" x2="9" y2="7" stroke="#7a4520" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M9,7 L4,2 L4,9 Z" fill="#b8b8c8" stroke="#888" strokeWidth="0.6"/>
-      <path d="M9,7 L14,2 L14,9 Z" fill="#d0d0e0" stroke="#aaa" strokeWidth="0.6"/>
-    </svg>
-  );
-}
-
-function FireballMarker({ progress }: { progress: number }) {
-  const size = 20 + progress * 6;
-  return (
-    <div style={{
-      position: "absolute", left: -size / 2, top: -size / 2,
-      width: size, height: size, borderRadius: "50%",
-      background: "radial-gradient(circle, #fff 0%, #FFD700 20%, #FF6000 55%, #CC0000 100%)",
-      boxShadow: `0 0 ${10 + progress * 8}px ${5 + progress * 5}px rgba(255,100,0,0.8)`,
-      pointerEvents: "none",
-    }}/>
-  );
-}
-
-function SplashRing({ effect, gameTime, cell }: { effect: import("../game/engine/gameState").SplashEffect; gameTime: number; cell: number }) {
-  const t = Math.min(1, (gameTime - effect.spawnTime) / effect.duration);
-  const maxR = effect.radius * cell;
-  const r = maxR * (0.3 + t * 0.7);
-  const opacity = 1 - t;
-  const cx = effect.x * cell + cell / 2;
-  const cy = effect.y * cell + cell / 2;
-  return (
-    <div style={{
-      position: "absolute", left: cx - r, top: cy - r,
-      width: r * 2, height: r * 2, borderRadius: "50%",
-      border: `${3 - t * 2}px solid rgba(255,140,0,${opacity})`,
-      boxShadow: `inset 0 0 ${12 * opacity}px rgba(255,200,0,${opacity * 0.5})`,
-      pointerEvents: "none",
-    }}/>
-  );
-}
-
-function FloatingTextView({ ft, gameTime, cell }: { ft: FloatingText; gameTime: number; cell: number }) {
-  const age = gameTime - ft.spawnTime;
-  const t = Math.min(1, age / ft.duration);
-  const opacity = ft.large ? (t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4) : 1 - t;
-  const yOff = -t * cell * (ft.large ? 1.8 : 1.2);
-  const x = ft.x * cell + cell / 2;
-  const y = ft.y * cell + cell / 2;
-  return (
-    <div style={{
-      position: "absolute",
-      left: x, top: y + yOff,
-      transform: "translateX(-50%)",
-      fontSize: ft.large ? "1.6rem" : "0.8rem",
-      fontWeight: 800,
-      color: ft.color,
-      opacity,
-      pointerEvents: "none",
-      textShadow: ft.large
-        ? "0 0 12px rgba(240,192,64,0.7), 0 2px 4px rgba(0,0,0,0.9)"
-        : "0 1px 3px rgba(0,0,0,0.8)",
-      whiteSpace: "nowrap",
-    }}>
-      {ft.text}
-    </div>
-  );
-}
-
 export default function GameGrid({
   state, selectedItem, selection, onUpdateState, onExitBuildMode, onSelect,
 }: Props) {
@@ -187,6 +96,33 @@ export default function GameGrid({
   useEffect(() => {
     if (!selectedItem) setHoveredCell(null);
   }, [selectedItem]);
+
+  // Крипы рисуются на canvas (см. HotCanvas), поэтому клики по ним
+  // перехватываем на фазе capture здесь — попадание считаем по тем же
+  // размерам маркера, что использует HotCanvas.
+  const handleContainerClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (state.creeps.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+    const baseCreepSize = Math.max(16, Math.round(cell * 0.5));
+    for (const c of state.creeps) {
+      const isBoss = c.kind === "angel" || c.kind === "black_dragon" || c.kind === "archangel";
+      const size = isBoss ? Math.round(baseCreepSize * 1.6) : baseCreepSize;
+      const cx = c.position.x * cell + cell / 2;
+      const cy = c.position.y * cell + cell / 2 - size * 0.15;
+      const hitRadius = size * 0.6;
+      const dx = clickX - cx;
+      const dy = clickY - cy;
+      if (dx * dx + dy * dy <= hitRadius * hitRadius) {
+        const already = selection?.kind === "creep" && selection.id === c.id;
+        onSelect(already ? null : { kind: "creep", id: c.id });
+        onExitBuildMode();
+        e.stopPropagation();
+        return;
+      }
+    }
+  };
 
   const cells = [];
   for (let r = 0; r < GRID_ROWS; r++) {
@@ -371,46 +307,6 @@ export default function GameGrid({
     }
   }
 
-  const baseCreepSize = Math.max(16, Math.round(cell * 0.5));
-  const creepMarkers = state.creeps.map(e => {
-    const x = e.position.x * cell + cell / 2;
-    const y = e.position.y * cell + cell / 2;
-    const hpPct = Math.max(0, Math.min(1, e.hp / e.maxHp));
-    const isSlowed = e.slowTimer > 0;
-    const isBoss = e.kind === "angel" || e.kind === "black_dragon" || e.kind === "archangel";
-    const creepSize = isBoss ? Math.round(baseCreepSize * 1.6) : baseCreepSize;
-    const def = CREEP_DEFS[e.kind];
-    const hpBarColor = e.regenPerSec > 0
-      ? "#8bc34a"
-      : hpPct > 0.5 ? "#4caf50" : "#f44336";
-    const isSelectedCreep = selection?.kind === "creep" && selection.id === e.id;
-    return (
-      <div
-        key={e.id}
-        onClick={() => {
-          onSelect(isSelectedCreep ? null : { kind: "creep", id: e.id });
-          onExitBuildMode();
-        }}
-        style={{
-          position: "absolute",
-          left: x - creepSize / 2, top: y - creepSize * 0.65,
-          width: creepSize, pointerEvents: "auto", cursor: "pointer",
-          display: "flex", flexDirection: "column", alignItems: "center",
-          borderRadius: 4,
-          boxShadow: isSelectedCreep ? "0 0 0 2px rgba(80,220,255,0.9)" : undefined,
-        }}>
-        <div style={{ width: "100%", height: isBoss ? 4 : 3, background: "#333", borderRadius: 2, marginBottom: 1 }}>
-          <div style={{ width: `${hpPct * 100}%`, height: "100%", borderRadius: 2, background: hpBarColor, transition: "width 0.12s linear" }}/>
-        </div>
-        <span style={{
-          fontSize: `${Math.max(0.6, (isBoss ? cell * 1.3 : cell) / 56)}rem`,
-          lineHeight: 1,
-          filter: isSlowed ? "hue-rotate(180deg)" : "none",
-        }}>{def.emoji}</span>
-      </div>
-    );
-  });
-
   // Радиус атаки выбранной башни при hover в режиме строительства
   const buildRange = selectedItem && hoveredCell
     ? TOWER_DEFS[selectedItem].grades[0].range
@@ -434,6 +330,7 @@ export default function GameGrid({
       }}
       onMouseLeave={() => setHoveredCell(null)}
       onContextMenu={e => { e.preventDefault(); onExitBuildMode(); }}
+      onClickCapture={handleContainerClickCapture}
     >
       <div style={{
         display: "grid",
@@ -444,7 +341,7 @@ export default function GameGrid({
       </div>
 
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-        {/* Круг радиуса атаки */}
+        {/* Круг радиуса атаки при постройке */}
         {hoveredCell && buildRange !== null && (
           <div style={{
             position: "absolute",
@@ -485,31 +382,9 @@ export default function GameGrid({
             )}
           </>
         )}
-
-        {creepMarkers}
-        {state.splashEffects.map(e =>
-          <SplashRing key={e.id} effect={e} gameTime={state.gameTime} cell={cell} />
-        )}
-        {state.projectiles.map(p => {
-          const progress = Math.min(1, (state.gameTime - p.spawnTime) / p.duration);
-          const x = (p.fromCol + (p.toX - p.fromCol) * progress) * cell + cell / 2;
-          const y = (p.fromRow + (p.toY - p.fromRow) * progress) * cell + cell / 2;
-          const angle = Math.atan2(p.toY - p.fromRow, p.toX - p.fromCol) * (180 / Math.PI);
-          return (
-            <div key={p.id} style={{ position: "absolute", left: x, top: y, pointerEvents: "none" }}>
-              {p.kind === "fireball"
-                ? <FireballMarker progress={progress} />
-                : p.kind === "axe"
-                  ? <AxeMarker angle={angle} progress={progress} />
-                  : <ArrowMarker angle={angle} towerType={p.towerType} />
-              }
-            </div>
-          );
-        })}
-        {state.floatingTexts.map(ft =>
-          <FloatingTextView key={ft.id} ft={ft} gameTime={state.gameTime} cell={cell} />
-        )}
       </div>
+
+      <HotCanvas state={state} cell={cell} selection={selection} width={GRID_COLS * cell} height={GRID_ROWS * cell} />
     </div>
   );
 }

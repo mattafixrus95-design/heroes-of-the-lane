@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import TowerIcon from "./TowerIcon";
@@ -7,7 +8,7 @@ interface Props {
   onShowInfo: (type: TowerType) => void;
 }
 
-export default function ShopPreviewPanel({ type, onShowInfo }: Props) {
+function ShopPreviewPanel({ type, onShowInfo }: Props) {
   const def = TOWER_DEFS[type];
   const grade = def.grades[0];
 
@@ -47,3 +48,5 @@ export default function ShopPreviewPanel({ type, onShowInfo }: Props) {
     </div>
   );
 }
+
+export default memo(ShopPreviewPanel);
