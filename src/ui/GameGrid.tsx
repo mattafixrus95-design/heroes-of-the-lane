@@ -3,7 +3,7 @@ import type { GameState, Tower, Hero } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import type { HeroType } from "../data/heroes";
-import { HERO_DEFS } from "../data/heroes";
+import { HERO_DEFS, heroRange } from "../data/heroes";
 import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
 import GateSVG from "../assets/GateSVG";
 import FarmSVG from "../assets/FarmSVG";
@@ -402,7 +402,7 @@ export default function GameGrid({
   // Круги радиуса атаки и ауры у выбранного героя
   const selectedHero = selection?.kind === "hero" ? state.heroes.find(h => h.id === selection.id) : null;
   const selectedHeroDef = selectedHero ? HERO_DEFS[selectedHero.type] : null;
-  const selectedHeroRangePx = selectedHeroDef ? selectedHeroDef.range * cell : 0;
+  const selectedHeroRangePx = selectedHero && selectedHeroDef ? heroRange(selectedHero.level, selectedHeroDef) * cell : 0;
   const selectedHeroAuraPx = selectedHeroDef?.ability.kind === "aura_damage"
     ? selectedHeroDef.ability.radius * cell
     : 0;

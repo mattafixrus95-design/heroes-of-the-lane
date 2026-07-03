@@ -11,7 +11,14 @@ interface Props {
   height: number;
 }
 
-function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angleDeg: number, isElf: boolean) {
+type ArrowStyle = "default" | "elf" | "ivor";
+
+function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angleDeg: number, style: ArrowStyle) {
+  if (style === "ivor") {
+    drawIvorArrow(ctx, x, y, angleDeg);
+    return;
+  }
+  const isElf = style === "elf";
   const shaft = isElf ? "#8B6914" : "#5C3A1E";
   const feather = isElf ? "#2a9d2a" : "#9d5a2a";
   ctx.save();
@@ -40,6 +47,55 @@ function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angleDeg
     ctx.moveTo(-7, 0); ctx.lineTo(-10, 3);
   }
   ctx.stroke();
+  ctx.restore();
+}
+
+// Стрела Ивора — тонкое серебряное древко со светящимся синим наконечником,
+// заметно отличается от обычных лучников (у тех — коричневое дерево).
+function drawIvorArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angleDeg: number) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate((angleDeg * Math.PI) / 180);
+
+  // Голубой шлейф света вдоль древка
+  ctx.strokeStyle = "rgba(120,200,255,0.35)";
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(-13, 0);
+  ctx.lineTo(6, 0);
+  ctx.stroke();
+
+  // Серебряное древко
+  ctx.strokeStyle = "#d8dfe6";
+  ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  ctx.moveTo(-12, 0);
+  ctx.lineTo(9, 0);
+  ctx.stroke();
+
+  // Светящийся наконечник
+  ctx.save();
+  ctx.shadowColor = "#7fd6ff";
+  ctx.shadowBlur = 6;
+  ctx.fillStyle = "#eaf6ff";
+  ctx.beginPath();
+  ctx.moveTo(7, -2.6);
+  ctx.lineTo(15, 0);
+  ctx.lineTo(7, 2.6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Серебряное оперение
+  ctx.strokeStyle = "#b9c4cc";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(-10, 0); ctx.lineTo(-13, -3.5);
+  ctx.moveTo(-10, 0); ctx.lineTo(-13, 3.5);
+  ctx.moveTo(-7, 0);  ctx.lineTo(-9.5, -2.5);
+  ctx.moveTo(-7, 0);  ctx.lineTo(-9.5, 2.5);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -181,7 +237,7 @@ export default function HotCanvas({ state, cell, selection, width, height }: Pro
       const angle = Math.atan2(p.toY - p.fromRow, p.toX - p.fromCol) * (180 / Math.PI);
       if (p.kind === "fireball") drawFireball(ctx, x, y, progress);
       else if (p.kind === "axe") drawAxe(ctx, x, y, angle, progress);
-      else drawArrow(ctx, x, y, angle, p.towerType === "elf");
+      else drawArrow(ctx, x, y, angle, p.towerType === "ivor" ? "ivor" : p.towerType === "elf" ? "elf" : "default");
     }
 
     // Всплывающий текст

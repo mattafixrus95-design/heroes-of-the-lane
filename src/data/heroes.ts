@@ -1,3 +1,5 @@
+import { HERO_MAX_LEVEL } from "./buildings";
+
 export type HeroType = "ivor";
 
 export type HeroAbility =
@@ -29,4 +31,14 @@ export const HERO_DEFS: Record<HeroType, HeroDef> = {
 // уровень 1 — +5% урона, каждый следующий уровень — ещё +1%
 export function heroAuraPct(level: number, ability: { basePct: number; perLevelPct: number }): number {
   return ability.basePct + (level - 1) * ability.perLevelPct;
+}
+
+// +1 к собственному урону героя за каждый уровень выше первого
+export function heroDamage(level: number, def: { damage: number }): number {
+  return def.damage + (level - 1);
+}
+
+// На максимальном уровне герой получает +1 к радиусу атаки
+export function heroRange(level: number, def: { range: number }): number {
+  return def.range + (level >= HERO_MAX_LEVEL ? 1 : 0);
 }
