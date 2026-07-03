@@ -250,17 +250,10 @@ export default function GameGrid({
             }}/>
           )}
 
-          {isEntry && !tower && (
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ObjectShadow size={iconSize} />
-              {/* Без вертикального сдвига: проём нарисован так, чтобы совпадать
-                  с центром клетки — именно там появляются крипы. Разворот в
-                  сторону дороги нарисован внутри самого спрайта (боковые грани). */}
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
-                <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
-              </span>
-            </span>
-          )}
+          {/* Сам спрайт ворот рисуется в отдельном слое ниже крипов (см. ниже
+              по разметке) — иначе только что заспавнившийся крип оказывается
+              визуально скрыт под воротами и "выезжает из-за" них, а не
+              выходит из открытых створок. Здесь остаётся только клик-зона. */}
           {isExit && !tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(-${Math.round(cell * 0.14)}px)` }}>
               <ObjectShadow size={iconSize} />
@@ -450,6 +443,20 @@ export default function GameGrid({
       onClickCapture={handleContainerClickCapture}
     >
       <TerrainLayer cell={cell} />
+
+      {/* Спрайт ворот — НИЖЕ слоя крипов, чтобы только что заспавнившийся крип
+          был виден поверх ворот и выглядел выходящим из открытых створок,
+          а не прячущимся за силуэтом ворот. */}
+      <div style={{
+        position: "absolute", left: ENTRY_CELL[0] * cell, top: ENTRY_CELL[1] * cell,
+        width: cell, height: cell, zIndex: 1,
+        display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none",
+      }}>
+        <ObjectShadow size={iconSize} />
+        <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+          <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
+        </span>
+      </div>
 
       {/* Крипы/снаряды/splash — под постройками, как требует слоевая модель поля */}
       <EffectsCanvas state={state} cell={cell} selection={selection} width={GRID_COLS * cell} height={GRID_ROWS * cell} />
