@@ -12,8 +12,9 @@ import TavernSVG from "../assets/TavernSVG";
 import TowerIcon from "./TowerIcon";
 import TownIcon from "./TownIcon";
 import HeroIcon from "./HeroIcon";
-import HotCanvas from "./HotCanvas";
+import { EffectsCanvas, TextsCanvas } from "./HotCanvas";
 import TerrainLayer from "./TerrainLayer";
+import ObjectShadow from "./ObjectShadow";
 import type { ShopItem } from "./TowerShop";
 import type { Selection } from "./selection";
 
@@ -101,8 +102,9 @@ export default function GameGrid({
   const canBuild = true;
   const buildModeActive = !!selectedItem || !!pendingHero;
 
-  const iconSize  = Math.round(cell * 0.72);
-  const towerSize = Math.round(cell * 0.71);
+  // Визуальная иерархия: здания > башни > крипы (крипы — см. baseCreepSize в EffectsCanvas)
+  const iconSize  = Math.round(cell * 0.84);
+  const towerSize = Math.round(cell * 0.68);
 
   const [hoveredCell, setHoveredCell] = useState<{ col: number; row: number } | null>(null);
 
@@ -111,9 +113,9 @@ export default function GameGrid({
     if (!buildModeActive) setHoveredCell(null);
   }, [buildModeActive]);
 
-  // Крипы рисуются на canvas (см. HotCanvas), поэтому клики по ним
-  // перехватываем на фазе capture здесь — попадание считаем по тем же
-  // размерам маркера, что использует HotCanvas.
+  // Крипы рисуются на canvas (см. EffectsCanvas в HotCanvas.tsx), поэтому клики
+  // по ним перехватываем на фазе capture здесь — попадание считаем по тем же
+  // размерам маркера, что использует EffectsCanvas.
   const handleContainerClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
     if (state.creeps.length === 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -248,10 +250,20 @@ export default function GameGrid({
             }}/>
           )}
 
-          {isEntry && !tower && <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />}
+          {isEntry && !tower && (
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ObjectShadow size={iconSize} />
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+                <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
+              </span>
+            </span>
+          )}
           {isExit && !tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <TownIcon level={state.townLevel} size={iconSize} />
+              <ObjectShadow size={iconSize} />
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+                <TownIcon level={state.townLevel} size={iconSize} />
+              </span>
               {state.townBuildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -267,7 +279,10 @@ export default function GameGrid({
 
           {isFarmCell && !tower && state.farm && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <FarmSVG size={iconSize} />
+              <ObjectShadow size={iconSize} />
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+                <FarmSVG size={iconSize} />
+              </span>
               {state.farm.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -283,7 +298,10 @@ export default function GameGrid({
 
           {isSawmillCell && !tower && state.sawmill && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <SawmillSVG size={iconSize} />
+              <ObjectShadow size={iconSize} />
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+                <SawmillSVG size={iconSize} />
+              </span>
               {state.sawmill.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -299,7 +317,10 @@ export default function GameGrid({
 
           {isTavernCell && !tower && state.tavern && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <TavernSVG size={iconSize} />
+              <ObjectShadow size={iconSize} />
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+                <TavernSVG size={iconSize} />
+              </span>
               {state.tavern.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -316,7 +337,10 @@ export default function GameGrid({
           {/* Герой */}
           {hero && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <HeroIcon type={hero.type} size={towerSize} />
+              <ObjectShadow size={towerSize} />
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+                <HeroIcon type={hero.type} size={towerSize} />
+              </span>
               {hero.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -338,7 +362,10 @@ export default function GameGrid({
           {/* Башня */}
           {tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <TowerIcon type={tower.type} grade={tower.gradeIndex} size={towerSize} />
+              <ObjectShadow size={towerSize} />
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+                <TowerIcon type={tower.type} grade={tower.gradeIndex} size={towerSize} />
+              </span>
               {tower.buildTimeRemaining > 0 && (
                 <span style={{
                   position: "absolute", inset: 0,
@@ -421,8 +448,11 @@ export default function GameGrid({
     >
       <TerrainLayer cell={cell} />
 
+      {/* Крипы/снаряды/splash — под постройками, как требует слоевая модель поля */}
+      <EffectsCanvas state={state} cell={cell} selection={selection} width={GRID_COLS * cell} height={GRID_ROWS * cell} />
+
       <div style={{
-        position: "relative", zIndex: 1,
+        position: "relative", zIndex: 2,
         display: "grid",
         gridTemplateColumns: `repeat(${GRID_COLS}, ${cell}px)`,
         gridTemplateRows: `repeat(${GRID_ROWS}, ${cell}px)`,
@@ -430,7 +460,7 @@ export default function GameGrid({
         {cells}
       </div>
 
-      <div style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none" }}>
         {/* Круг радиуса атаки при постройке */}
         {hoveredCell && buildRange !== null && (
           <div style={{
@@ -502,7 +532,8 @@ export default function GameGrid({
         )}
       </div>
 
-      <HotCanvas state={state} cell={cell} selection={selection} width={GRID_COLS * cell} height={GRID_ROWS * cell} />
+      {/* Всплывающий текст — самый верхний слой поля */}
+      <TextsCanvas state={state} cell={cell} width={GRID_COLS * cell} height={GRID_ROWS * cell} />
     </div>
   );
 }
