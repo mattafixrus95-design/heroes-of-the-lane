@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import TowerIcon from "./TowerIcon";
@@ -26,7 +27,7 @@ function Row({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-export default function TowerInfoModal({ type, onClose }: Props) {
+function TowerInfoModal({ type, onClose }: Props) {
   const def = TOWER_DEFS[type];
   const base = def.grades[0];
   const up   = def.grades[1];
@@ -92,3 +93,5 @@ export default function TowerInfoModal({ type, onClose }: Props) {
     </div>
   );
 }
+
+export default memo(TowerInfoModal);

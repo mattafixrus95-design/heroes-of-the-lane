@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { GameState } from "../game/engine/gameState";
 import { maxFood, usedFood } from "../game/engine/gameState";
 import { startWave, startWaveInternal } from "../game/entities/spawnWave";
@@ -20,7 +21,7 @@ function volumeEmoji(v: number) {
   return "🔊";
 }
 
-export default function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMute }: Props) {
+function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMute }: Props) {
   const { phase, wave, gold, wood, lives, maxLives, spawnQueue, creeps } = state;
   const remaining = creeps.length + spawnQueue.length;
   const isPrep = phase === "prep";
@@ -104,3 +105,42 @@ export default function HUD({ state, onUpdateState, onReset, volume, onVolumeCha
     </div>
   );
 }
+
+// HUD зависит от state целиком, а state.gameTime меняется каждый кадр —
+// без кастомного сравнения обычный memo был бы бесполезен. Сверяем
+// только те поля, которые реально влияют на отображение.
+export default memo(HUD, (prev, next) => {
+  if (
+    prev.volume !== next.volume ||
+    prev.onUpdateState !== next.onUpdateState ||
+    prev.onReset !== next.onReset ||
+    prev.onVolumeChange !== next.onVolumeChange ||
+    prev.onToggleMute !== next.onToggleMute
+  ) return false;
+
+  const ps = prev.state, ns = next.state;
+  if (
+    ps.phase !== ns.phase ||
+    ps.wave !== ns.wave ||
+    ps.gold !== ns.gold ||
+    ps.wood !== ns.wood ||
+    ps.lives !== ns.lives ||
+    ps.maxLives !== ns.maxLives ||
+    ps.food !== ns.food ||
+    ps.isPaused !== ns.isPaused ||
+    ps.creeps.length !== ns.creeps.length ||
+    ps.spawnQueue.length !== ns.spawnQueue.length ||
+    (ps.farm?.foodProduced ?? 0) !== (ns.farm?.foodProduced ?? 0)
+  ) return false;
+
+  // Таймер подготовки показывается только целым числом секунд
+  if (ps.phase === "prep" && Math.ceil(ps.prepTimer) !== Math.ceil(ns.prepTimer)) return false;
+
+  // Суммарная стоимость башен — сравниваем сами значения, а не ссылку
+  // на массив (он пересоздаётся каждый тик игрового цикла)
+  const psValue = ps.towers.reduce((s, t) => s + t.totalInvested, 0);
+  const nsValue = ns.towers.reduce((s, t) => s + t.totalInvested, 0);
+  if (psValue !== nsValue) return false;
+
+  return true;
+});

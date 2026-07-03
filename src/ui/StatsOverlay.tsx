@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { GameState } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
 import SawmillSVG from "../assets/SawmillSVG";
@@ -7,7 +8,7 @@ interface Props {
   onReset: () => void;
 }
 
-export default function StatsOverlay({ state, onReset }: Props) {
+function StatsOverlay({ state, onReset }: Props) {
   const isVictory = state.phase === "victory";
 
   const towerCounts: Record<string, number> = {};
@@ -114,3 +115,16 @@ export default function StatsOverlay({ state, onReset }: Props) {
     </div>
   );
 }
+
+// Экран показывается только в конце игры — контент фактически
+// перестаёт меняться, кроме gameTime (тикает даже в victory).
+// Сверяем ссылки на массивы вместо всего state.
+export default memo(StatsOverlay, (prev, next) =>
+  prev.onReset === next.onReset &&
+  prev.state.phase === next.state.phase &&
+  prev.state.wave === next.state.wave &&
+  prev.state.towers === next.state.towers &&
+  prev.state.waveStats === next.state.waveStats &&
+  prev.state.farm === next.state.farm &&
+  prev.state.sawmill === next.state.sawmill
+);

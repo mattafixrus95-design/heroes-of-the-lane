@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { GameState, Tower, Creep, CreepKind, FloatingText } from "../game/engine/gameState";
 import { SELL_RATE } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
@@ -496,7 +497,7 @@ function WavePanel({ state }: { state: GameState }) {
   );
 }
 
-export default function ContextMenu({ state, selection, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo }: Props) {
+function ContextMenu({ state, selection, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo }: Props) {
   if (selection.kind === "tower") {
     const tower = state.towers.find(t => t.id === selection.id);
     if (!tower) return null;
@@ -547,3 +548,55 @@ export default function ContextMenu({ state, selection, onUpdateState, onClose, 
     </div>
   );
 }
+
+// state целиком меняется каждый кадр (state.gameTime), поэтому обычный
+// memo был бы бесполезен — сверяем только поля, которые реально
+// использует конкретная панель по selection.kind. Для "creep" всегда
+// перерисовываем — HP там живое и должно обновляться каждый кадр.
+function contextMenuPropsEqual(prev: Props, next: Props): boolean {
+  if (
+    prev.selection !== next.selection ||
+    prev.onUpdateState !== next.onUpdateState ||
+    prev.onClose !== next.onClose ||
+    prev.onShowTowerInfo !== next.onShowTowerInfo ||
+    prev.onShowBuildingInfo !== next.onShowBuildingInfo
+  ) return false;
+
+  const sel = next.selection;
+  const ps = prev.state, ns = next.state;
+
+  if (sel.kind === "creep") return false;
+
+  if (sel.kind === "tower") {
+    const pt = ps.towers.find(t => t.id === sel.id);
+    const nt = ns.towers.find(t => t.id === sel.id);
+    return pt === nt && ps.gold === ns.gold && ps.food === ns.food && ps.townLevel === ns.townLevel;
+  }
+
+  if (sel.kind === "wave") {
+    return (
+      ps.wave === ns.wave &&
+      ps.phase === ns.phase &&
+      Math.ceil(ps.prepTimer) === Math.ceil(ns.prepTimer) &&
+      (ps.creeps.length + ps.spawnQueue.length) === (ns.creeps.length + ns.spawnQueue.length)
+    );
+  }
+
+  if (sel.kind === "farm") {
+    return ps.farm === ns.farm && ps.gold === ns.gold && ps.wood === ns.wood;
+  }
+
+  if (sel.kind === "sawmill") {
+    return ps.sawmill === ns.sawmill && ps.gold === ns.gold && ps.wood === ns.wood;
+  }
+
+  // town
+  return (
+    ps.townLevel === ns.townLevel &&
+    ps.townBuildTimeRemaining === ns.townBuildTimeRemaining &&
+    ps.gold === ns.gold && ps.wood === ns.wood &&
+    ps.lives === ns.lives && ps.maxLives === ns.maxLives
+  );
+}
+
+export default memo(ContextMenu, contextMenuPropsEqual);

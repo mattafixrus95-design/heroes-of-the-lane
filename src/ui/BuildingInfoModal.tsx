@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { ReactNode } from "react";
 import {
   farmCost, FARM_GOLD_COST, FARM_BUILD_TIME, FARM_FOOD_PER_LEVEL, FARM_WOOD_COST_BY_LEVEL,
@@ -21,7 +22,7 @@ function Row({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-export default function BuildingInfoModal({ kind, onClose }: Props) {
+function BuildingInfoModal({ kind, onClose }: Props) {
   return (
     <div className="tower-menu-overlay" onClick={onClose}>
       <div className="tower-menu" style={{ gap: 10 }} onClick={e => e.stopPropagation()}>
@@ -87,3 +88,5 @@ export default function BuildingInfoModal({ kind, onClose }: Props) {
     </div>
   );
 }
+
+export default memo(BuildingInfoModal);

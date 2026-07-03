@@ -60,25 +60,39 @@ export default function App() {
     prevProjectileIds.current = current;
   }, [state.projectiles, volume]);
 
-  function handleReset() {
+  const handleReset = useCallback(() => {
     setState(createInitialState());
     setSelectedItem(null);
     setSelection(null);
     setInfoTowerType(null);
     setInfoBuildingKind(null);
-  }
+  }, []);
 
-  function handleSelect(sel: Selection | null) {
+  const handleSelect = useCallback((sel: Selection | null) => {
     setSelection(sel);
     setSelectedItem(null);
     if (sel?.kind === "tower") setBottomTab("towers");
     else if (sel?.kind === "farm" || sel?.kind === "sawmill" || sel?.kind === "town") setBottomTab("buildings");
-  }
+  }, []);
 
-  function handleSelectShopItem(item: ShopItem | null) {
+  const handleSelectShopItem = useCallback((item: ShopItem | null) => {
     setSelectedItem(item);
     setSelection(null);
-  }
+  }, []);
+
+  const handleExitBuildMode = useCallback(() => setSelectedItem(null), []);
+  const handleCloseSelection = useCallback(() => setSelection(null), []);
+  const handleCloseTowerInfo = useCallback(() => setInfoTowerType(null), []);
+  const handleCloseBuildingInfo = useCallback(() => setInfoBuildingKind(null), []);
+
+  const handleVolumeChange = useCallback((v: number) => {
+    if (v > 0) prevVolumeRef.current = v;
+    setVolume(v);
+  }, []);
+
+  const handleToggleMute = useCallback(() => {
+    setVolume(v => v > 0 ? (prevVolumeRef.current = v, 0) : prevVolumeRef.current);
+  }, []);
 
   const showStats = state.phase === "defeat" || state.phase === "victory";
 
@@ -89,18 +103,15 @@ export default function App() {
         onUpdateState={updateState}
         onReset={handleReset}
         volume={volume}
-        onVolumeChange={v => {
-          if (v > 0) prevVolumeRef.current = v;
-          setVolume(v);
-        }}
-        onToggleMute={() => setVolume(v => v > 0 ? (prevVolumeRef.current = v, 0) : prevVolumeRef.current)}
+        onVolumeChange={handleVolumeChange}
+        onToggleMute={handleToggleMute}
       />
       <GameGrid
         state={state}
         selectedItem={selectedItem}
         selection={selection}
         onUpdateState={updateState}
-        onExitBuildMode={() => setSelectedItem(null)}
+        onExitBuildMode={handleExitBuildMode}
         onSelect={handleSelect}
       />
       <BottomHUD
@@ -117,7 +128,7 @@ export default function App() {
           state={state}
           selection={selection}
           onUpdateState={updateState}
-          onClose={() => setSelection(null)}
+          onClose={handleCloseSelection}
           onShowTowerInfo={setInfoTowerType}
           onShowBuildingInfo={setInfoBuildingKind}
         />
@@ -126,10 +137,10 @@ export default function App() {
         <ShopPreviewPanel type={selectedItem} onShowInfo={setInfoTowerType} />
       )}
       {infoTowerType && (
-        <TowerInfoModal type={infoTowerType} onClose={() => setInfoTowerType(null)} />
+        <TowerInfoModal type={infoTowerType} onClose={handleCloseTowerInfo} />
       )}
       {infoBuildingKind && (
-        <BuildingInfoModal kind={infoBuildingKind} onClose={() => setInfoBuildingKind(null)} />
+        <BuildingInfoModal kind={infoBuildingKind} onClose={handleCloseBuildingInfo} />
       )}
       {showStats && (
         <StatsOverlay state={state} onReset={handleReset} />
