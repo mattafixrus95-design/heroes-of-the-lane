@@ -40,12 +40,12 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Лесной",
-        damage: 2, range: 3, attackSpeed: 1.20, slow: 0,
+        damage: 3, range: 3, attackSpeed: 1.30, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Капитан",
-        damage: 5, range: 3, attackSpeed: 1.60, slow: 0,
+        damage: 6, range: 3, attackSpeed: 1.70, slow: 0,
         ability: { kind: "crit", chance: 0.20, multiplier: 2 },
         upgradeCost: 30, upgradeTime: 1, foodUpgradeCost: 0,
       },
@@ -60,12 +60,12 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Лесной",
-        damage: 3, range: 2, attackSpeed: 1.50, slow: 0,
+        damage: 4, range: 2, attackSpeed: 1.50, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Боевой",
-        damage: 5, range: 3, attackSpeed: 1.80, slow: 0.25,
+        damage: 6, range: 3, attackSpeed: 1.80, slow: 0.25,
         upgradeCost: 45, upgradeTime: 1, foodUpgradeCost: 0,
       },
     ],
@@ -79,12 +79,12 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Лесной",
-        damage: 4, range: 3, attackSpeed: 1.20, slow: 0,
+        damage: 5, range: 3, attackSpeed: 1.20, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Благородный",
-        damage: 5, range: 4, attackSpeed: 1.50, slow: 0,
+        damage: 4, range: 4, attackSpeed: 1.50, slow: 0,
         ability: { kind: "multishot", extraTargets: 3, extraDmgPct: 0.40 },
         upgradeCost: 105, upgradeTime: 2, foodUpgradeCost: 2,
       },
@@ -99,15 +99,15 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Лесной",
-        damage: 6, range: 3, attackSpeed: 2.00, slow: 0,
+        damage: 7, range: 3, attackSpeed: 2.00, slow: 0,
         ability: { kind: "vulnerability", pct: 0.15, duration: 2 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Серебряный",
-        damage: 9, range: 4, attackSpeed: 2.30, slow: 0,
+        damage: 10, range: 4, attackSpeed: 2.30, slow: 0,
         ability: { kind: "vulnerability", pct: 0.30, duration: 3 },
-        upgradeCost: 150, upgradeTime: 2, foodUpgradeCost: 3,
+        upgradeCost: 155, upgradeTime: 2, foodUpgradeCost: 3,
       },
     ],
   },
@@ -142,13 +142,13 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       {
         gradeName: "Лесной",
         damage: 9, range: 3, attackSpeed: 1.50, slow: 0,
-        ability: { kind: "aura_haste", radius: 2, pct: 0.15 },
+        ability: { kind: "aura_haste", radius: 2.5, pct: 0.15 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Боевой",
-        damage: 15, range: 4, attackSpeed: 1.70, slow: 0,
-        ability: { kind: "aura_haste", radius: 3, pct: 0.20 },
+        damage: 15, range: 3.5, attackSpeed: 1.70, slow: 0,
+        ability: { kind: "aura_haste", radius: 3.5, pct: 0.20 },
         upgradeCost: 265, upgradeTime: 3, foodUpgradeCost: 3,
       },
     ],
@@ -168,7 +168,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Золотой",
-        damage: 18, range: 5, attackSpeed: 1.20, slow: 0,
+        damage: 18, range: 4.5, attackSpeed: 1.20, slow: 0,
         ability: { kind: "aoe", radius: 2, dmgPct: 0.5 },
         upgradeCost: 340, upgradeTime: 3, foodUpgradeCost: 4,
       },
