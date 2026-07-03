@@ -13,7 +13,7 @@ import { FARM_CELL, SAWMILL_CELL, EXIT_CELL, TAVERN_CELL } from "../data/map";
 import { CREEP_DEFS, WAVE_DEFS } from "../data/waves";
 import { HERO_DEFS, heroAuraPct } from "../data/heroes";
 import type { HeroType } from "../data/heroes";
-import { auraBonus } from "../game/systems/towerAttack";
+import { auraBonus, heroAuraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
 import HeroIcon from "./HeroIcon";
 import WoodSVG from "../assets/WoodSVG";
@@ -139,6 +139,9 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
   const bonus = auraBonus(tower, state.towers);
   const effectiveAttackSpeed = tower.attackSpeed * (1 + bonus);
 
+  const heroBonus = heroAuraBonus(tower, state.heroes);
+  const effectiveDamage = tower.damage * (1 + heroBonus);
+
   const canAffordUpgrade = nextGrade
     ? state.gold >= nextGrade.upgradeCost && state.food >= nextGrade.foodUpgradeCost
     : false;
@@ -158,7 +161,7 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
       )}
 
       <div className="cm-stats">
-        <span>⚔️ {tower.damage}</span>
+        <span>⚔️ {heroBonus > 0 ? `${tower.damage} → ${effectiveDamage.toFixed(1)}` : tower.damage}{heroBonus > 0 && ` (+${Math.round(heroBonus * 100)}% герой)`}</span>
         <span>🎯 {tower.range}</span>
         <span>⚡ {bonus > 0 ? `${tower.attackSpeed} → ${effectiveAttackSpeed.toFixed(2)}` : tower.attackSpeed}/с{bonus > 0 && ` (+${Math.round(bonus * 100)}% аура)`}</span>
         {tower.ability?.kind === "aoe"           && <span>💥 AoE r{tower.ability.radius}</span>}
@@ -836,7 +839,9 @@ function contextMenuPropsEqual(prev: Props, next: Props): boolean {
   if (sel.kind === "tower") {
     const pt = ps.towers.find(t => t.id === sel.id);
     const nt = ns.towers.find(t => t.id === sel.id);
-    return pt === nt && ps.gold === ns.gold && ps.food === ns.food && ps.townLevel === ns.townLevel;
+    const heroesEqual = ps.heroes.length === ns.heroes.length
+      && ps.heroes.every((h, i) => h.level === ns.heroes[i].level && h.col === ns.heroes[i].col && h.row === ns.heroes[i].row);
+    return pt === nt && heroesEqual && ps.gold === ns.gold && ps.food === ns.food && ps.townLevel === ns.townLevel;
   }
 
   if (sel.kind === "hero") {
