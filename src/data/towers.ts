@@ -105,7 +105,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Серебряный",
-        damage: 10, range: 4, attackSpeed: 2.30, slow: 0,
+        damage: 9, range: 4, attackSpeed: 2.30, slow: 0,
         ability: { kind: "vulnerability", pct: 0.30, duration: 3 },
         upgradeCost: 150, upgradeTime: 2, foodUpgradeCost: 3,
       },
@@ -126,7 +126,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Солдат",
-        damage: 14, range: 3, attackSpeed: 1.00, slow: 0,
+        damage: 13, range: 3, attackSpeed: 1.00, slow: 0,
         ability: { kind: "root", everyNth: 2, duration: 0.75 },
         upgradeCost: 165, upgradeTime: 2, foodUpgradeCost: 3,
       },
@@ -147,9 +147,9 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Боевой",
-        damage: 16, range: 4, attackSpeed: 1.70, slow: 0,
+        damage: 15, range: 4, attackSpeed: 1.70, slow: 0,
         ability: { kind: "aura_haste", radius: 3, pct: 0.20 },
-        upgradeCost: 255, upgradeTime: 3, foodUpgradeCost: 3,
+        upgradeCost: 265, upgradeTime: 3, foodUpgradeCost: 3,
       },
     ],
   },
@@ -168,9 +168,9 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Золотой",
-        damage: 19, range: 5, attackSpeed: 1.20, slow: 0,
+        damage: 18, range: 5, attackSpeed: 1.20, slow: 0,
         ability: { kind: "aoe", radius: 2, dmgPct: 0.5 },
-        upgradeCost: 330, upgradeTime: 3, foodUpgradeCost: 4,
+        upgradeCost: 340, upgradeTime: 3, foodUpgradeCost: 4,
       },
     ],
   },
