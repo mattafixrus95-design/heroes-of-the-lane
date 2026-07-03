@@ -387,3 +387,15 @@ body {
   .cm-btn:hover { opacity: 0.88; transform: scale(1.02); }
   .tm-close:hover { color: #fff; }
 }
+
+/* ── Мерцание факелов у ворот ── */
+@keyframes gate-flame-flicker {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  25%      { opacity: 0.85; transform: scaleY(0.92); }
+  50%      { opacity: 1; transform: scaleY(1.05); }
+  75%      { opacity: 0.9; transform: scaleY(0.96); }
+}
+.gate-flame {
+  transform-origin: center bottom;
+  animation: gate-flame-flicker 1.4s ease-in-out infinite;
+}
