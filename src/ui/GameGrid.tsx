@@ -254,11 +254,10 @@ export default function GameGrid({
             <span style={{
               position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
               transform: `translateY(-${Math.round(cell * 0.14)}px)`,
-              perspective: 300,
             }}>
               <ObjectShadow size={iconSize} />
-              {/* Лёгкий разворот в сторону дороги — псевдо-3D без переделки самого спрайта */}
-              <span style={{ position: "relative", zIndex: 1, display: "flex", transform: "rotateY(-16deg)", transformStyle: "preserve-3d" }}>
+              {/* Разворот в сторону дороги нарисован внутри самого спрайта (боковые грани) */}
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
                 <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
               </span>
             </span>
