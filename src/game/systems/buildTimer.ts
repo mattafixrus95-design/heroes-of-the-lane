@@ -34,7 +34,7 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
       food += FARM_FOOD_PER_LEVEL;
       newTexts.push({
         id: `ft-farm-${++ftCounter}`,
-        text: `+${FARM_FOOD_PER_LEVEL}🌾`,
+        text: `+${FARM_FOOD_PER_LEVEL}🍖`,
         x: FARM_CELL[0], y: FARM_CELL[1],
         color: "#8bc34a",
         spawnTime: state.gameTime,

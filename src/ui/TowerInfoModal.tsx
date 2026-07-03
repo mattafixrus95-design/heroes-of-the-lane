@@ -63,7 +63,7 @@ function TowerInfoModal({ type, onClose }: Props) {
           {base.ability?.kind === "aura_haste"    && <Row label="Аура скор."  value={`+${Math.round(base.ability.pct * 100)}% r${base.ability.radius}`} />}
           {base.slow > 0 && <Row label="Замедление" value={`${Math.round(base.slow * 100)}%`} />}
           <div style={{ marginTop: 4, fontSize: "0.78rem", color: "#f0c040", fontWeight: 700 }}>
-            💰 {def.purchaseCost} &nbsp; 🌾 {def.foodCost}
+            💰 {def.purchaseCost} &nbsp; 🍖 {def.foodCost}
           </div>
         </div>
 
@@ -84,7 +84,7 @@ function TowerInfoModal({ type, onClose }: Props) {
           {up.slow > 0 && <Row label="Замедление"  value={`${Math.round(up.slow * 100)}%`} />}
           <div style={{ marginTop: 4, fontSize: "0.78rem", color: "#2a9d9d", fontWeight: 700 }}>
             💰 {up.upgradeCost}
-            {up.foodUpgradeCost > 0 && <> &nbsp; 🌾 {up.foodUpgradeCost}</>}
+            {up.foodUpgradeCost > 0 && <> &nbsp; 🍖 {up.foodUpgradeCost}</>}
             &nbsp; ⏱ {up.upgradeTime}с
           </div>
         </div>

@@ -30,7 +30,7 @@ function BuildingInfoModal({ kind, onClose }: Props) {
       <div className="tower-menu" style={{ gap: 10 }} onClick={e => e.stopPropagation()}>
         <div className="tm-header">
           <div className="tm-title">
-            {kind === "farm" && "🌾 Ферма"}
+            {kind === "farm" && "🍖 Ферма"}
             {kind === "sawmill" && <span className="cost-icon"><SawmillSVG size={22} /> Лесопилка</span>}
             {kind === "town" && "🏘️ Город"}
             {kind === "tavern" && <span className="cost-icon"><TavernSVG size={22} /> Таверна</span>}
