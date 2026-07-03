@@ -1,4 +1,5 @@
-import type { GameState, Tower, Creep, Projectile } from "../engine/gameState";
+import type { GameState, Tower, Creep, Projectile, Hero } from "../engine/gameState";
+import { HERO_DEFS, heroAuraPct } from "../../data/heroes";
 
 const ARROW_SPEED    = 12;
 const FIREBALL_SPEED = 10;
@@ -9,7 +10,7 @@ function dist(tower: Tower, creep: Creep): number {
   return Math.hypot(tower.col - creep.position.x, tower.row - creep.position.y);
 }
 
-function towerDist(a: Tower, b: Tower): number {
+function towerDist(a: { col: number; row: number }, b: { col: number; row: number }): number {
   return Math.hypot(a.col - b.col, a.row - b.row);
 }
 
@@ -34,6 +35,19 @@ export function auraBonus(tower: Tower, towers: Tower[]): number {
     if (t.id === tower.id) continue;
     if (t.ability?.kind === "aura_haste" && t.buildTimeRemaining <= 0 && towerDist(t, tower) <= t.ability.radius) {
       bonus += t.ability.pct;
+    }
+  }
+  return bonus;
+}
+
+// Суммарный бонус к урону от аур героев рядом (растёт с уровнем героя)
+export function heroAuraBonus(tower: Tower, heroes: Hero[]): number {
+  let bonus = 0;
+  for (const h of heroes) {
+    if (h.buildTimeRemaining > 0) continue;
+    const ability = HERO_DEFS[h.type].ability;
+    if (ability.kind === "aura_damage" && towerDist(h, tower) <= ability.radius) {
+      bonus += heroAuraPct(h.level, ability);
     }
   }
   return bonus;
@@ -96,7 +110,7 @@ export function tickTowerAttack(state: GameState): GameState {
       : undefined;
 
     // Кентавр: шанс критического удара
-    let damage = tower.damage;
+    let damage = tower.damage * (1 + heroAuraBonus(tower, state.heroes));
     if (ab?.kind === "crit" && Math.random() < ab.chance) damage *= ab.multiplier;
 
     if (tower.type === "dragon") {
@@ -114,7 +128,7 @@ export function tickTowerAttack(state: GameState): GameState {
         .filter(c => c.id !== target.id && dist(tower, c) <= tower.range)
         .sort((a, b) => b.pathProgress - a.pathProgress)
         .slice(0, ab.extraTargets);
-      const extraDmg = tower.damage * ab.extraDmgPct;
+      const extraDmg = damage * ab.extraDmgPct;
       for (const c of extraTargets) {
         newProjectiles.push(makeProjectile(tower, c, state.gameTime, extraDmg, 0, "arrow"));
       }

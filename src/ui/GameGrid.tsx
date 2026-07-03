@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
-import type { GameState, Tower } from "../game/engine/gameState";
+import type { GameState, Tower, Hero } from "../game/engine/gameState";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
-import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL } from "../data/map";
+import type { HeroType } from "../data/heroes";
+import { HERO_DEFS } from "../data/heroes";
+import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
 import GateSVG from "../assets/GateSVG";
 import FarmSVG from "../assets/FarmSVG";
 import SawmillSVG from "../assets/SawmillSVG";
+import TavernSVG from "../assets/TavernSVG";
 import TowerIcon from "./TowerIcon";
 import TownIcon from "./TownIcon";
+import HeroIcon from "./HeroIcon";
 import HotCanvas from "./HotCanvas";
 import type { ShopItem } from "./TowerShop";
 import type { Selection } from "./selection";
@@ -30,9 +34,12 @@ interface Props {
   state: GameState;
   selectedItem: ShopItem | null;
   selection: Selection | null;
+  pendingHero: HeroType | null;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onExitBuildMode: () => void;
   onSelect: (s: Selection | null) => void;
+  onPlaceHero: () => void;
+  onCancelPendingHero: () => void;
 }
 
 function placeTower(col: number, row: number, type: TowerType, state: GameState): GameState {
@@ -64,6 +71,28 @@ function placeTower(col: number, row: number, type: TowerType, state: GameState)
   };
 }
 
+// Герой уже оплачен при найме в таверне — здесь только размещение на поле,
+// золото повторно не списывается.
+function placeHero(col: number, row: number, type: HeroType, state: GameState): GameState {
+  if (state.heroes.length > 0) return state;
+  if (state.towers.some(t => t.col === col && t.row === row)) return state;
+  const def = HERO_DEFS[type];
+  if (state.food < def.foodCost) return state;
+  const hero: Hero = {
+    id: `h-${Date.now()}-${Math.random()}`,
+    type, col, row,
+    level: 1,
+    foodSpent: def.foodCost,
+    lastAttackTime: -999,
+    buildTimeRemaining: def.buildTime,
+  };
+  return {
+    ...state,
+    food: state.food - def.foodCost,
+    heroes: [...state.heroes, hero],
+  };
+}
+
 const PATH_CORNER   = new Set(["9,0","9,2","0,2","0,4","9,4","9,6","0,6","0,8"]);
 const PATH_VERTICAL = new Set(["9,1","0,3","9,5","0,7"]);
 
@@ -82,20 +111,21 @@ function cellBg(col: number, row: number, isPath: boolean): string {
 }
 
 export default function GameGrid({
-  state, selectedItem, selection, onUpdateState, onExitBuildMode, onSelect,
+  state, selectedItem, selection, pendingHero, onUpdateState, onExitBuildMode, onSelect, onPlaceHero, onCancelPendingHero,
 }: Props) {
   const cell = useCell();
   const canBuild = true;
+  const buildModeActive = !!selectedItem || !!pendingHero;
 
   const iconSize  = Math.round(cell * 0.72);
   const towerSize = Math.round(cell * 0.71);
 
   const [hoveredCell, setHoveredCell] = useState<{ col: number; row: number } | null>(null);
 
-  // Очищаем hover когда выходим из режима строительства
+  // Очищаем hover когда выходим из режима строительства/размещения героя
   useEffect(() => {
-    if (!selectedItem) setHoveredCell(null);
-  }, [selectedItem]);
+    if (!buildModeActive) setHoveredCell(null);
+  }, [buildModeActive]);
 
   // Крипы рисуются на canvas (см. HotCanvas), поэтому клики по ним
   // перехватываем на фазе capture здесь — попадание считаем по тем же
@@ -130,20 +160,24 @@ export default function GameGrid({
       const isPath   = isPathCell(c, r);
       const isTerritory = isTownTerritory(c, r);
       const tower    = state.towers.find(t => t.col === c && t.row === r);
+      const hero     = state.heroes.find(h => h.col === c && h.row === r);
       const isEntry  = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
       const isExit   = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
       const isFarmCell    = c === FARM_CELL[0]    && r === FARM_CELL[1];
       const isSawmillCell = c === SAWMILL_CELL[0] && r === SAWMILL_CELL[1];
+      const isTavernCell  = c === TAVERN_CELL[0]  && r === TAVERN_CELL[1];
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
       const isSelectedTower = !!tower && selection?.kind === "tower" && selection.id === tower.id;
+      const isSelectedHero = !!hero && selection?.kind === "hero" && selection.id === hero.id;
       const isSelectedGate = isEntry && selection?.kind === "wave";
       const isSelectedFarm = isFarmCell && selection?.kind === "farm";
       const isSelectedSawmill = isSawmillCell && selection?.kind === "sawmill";
       const isSelectedTown = isExit && selection?.kind === "town";
+      const isSelectedTavern = isTavernCell && selection?.kind === "tavern";
 
       // Состояние hover и подсветки
-      const isHovered = !!selectedItem && hoveredCell?.col === c && hoveredCell?.row === r;
-      const canPlaceHere = !isPath && !isTerritory && !tower && canBuild;
+      const isHovered = buildModeActive && hoveredCell?.col === c && hoveredCell?.row === r;
+      const canPlaceHere = !isPath && !isTerritory && !tower && !hero && canBuild;
       const highlightColor = isHovered
         ? (canPlaceHere ? "rgba(80,255,80,0.28)" : "rgba(255,60,60,0.32)")
         : undefined;
@@ -152,6 +186,12 @@ export default function GameGrid({
         if (tower) {
           const already = selection?.kind === "tower" && selection.id === tower.id;
           onSelect(already ? null : { kind: "tower", id: tower.id });
+          onExitBuildMode();
+          return;
+        }
+        if (hero) {
+          const already = selection?.kind === "hero" && selection.id === hero.id;
+          onSelect(already ? null : { kind: "hero", id: hero.id });
           onExitBuildMode();
           return;
         }
@@ -175,6 +215,16 @@ export default function GameGrid({
           onExitBuildMode();
           return;
         }
+        if (isTavernCell) {
+          onSelect(selection?.kind === "tavern" ? null : { kind: "tavern" });
+          onExitBuildMode();
+          return;
+        }
+        if (canPlaceHere && pendingHero) {
+          onUpdateState(s => placeHero(c, r, pendingHero, s));
+          onPlaceHero();
+          return;
+        }
         if (!isPath && !isTerritory && canBuild && selectedItem) {
           onUpdateState(s => placeTower(c, r, selectedItem, s));
           return;
@@ -186,7 +236,7 @@ export default function GameGrid({
         <div
           key={`${c}-${r}`}
           onClick={handleClick}
-          onMouseEnter={() => selectedItem && setHoveredCell({ col: c, row: r })}
+          onMouseEnter={() => buildModeActive && setHoveredCell({ col: c, row: r })}
           style={{
             width: cell, height: cell,
             background: highlightColor
@@ -195,9 +245,9 @@ export default function GameGrid({
             border: isPath
               ? "1px solid rgba(80,55,25,0.45)"
               : "1px solid rgba(25,70,35,0.35)",
-            cursor: (tower || isEntry || isExit || isFarmCell || isSawmillCell) ? "pointer"
+            cursor: (tower || hero || isEntry || isExit || isFarmCell || isSawmillCell || isTavernCell) ? "pointer"
               : (isPath || isTerritory || !canBuild) ? "default"
-              : selectedItem ? "crosshair" : "default",
+              : buildModeActive ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
             position: "relative", overflow: "visible",
             touchAction: "manipulation",
@@ -206,7 +256,7 @@ export default function GameGrid({
               ? "inset 0 0 0 2px rgba(80,255,80,0.7)"
               : "inset 0 0 0 2px rgba(255,60,60,0.7)"
             } : {}),
-            ...(isSelectedTower || isSelectedGate || isSelectedFarm || isSelectedSawmill || isSelectedTown
+            ...(isSelectedTower || isSelectedHero || isSelectedGate || isSelectedFarm || isSelectedSawmill || isSelectedTown || isSelectedTavern
               ? { boxShadow: "inset 0 0 0 2px rgba(80,220,255,0.85)" } : {}),
           }}
         >
@@ -268,6 +318,44 @@ export default function GameGrid({
             </span>
           )}
 
+          {isTavernCell && !tower && state.tavern && (
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <TavernSVG size={iconSize} />
+              {state.tavern.buildTimeRemaining > 0 && (
+                <span style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                  color: "#f0c040", flexDirection: "column", gap: 1,
+                }}>
+                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.tavern.buildTimeRemaining)}с</span>
+                </span>
+              )}
+            </span>
+          )}
+
+          {/* Герой */}
+          {hero && (
+            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <HeroIcon type={hero.type} size={towerSize} />
+              {hero.buildTimeRemaining > 0 && (
+                <span style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                  color: "#f0c040", flexDirection: "column", gap: 1,
+                }}>
+                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(hero.buildTimeRemaining)}с</span>
+                </span>
+              )}
+              <span style={{
+                position: "absolute", top: -6, left: -8,
+                fontSize: "0.5rem", background: "#7fd6ff", color: "#1a1a2e",
+                borderRadius: 3, padding: "1px 3px", fontWeight: 800,
+              }}>{hero.level}</span>
+            </span>
+          )}
+
           {/* Башня */}
           {tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -293,7 +381,7 @@ export default function GameGrid({
           )}
 
           {/* Призрак башни при строительстве */}
-          {isHovered && !tower && canBuild && selectedItem && (
+          {isHovered && !tower && !hero && canBuild && selectedItem && (
             <div style={{
               position: "absolute", inset: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -302,14 +390,26 @@ export default function GameGrid({
               <TowerIcon type={selectedItem} grade={0} size={towerSize} />
             </div>
           )}
+
+          {/* Призрак героя при размещении */}
+          {isHovered && !tower && !hero && canBuild && pendingHero && (
+            <div style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              opacity: 0.55, pointerEvents: "none",
+            }}>
+              <HeroIcon type={pendingHero} size={towerSize} />
+            </div>
+          )}
         </div>
       );
     }
   }
 
-  // Радиус атаки выбранной башни при hover в режиме строительства
-  const buildRange = selectedItem && hoveredCell
-    ? TOWER_DEFS[selectedItem].grades[0].range
+  // Радиус атаки выбранной башни/героя при hover в режиме строительства/размещения
+  const buildRange = !hoveredCell ? null
+    : selectedItem ? TOWER_DEFS[selectedItem].grades[0].range
+    : pendingHero ? HERO_DEFS[pendingHero].range
     : null;
   const radiusPx = buildRange !== null ? buildRange * cell : 0;
 
@@ -318,6 +418,14 @@ export default function GameGrid({
   const selectedTowerRangePx = selectedTower ? selectedTower.range * cell : 0;
   const selectedTowerAuraPx = selectedTower?.ability?.kind === "aura_haste"
     ? selectedTower.ability.radius * cell
+    : 0;
+
+  // Круги радиуса атаки и ауры у выбранного героя
+  const selectedHero = selection?.kind === "hero" ? state.heroes.find(h => h.id === selection.id) : null;
+  const selectedHeroDef = selectedHero ? HERO_DEFS[selectedHero.type] : null;
+  const selectedHeroRangePx = selectedHeroDef ? selectedHeroDef.range * cell : 0;
+  const selectedHeroAuraPx = selectedHeroDef?.ability.kind === "aura_damage"
+    ? selectedHeroDef.ability.radius * cell
     : 0;
 
   return (
@@ -329,7 +437,7 @@ export default function GameGrid({
         borderRadius: 6, overflow: "hidden", touchAction: "none",
       }}
       onMouseLeave={() => setHoveredCell(null)}
-      onContextMenu={e => { e.preventDefault(); onExitBuildMode(); }}
+      onContextMenu={e => { e.preventDefault(); pendingHero ? onCancelPendingHero() : onExitBuildMode(); }}
       onClickCapture={handleContainerClickCapture}
     >
       <div style={{
@@ -378,6 +486,34 @@ export default function GameGrid({
                 borderRadius: "50%",
                 border: "2px dashed rgba(120,180,255,0.75)",
                 background: "rgba(120,180,255,0.08)",
+              }}/>
+            )}
+          </>
+        )}
+
+        {/* Радиус атаки и ауры выбранного героя */}
+        {selectedHero && (
+          <>
+            <div style={{
+              position: "absolute",
+              left: (selectedHero.col + 0.5) * cell - selectedHeroRangePx,
+              top:  (selectedHero.row + 0.5) * cell - selectedHeroRangePx,
+              width:  selectedHeroRangePx * 2,
+              height: selectedHeroRangePx * 2,
+              borderRadius: "50%",
+              border: "2px solid rgba(255,230,80,0.6)",
+              background: "rgba(255,230,80,0.07)",
+            }}/>
+            {selectedHeroAuraPx > 0 && (
+              <div style={{
+                position: "absolute",
+                left: (selectedHero.col + 0.5) * cell - selectedHeroAuraPx,
+                top:  (selectedHero.row + 0.5) * cell - selectedHeroAuraPx,
+                width:  selectedHeroAuraPx * 2,
+                height: selectedHeroAuraPx * 2,
+                borderRadius: "50%",
+                border: "2px dashed rgba(255,150,220,0.75)",
+                background: "rgba(255,150,220,0.08)",
               }}/>
             )}
           </>

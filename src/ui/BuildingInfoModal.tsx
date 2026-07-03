@@ -4,12 +4,14 @@ import {
   farmCost, FARM_GOLD_COST, FARM_BUILD_TIME, FARM_FOOD_PER_LEVEL, FARM_WOOD_COST_BY_LEVEL,
   sawmillCost, SAWMILL_GOLD_COST, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
+  TAVERN_COST, TAVERN_BUILD_TIME, HERO_HIRE_COST,
 } from "../data/buildings";
 import WoodSVG from "../assets/WoodSVG";
 import SawmillSVG from "../assets/SawmillSVG";
+import TavernSVG from "../assets/TavernSVG";
 
 interface Props {
-  kind: "farm" | "sawmill" | "town";
+  kind: "farm" | "sawmill" | "town" | "tavern";
   onClose: () => void;
 }
 
@@ -31,6 +33,7 @@ function BuildingInfoModal({ kind, onClose }: Props) {
             {kind === "farm" && "🌾 Ферма"}
             {kind === "sawmill" && <span className="cost-icon"><SawmillSVG size={22} /> Лесопилка</span>}
             {kind === "town" && "🏘️ Город"}
+            {kind === "tavern" && <span className="cost-icon"><TavernSVG size={22} /> Таверна</span>}
           </div>
           <button className="tm-close" onClick={onClose}>✕</button>
         </div>
@@ -67,6 +70,19 @@ function BuildingInfoModal({ kind, onClose }: Props) {
                 <Row key={i} label={`Ур. ${i + 1}`} value={<span className="cost-icon">💰{cost.gold} <WoodSVG size={13} />{cost.wood}</span>} />
               );
             })}
+          </div>
+        )}
+
+        {kind === "tavern" && (
+          <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 5 }}>
+            <div style={{ fontSize: "0.78rem", color: "#aaa", lineHeight: 1.3, marginBottom: 4 }}>
+              Открывает найм героев. На поле одновременно может находиться только один герой,
+              продать его нельзя. После постройки в таверне появляется один случайный герой —
+              нанять его можно за фиксированную цену золота.
+            </div>
+            <Row label="Стройка"    value={`${TAVERN_BUILD_TIME}с`} />
+            <Row label="Цена постройки" value={<span className="cost-icon">💰{TAVERN_COST.gold} <WoodSVG size={13} />{TAVERN_COST.wood}</span>} />
+            <Row label="Найм героя" value={`💰${HERO_HIRE_COST}`} />
           </div>
         )}
 

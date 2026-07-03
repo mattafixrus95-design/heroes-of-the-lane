@@ -11,11 +11,11 @@ export const GRID_ROWS = 10;
 // r5 [ .  .  .  .  .  .  .  .  .  P ]
 // r6 [ P  P  P  P  P  P  P  P  P  P ]
 // r7 [ P  .  .  .  .  .  .  .  .  . ]
-// r8 [ P  P  P  P  P  P  P  P  P  C ]
-// r9 [ .  .  .  .  .  .  .  .  T  T ]  ← новый ряд, полностью зелёный кроме территории города
+// r8 [ P  P  P  P  P  P  P  C  T  . ]  ← замок сдвинут на клетку влево
+// r9 [ .  .  .  .  .  .  .  .  T  T ]
 
 export const ENTRY_CELL: [number, number] = [0, 0];
-export const EXIT_CELL:  [number, number] = [9, 8];
+export const EXIT_CELL:  [number, number] = [8, 8]; // замок — на клетку левее, чем раньше
 
 export const PATH: [number, number][] = [
   // Row 0 → right (G at col 0)
@@ -34,8 +34,8 @@ export const PATH: [number, number][] = [
   [8,6],[7,6],[6,6],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],
   // Turn down col 0 → row 8
   [0,7],[0,8],
-  // Row 8 → right (C at col 9)
-  [1,8],[2,8],[3,8],[4,8],[5,8],[6,8],[7,8],[8,8],[9,8],
+  // Row 8 → right, заканчивается у замка (C at col 8)
+  [1,8],[2,8],[3,8],[4,8],[5,8],[6,8],[7,8],[8,8],
 ];
 
 export const PATH_SET = new Set(PATH.map(([c, r]) => `${c},${r}`));
@@ -45,10 +45,11 @@ export function isPathCell(col: number, row: number): boolean {
 }
 
 // Территория города: нижние правые 2×2 клетки карты.
-// (9,8) — замок (конечная точка пути), (8,8) — часть дороги.
-// (8,9) — слот фермы, (9,9) — слот лесопилки.
+// (8,8) — замок (конечная точка пути). (9,8) — освободилось после переноса
+// замка, слот таверны. (8,9) — слот фермы, (9,9) — слот лесопилки.
 export const FARM_CELL:    [number, number] = [8, 9];
 export const SAWMILL_CELL: [number, number] = [9, 9];
+export const TAVERN_CELL:  [number, number] = [9, 8];
 export const TOWN_TERRITORY = new Set(["8,8", "9,8", "8,9", "9,9"]);
 
 export function isTownTerritory(col: number, row: number): boolean {

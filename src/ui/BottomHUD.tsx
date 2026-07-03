@@ -80,6 +80,8 @@ export default memo(BottomHUD, (prev, next) => {
     (ps.farm?.level ?? 0) === (ns.farm?.level ?? 0) &&
     ((ps.farm?.buildTimeRemaining ?? 0) > 0) === ((ns.farm?.buildTimeRemaining ?? 0) > 0) &&
     (ps.sawmill?.level ?? 0) === (ns.sawmill?.level ?? 0) &&
-    ((ps.sawmill?.buildTimeRemaining ?? 0) > 0) === ((ns.sawmill?.buildTimeRemaining ?? 0) > 0)
+    ((ps.sawmill?.buildTimeRemaining ?? 0) > 0) === ((ns.sawmill?.buildTimeRemaining ?? 0) > 0) &&
+    ps.tavern === ns.tavern &&
+    ps.heroes.length === ns.heroes.length
   );
 });

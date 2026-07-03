@@ -1,4 +1,5 @@
 import type { TowerType, TowerAbility } from "../../data/towers";
+import type { HeroType } from "../../data/heroes";
 import { TOWN_LEVELS, STARTING_TOWN_LEVEL, STARTING_WOOD, BASE_FOOD_CAPACITY, FARM_FOOD_PER_LEVEL } from "../../data/buildings";
 
 export type Phase = "idle" | "prep" | "wave" | "defeat" | "victory";
@@ -76,6 +77,28 @@ export interface Sawmill {
   tickTimer: number;          // секунд до следующего тика дохода
 }
 
+// Герои хранятся отдельно от башен — это принципиально другая сущность
+// (не продаётся, не грейдится обычным способом, растёт уровнем от волн).
+export interface Hero {
+  id: string;
+  type: HeroType;
+  col: number;
+  row: number;
+  level: number;              // 1..HERO_MAX_LEVEL, растёт по волнам
+  foodSpent: number;
+  lastAttackTime: number;
+  buildTimeRemaining: number; // > 0 = только что поставлен, ещё не атакует
+}
+
+export interface HeroOffer {
+  type: HeroType;
+}
+
+export interface Tavern {
+  buildTimeRemaining: number; // > 0 = строится
+  offers: HeroOffer[];        // сейчас всегда максимум 1 — задел под будущий список из 3
+}
+
 export interface PendingDamage {
   targetId: string;
   damage: number;
@@ -88,7 +111,7 @@ export interface PendingDamage {
 
 export interface Projectile {
   id: string;
-  towerType: TowerType;
+  towerType: TowerType | HeroType;
   fromCol: number;
   fromRow: number;
   toX: number;
@@ -132,13 +155,15 @@ export interface GameState {
   wood: number;
   lives: number;
   maxLives: number;
-  townLevel: 1 | 2 | 3;
+  townLevel: 1 | 2 | 3 | 4;
   townBuildTimeRemaining: number; // > 0 = город строится (апгрейд ещё не завершён)
   food: number;
   creeps: Creep[];
   towers: Tower[];
+  heroes: Hero[];
   farm: Farm | null;
   sawmill: Sawmill | null;
+  tavern: Tavern | null;
   projectiles: Projectile[];
   splashEffects: SplashEffect[];
   floatingTexts: FloatingText[];
@@ -180,8 +205,10 @@ export function createInitialState(): GameState {
     food: BASE_FOOD_CAPACITY + FARM_FOOD_PER_LEVEL,
     creeps: [],
     towers: [],
+    heroes: [],
     farm: { level: 1, foodProduced: FARM_FOOD_PER_LEVEL, totalInvested: 0, buildTimeRemaining: 0 },
     sawmill: null,
+    tavern: null,
     projectiles: [],
     splashEffects: [],
     floatingTexts: [],

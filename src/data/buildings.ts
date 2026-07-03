@@ -34,7 +34,7 @@ export function sawmillCost(targetLevel: number): ResourceCost {
 
 // ── Город ─────────────────────────────────────────────────────────────────────
 export interface TownLevelDef {
-  level: 1 | 2 | 3;
+  level: 1 | 2 | 3 | 4;
   name: string;
   maxHp: number;
   upgradeCost: ResourceCost | null; // null = стартовый уровень, апгрейд недоступен
@@ -43,11 +43,22 @@ export interface TownLevelDef {
   maxUpgradeTier: number;           // максимальный tier башен, доступных к улучшению
 }
 
+// HP форта/цитадели/замка не были явно заданы в ТЗ — выбраны как
+// разумная прогрессия между Деревней (20) и старым значением Замка (65)
 export const TOWN_LEVELS: TownLevelDef[] = [
-  { level: 1, name: "Деревня",  maxHp: 30, upgradeCost: null,                     buildTime: 0, maxBuildTier: 5, maxUpgradeTier: 3 },
-  { level: 2, name: "Цитадель", maxHp: 45, upgradeCost: { gold: 50,  wood: 200 }, buildTime: 5, maxBuildTier: 7, maxUpgradeTier: 5 },
-  { level: 3, name: "Замок",    maxHp: 65, upgradeCost: { gold: 100, wood: 500 }, buildTime: 7, maxBuildTier: 7, maxUpgradeTier: 7 },
+  { level: 1, name: "Деревня",  maxHp: 20, upgradeCost: null,                     buildTime: 0, maxBuildTier: 4, maxUpgradeTier: 2 },
+  { level: 2, name: "Форт",     maxHp: 35, upgradeCost: { gold: 50,  wood: 100 }, buildTime: 4, maxBuildTier: 6, maxUpgradeTier: 4 },
+  { level: 3, name: "Цитадель", maxHp: 50, upgradeCost: { gold: 100, wood: 200 }, buildTime: 5, maxBuildTier: 7, maxUpgradeTier: 5 },
+  { level: 4, name: "Замок",    maxHp: 70, upgradeCost: { gold: 150, wood: 350 }, buildTime: 6, maxBuildTier: 7, maxUpgradeTier: 7 },
 ];
 
 export const STARTING_TOWN_LEVEL = 1;
 export const BASE_FOOD_CAPACITY = 0; // без фермы еды нет вообще
+
+// ── Таверна ───────────────────────────────────────────────────────────────────
+export const TAVERN_COST: ResourceCost = { gold: 50, wood: 50 };
+export const TAVERN_BUILD_TIME = 3;
+
+// ── Герои ─────────────────────────────────────────────────────────────────────
+export const HERO_HIRE_COST = 150; // золото, фикс. цена найма
+export const HERO_MAX_LEVEL = 10;

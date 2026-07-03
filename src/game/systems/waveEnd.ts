@@ -1,6 +1,7 @@
 import type { GameState, WaveStat, FloatingText } from "../engine/gameState";
 import { PREP_DURATION } from "../engine/gameState";
 import { WAVE_DEFS } from "../../data/waves";
+import { HERO_MAX_LEVEL } from "../../data/buildings";
 
 function saveWaveStat(state: GameState): WaveStat[] {
   return [...state.waveStats, {
@@ -41,12 +42,16 @@ export function tickWaveEnd(state: GameState): GameState {
   const bonus = waveBonus(state.wave);
   const ft = bonusText(bonus, state.gameTime);
 
+  // Герои на поле получают уровень за каждую пройденную волну
+  const heroes = state.heroes.map(h => ({ ...h, level: Math.min(HERO_MAX_LEVEL, h.level + 1) }));
+
   // Все волны пройдены — победа
   if (state.wave >= WAVE_DEFS.length) {
     return {
       ...state,
       phase: "victory",
       gold: state.gold + bonus,
+      heroes,
       projectiles: [], splashEffects: [],
       waveStats,
       floatingTexts: [...state.floatingTexts, ft],
@@ -59,6 +64,7 @@ export function tickWaveEnd(state: GameState): GameState {
     phase: "prep",
     prepTimer: PREP_DURATION,
     gold: state.gold + bonus,
+    heroes,
     projectiles: [], splashEffects: [],
     waveStats,
     floatingTexts: [...state.floatingTexts, ft],

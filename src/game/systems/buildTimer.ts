@@ -1,6 +1,13 @@
-import type { GameState, FloatingText } from "../engine/gameState";
+import type { GameState, FloatingText, HeroOffer } from "../engine/gameState";
 import { FARM_FOOD_PER_LEVEL, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL, TOWN_LEVELS } from "../../data/buildings";
 import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../../data/map";
+import { HERO_DEFS } from "../../data/heroes";
+import type { HeroType } from "../../data/heroes";
+
+function randomHeroOffer(): HeroOffer {
+  const types = Object.keys(HERO_DEFS) as HeroType[];
+  return { type: types[Math.floor(Math.random() * types.length)] };
+}
 
 let ftCounter = 0;
 
@@ -9,6 +16,12 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
     t.buildTimeRemaining > 0
       ? { ...t, buildTimeRemaining: Math.max(0, t.buildTimeRemaining - dt) }
       : t,
+  );
+
+  const heroes = state.heroes.map(h =>
+    h.buildTimeRemaining > 0
+      ? { ...h, buildTimeRemaining: Math.max(0, h.buildTimeRemaining - dt) }
+      : h,
   );
 
   let food = state.food;
@@ -86,11 +99,21 @@ export function tickBuildTimer(state: GameState, dt: number): GameState {
     }
   }
 
+  let tavern = state.tavern;
+  if (tavern && tavern.buildTimeRemaining > 0) {
+    const newTime = tavern.buildTimeRemaining - dt;
+    tavern = newTime <= 0
+      ? { ...tavern, buildTimeRemaining: 0, offers: [randomHeroOffer()] }
+      : { ...tavern, buildTimeRemaining: newTime };
+  }
+
   return {
     ...state,
     towers,
+    heroes,
     farm,
     sawmill,
+    tavern,
     food,
     wood,
     townLevel,
