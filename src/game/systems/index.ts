@@ -2,6 +2,7 @@ import type { GameState } from "../engine/gameState";
 import { tickCreepSpawn } from "./creepSpawn";
 import { tickEnemyMovement } from "./enemyMovement";
 import { tickTowerAttack } from "./towerAttack";
+import { tickHeroAttack } from "./heroAttack";
 import { tickProjectiles } from "./projectiles";
 import { tickWaveEnd } from "./waveEnd";
 import { tickBuildTimer } from "./buildTimer";
@@ -14,6 +15,7 @@ export function tickSystems(state: GameState, dt: number): GameState {
   s = tickCreepSpawn(s, dt);
   s = tickEnemyMovement(s, dt);
   s = tickTowerAttack(s);
+  s = tickHeroAttack(s);
   s = tickProjectiles(s);
   s = tickWaveEnd(s);
   s = tickFloatingTexts(s);

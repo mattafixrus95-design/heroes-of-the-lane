@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { GameState, Tower, Creep, CreepKind, FloatingText } from "../game/engine/gameState";
+import type { GameState, Tower, Hero, Creep, CreepKind, FloatingText } from "../game/engine/gameState";
 import { SELL_RATE } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
 import type { TowerType } from "../data/towers";
@@ -7,22 +7,29 @@ import {
   farmCost, FARM_BUILD_TIME,
   sawmillCost, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
+  TAVERN_COST, TAVERN_BUILD_TIME, HERO_HIRE_COST, HERO_MAX_LEVEL,
 } from "../data/buildings";
-import { FARM_CELL, SAWMILL_CELL, EXIT_CELL } from "../data/map";
+import { FARM_CELL, SAWMILL_CELL, EXIT_CELL, TAVERN_CELL } from "../data/map";
 import { CREEP_DEFS, WAVE_DEFS } from "../data/waves";
+import { HERO_DEFS, heroAuraPct } from "../data/heroes";
+import type { HeroType } from "../data/heroes";
 import { auraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
+import HeroIcon from "./HeroIcon";
 import WoodSVG from "../assets/WoodSVG";
 import SawmillSVG from "../assets/SawmillSVG";
+import TavernSVG from "../assets/TavernSVG";
 import type { Selection } from "./selection";
 
 interface Props {
   state: GameState;
   selection: Selection;
+  pendingHero: HeroType | null;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onClose: () => void;
   onShowTowerInfo: (type: TowerType) => void;
-  onShowBuildingInfo: (kind: "farm" | "sawmill" | "town") => void;
+  onShowBuildingInfo: (kind: "farm" | "sawmill" | "town" | "tavern") => void;
+  onHireHero: (type: HeroType) => void;
 }
 
 function ft(text: string, x: number, y: number, color: string, gameTime: number): FloatingText {
@@ -418,6 +425,130 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
   );
 }
 
+// ── Таверна ───────────────────────────────────────────────────────────────────
+function buildTavern(state: GameState): GameState {
+  if (state.tavern) return state;
+  if (state.gold < TAVERN_COST.gold || state.wood < TAVERN_COST.wood) return state;
+  const texts = [
+    ft(`-${TAVERN_COST.gold}💰`, TAVERN_CELL[0], TAVERN_CELL[1], "#ff8080", state.gameTime),
+    ft(`-${TAVERN_COST.wood}🌲`, TAVERN_CELL[0], TAVERN_CELL[1] - 0.6, "#ff8080", state.gameTime),
+  ];
+  return {
+    ...state,
+    gold: state.gold - TAVERN_COST.gold,
+    wood: state.wood - TAVERN_COST.wood,
+    tavern: { buildTimeRemaining: TAVERN_BUILD_TIME, offers: [] },
+    floatingTexts: [...state.floatingTexts, ...texts],
+  };
+}
+
+function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, onHireHero }: {
+  state: GameState; pendingHero: HeroType | null;
+  onUpdateState: Props["onUpdateState"]; onShowBuildingInfo: Props["onShowBuildingInfo"]; onHireHero: Props["onHireHero"];
+}) {
+  const tavern = state.tavern;
+  const isBuilding = !!tavern && tavern.buildTimeRemaining > 0;
+  const canAffordBuild = state.gold >= TAVERN_COST.gold && state.wood >= TAVERN_COST.wood;
+  const canBuild = !tavern && canAffordBuild;
+  const hasHeroInPlay = state.heroes.length > 0 || !!pendingHero;
+  const canAffordHire = state.gold >= HERO_HIRE_COST;
+
+  return (
+    <>
+      <div className="cm-header">
+        <span className="cm-title"><TavernSVG size={22} /> Таверна</span>
+      </div>
+
+      {isBuilding && (
+        <div className="cm-building-badge">⚙️ Строится… {Math.ceil(tavern!.buildTimeRemaining)}с</div>
+      )}
+
+      {tavern && !isBuilding && (
+        tavern.offers.length > 0 ? (
+          tavern.offers.map((offer, i) => {
+            const def = HERO_DEFS[offer.type];
+            return (
+              <div key={i} className="cm-stats" style={{ flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+                <span><HeroIcon type={offer.type} size={20} /> {def.name} · {def.race} {def.className}</span>
+                <span>⚔️ {def.damage} 🎯 {def.range} ⚡ {def.attackSpeed}/с 🌾 {def.foodCost}</span>
+                {def.ability.kind === "aura_damage" && (
+                  <span>✨ Аура +{Math.round(def.ability.basePct * 100)}% урона башням в радиусе {def.ability.radius} (растёт с уровнем)</span>
+                )}
+              </div>
+            );
+          })
+        ) : (
+          <div className="cm-stats"><span>Героев пока нет</span></div>
+        )
+      )}
+
+      <div className="cm-actions">
+        {!tavern ? (
+          <button
+            className="cm-btn upgrade"
+            disabled={!canBuild}
+            onClick={() => onUpdateState(buildTavern)}
+          >
+            Построить
+            <span className="cm-btn-cost">
+              💰 {TAVERN_COST.gold} <span className="cost-icon"><WoodSVG size={13} /> {TAVERN_COST.wood}</span>
+              {!canAffordBuild ? " (недост.)" : ""}
+            </span>
+          </button>
+        ) : !isBuilding && tavern.offers.length > 0 ? (
+          <button
+            className="cm-btn upgrade"
+            disabled={hasHeroInPlay || !canAffordHire}
+            onClick={() => onHireHero(tavern.offers[0].type)}
+          >
+            Нанять
+            <span className="cm-btn-cost">
+              💰 {HERO_HIRE_COST}
+              {hasHeroInPlay ? " (герой уже есть)" : !canAffordHire ? " (недост.)" : ""}
+            </span>
+          </button>
+        ) : null}
+
+        <button className="cm-btn info" onClick={() => onShowBuildingInfo("tavern")}>
+          Информация
+        </button>
+      </div>
+    </>
+  );
+}
+
+// ── Герой ─────────────────────────────────────────────────────────────────────
+function HeroPanel({ hero }: { hero: Hero }) {
+  const def = HERO_DEFS[hero.type];
+  const isBuilding = hero.buildTimeRemaining > 0;
+  const auraPct = def.ability.kind === "aura_damage" ? heroAuraPct(hero.level, def.ability) : 0;
+
+  return (
+    <>
+      <div className="cm-header">
+        <span className="cm-title"><HeroIcon type={hero.type} size={26} /> {def.name} · ур.{hero.level}</span>
+      </div>
+
+      {isBuilding && (
+        <div className="cm-building-badge">⚙️ Занимает позицию… {Math.ceil(hero.buildTimeRemaining)}с</div>
+      )}
+
+      <div className="cm-stats">
+        <span>⚔️ {def.damage}</span>
+        <span>🎯 {def.range}</span>
+        <span>⚡ {def.attackSpeed}/с</span>
+        <span>🌾 {def.foodCost}</span>
+        {def.ability.kind === "aura_damage" && (
+          <span>✨ Аура +{Math.round(auraPct * 100)}% урона · r{def.ability.radius}</span>
+        )}
+      </div>
+      <div className="cm-stats">
+        <span>Уровень {hero.level}/{HERO_MAX_LEVEL} · растёт после каждой волны</span>
+      </div>
+    </>
+  );
+}
+
 // ── Крип ──────────────────────────────────────────────────────────────────────
 const ABILITY_LABEL: Record<string, string> = {
   block: "🛡 Блок 20%",
@@ -497,13 +628,23 @@ function WavePanel({ state }: { state: GameState }) {
   );
 }
 
-function ContextMenu({ state, selection, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo }: Props) {
+function ContextMenu({ state, selection, pendingHero, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo, onHireHero }: Props) {
   if (selection.kind === "tower") {
     const tower = state.towers.find(t => t.id === selection.id);
     if (!tower) return null;
     return (
       <div className="context-menu">
         <TowerPanel tower={tower} state={state} onUpdateState={onUpdateState} onClose={onClose} onShowTowerInfo={onShowTowerInfo} />
+      </div>
+    );
+  }
+
+  if (selection.kind === "hero") {
+    const hero = state.heroes.find(h => h.id === selection.id);
+    if (!hero) return null;
+    return (
+      <div className="context-menu">
+        <HeroPanel hero={hero} />
       </div>
     );
   }
@@ -542,6 +683,14 @@ function ContextMenu({ state, selection, onUpdateState, onClose, onShowTowerInfo
     );
   }
 
+  if (selection.kind === "tavern") {
+    return (
+      <div className="context-menu">
+        <TavernPanel state={state} pendingHero={pendingHero} onUpdateState={onUpdateState} onShowBuildingInfo={onShowBuildingInfo} onHireHero={onHireHero} />
+      </div>
+    );
+  }
+
   return (
     <div className="context-menu">
       <TownPanel state={state} onUpdateState={onUpdateState} onShowBuildingInfo={onShowBuildingInfo} />
@@ -556,10 +705,12 @@ function ContextMenu({ state, selection, onUpdateState, onClose, onShowTowerInfo
 function contextMenuPropsEqual(prev: Props, next: Props): boolean {
   if (
     prev.selection !== next.selection ||
+    prev.pendingHero !== next.pendingHero ||
     prev.onUpdateState !== next.onUpdateState ||
     prev.onClose !== next.onClose ||
     prev.onShowTowerInfo !== next.onShowTowerInfo ||
-    prev.onShowBuildingInfo !== next.onShowBuildingInfo
+    prev.onShowBuildingInfo !== next.onShowBuildingInfo ||
+    prev.onHireHero !== next.onHireHero
   ) return false;
 
   const sel = next.selection;
@@ -571,6 +722,12 @@ function contextMenuPropsEqual(prev: Props, next: Props): boolean {
     const pt = ps.towers.find(t => t.id === sel.id);
     const nt = ns.towers.find(t => t.id === sel.id);
     return pt === nt && ps.gold === ns.gold && ps.food === ns.food && ps.townLevel === ns.townLevel;
+  }
+
+  if (sel.kind === "hero") {
+    const ph = ps.heroes.find(h => h.id === sel.id);
+    const nh = ns.heroes.find(h => h.id === sel.id);
+    return ph === nh;
   }
 
   if (sel.kind === "wave") {
@@ -588,6 +745,10 @@ function contextMenuPropsEqual(prev: Props, next: Props): boolean {
 
   if (sel.kind === "sawmill") {
     return ps.sawmill === ns.sawmill && ps.gold === ns.gold && ps.wood === ns.wood;
+  }
+
+  if (sel.kind === "tavern") {
+    return ps.tavern === ns.tavern && ps.gold === ns.gold && ps.wood === ns.wood && ps.heroes.length === ns.heroes.length;
   }
 
   // town

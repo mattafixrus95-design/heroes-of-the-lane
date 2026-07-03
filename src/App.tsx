@@ -15,6 +15,8 @@ import BuildingInfoModal from "./ui/BuildingInfoModal";
 import StatsOverlay from "./ui/StatsOverlay";
 import UpdateButton from "./ui/UpdateButton";
 import type { TowerType } from "./data/towers";
+import type { HeroType } from "./data/heroes";
+import { HERO_HIRE_COST } from "./data/buildings";
 import type { Selection } from "./ui/selection";
 import { audioManager } from "./audio/AudioManager";
 import "./index.css";
@@ -23,11 +25,12 @@ export default function App() {
   const [state, setState] = useState<GameState>(createInitialState);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [pendingHero, setPendingHero] = useState<HeroType | null>(null);
   const [bottomTab, setBottomTab] = useState<BottomTab>("towers");
   const [volume, setVolume] = useState(0.7);
   const prevVolumeRef = useRef(0.7);
   const [infoTowerType, setInfoTowerType] = useState<TowerType | null>(null);
-  const [infoBuildingKind, setInfoBuildingKind] = useState<"farm" | "sawmill" | "town" | null>(null);
+  const [infoBuildingKind, setInfoBuildingKind] = useState<"farm" | "sawmill" | "town" | "tavern" | null>(null);
 
   const updateState = useCallback(
     (updater: (s: GameState) => GameState) => setState(updater),
@@ -64,6 +67,7 @@ export default function App() {
     setState(createInitialState());
     setSelectedItem(null);
     setSelection(null);
+    setPendingHero(null);
     setInfoTowerType(null);
     setInfoBuildingKind(null);
   }, []);
@@ -72,7 +76,7 @@ export default function App() {
     setSelection(sel);
     setSelectedItem(null);
     if (sel?.kind === "tower") setBottomTab("towers");
-    else if (sel?.kind === "farm" || sel?.kind === "sawmill" || sel?.kind === "town") setBottomTab("buildings");
+    else if (sel?.kind === "farm" || sel?.kind === "sawmill" || sel?.kind === "town" || sel?.kind === "tavern") setBottomTab("buildings");
   }, []);
 
   const handleSelectShopItem = useCallback((item: ShopItem | null) => {
@@ -82,6 +86,43 @@ export default function App() {
 
   const handleExitBuildMode = useCallback(() => setSelectedItem(null), []);
   const handleCloseSelection = useCallback(() => setSelection(null), []);
+
+  // Найм героя: золото списывается сразу, оффер убирается из таверны,
+  // герой переходит в режим размещения на поле (аналог selectedItem для башен).
+  const handleHireHero = useCallback((type: HeroType) => {
+    setState(s => {
+      if (s.gold < HERO_HIRE_COST) return s;
+      if (!s.tavern || s.tavern.buildTimeRemaining > 0) return s;
+      if (s.heroes.length > 0) return s;
+      const idx = s.tavern.offers.findIndex(o => o.type === type);
+      if (idx === -1) return s;
+      const offers = [...s.tavern.offers];
+      offers.splice(idx, 1);
+      return { ...s, gold: s.gold - HERO_HIRE_COST, tavern: { ...s.tavern, offers } };
+    });
+    setPendingHero(type);
+    setSelection(null);
+    setSelectedItem(null);
+  }, []);
+
+  // Отмена размещения героя до того, как он поставлен на поле — возврат
+  // золота и восстановление оффера в таверне.
+  const handleCancelPendingHero = useCallback(() => {
+    setPendingHero(current => {
+      if (current) {
+        setState(s => s.tavern ? {
+          ...s,
+          gold: s.gold + HERO_HIRE_COST,
+          tavern: { ...s.tavern, offers: [...s.tavern.offers, { type: current }] },
+        } : s);
+      }
+      return null;
+    });
+  }, []);
+
+  // Герой уже размещён в state (GameGrid вызвал placeHero) — здесь только
+  // очищаем режим размещения.
+  const handlePlaceHero = useCallback(() => setPendingHero(null), []);
   const handleCloseTowerInfo = useCallback(() => setInfoTowerType(null), []);
   const handleCloseBuildingInfo = useCallback(() => setInfoBuildingKind(null), []);
 
@@ -110,9 +151,12 @@ export default function App() {
         state={state}
         selectedItem={selectedItem}
         selection={selection}
+        pendingHero={pendingHero}
         onUpdateState={updateState}
         onExitBuildMode={handleExitBuildMode}
         onSelect={handleSelect}
+        onPlaceHero={handlePlaceHero}
+        onCancelPendingHero={handleCancelPendingHero}
       />
       <BottomHUD
         state={state}
@@ -127,10 +171,12 @@ export default function App() {
         <ContextMenu
           state={state}
           selection={selection}
+          pendingHero={pendingHero}
           onUpdateState={updateState}
           onClose={handleCloseSelection}
           onShowTowerInfo={setInfoTowerType}
           onShowBuildingInfo={setInfoBuildingKind}
+          onHireHero={handleHireHero}
         />
       )}
       {!selection && selectedItem && !showStats && (

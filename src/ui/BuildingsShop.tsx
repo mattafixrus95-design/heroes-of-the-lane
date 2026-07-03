@@ -4,6 +4,7 @@ import { TOWN_LEVELS } from "../data/buildings";
 import type { Selection } from "./selection";
 import FarmSVG from "../assets/FarmSVG";
 import SawmillSVG from "../assets/SawmillSVG";
+import TavernSVG from "../assets/TavernSVG";
 import TownIcon from "./TownIcon";
 
 interface Props {
@@ -19,7 +20,9 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
   const sawmillBuilding = !!state.sawmill && state.sawmill.buildTimeRemaining > 0;
   const sawmillMaxed = sawmillLevel >= SAWMILL_MAX_LEVEL;
   const townDef = TOWN_LEVELS[state.townLevel - 1];
-  const townMaxed = state.townLevel >= 3;
+  const townMaxed = state.townLevel >= TOWN_LEVELS.length;
+  const tavernBuilding = !!state.tavern && state.tavern.buildTimeRemaining > 0;
+  const tavernBuilt = !!state.tavern;
 
   function isSelected(kind: Selection["kind"]): boolean {
     return selection?.kind === kind;
@@ -52,6 +55,15 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
         <span className="shop-emoji"><TownIcon level={state.townLevel} size={26} /></span>
         <span className="shop-name">{townDef.name}</span>
         <span className="shop-cost">{townMaxed ? "макс." : "улучшить"}</span>
+      </div>
+
+      <div
+        className={`shop-item${isSelected("tavern") ? " selected" : ""}`}
+        onClick={() => onSelect(isSelected("tavern") ? null : { kind: "tavern" })}
+      >
+        <span className="shop-emoji"><TavernSVG size={26} /></span>
+        <span className="shop-name">Таверна</span>
+        <span className="shop-cost">{tavernBuilding ? "⚙️ строится" : tavernBuilt ? "открыта" : "построить"}</span>
       </div>
     </div>
   );

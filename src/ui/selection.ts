@@ -4,4 +4,6 @@ export type Selection =
   | { kind: "farm" }
   | { kind: "sawmill" }
   | { kind: "town" }
+  | { kind: "tavern" }
+  | { kind: "hero"; id: string }
   | { kind: "wave" };
