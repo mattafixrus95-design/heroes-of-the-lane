@@ -103,7 +103,7 @@ export default function GameGrid({
   const buildModeActive = !!selectedItem || !!pendingHero;
 
   // Визуальная иерархия: здания > башни > крипы (крипы — см. baseCreepSize в EffectsCanvas)
-  const iconSize  = Math.round(cell * 0.84);
+  const iconSize  = Math.round(cell * 0.94);
   const towerSize = Math.round(cell * 0.68);
 
   const [hoveredCell, setHoveredCell] = useState<{ col: number; row: number } | null>(null);
@@ -251,9 +251,14 @@ export default function GameGrid({
           )}
 
           {isEntry && !tower && (
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(-${Math.round(cell * 0.14)}px)` }}>
+            <span style={{
+              position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
+              transform: `translateY(-${Math.round(cell * 0.14)}px)`,
+              perspective: 300,
+            }}>
               <ObjectShadow size={iconSize} />
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+              {/* Лёгкий разворот в сторону дороги — псевдо-3D без переделки самого спрайта */}
+              <span style={{ position: "relative", zIndex: 1, display: "flex", transform: "rotateY(-16deg)", transformStyle: "preserve-3d" }}>
                 <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
               </span>
             </span>
