@@ -11,7 +11,7 @@ import {
 } from "../data/buildings";
 import { FARM_CELL, SAWMILL_CELL, EXIT_CELL, TAVERN_CELL } from "../data/map";
 import { CREEP_DEFS, WAVE_DEFS } from "../data/waves";
-import { HERO_DEFS, heroAuraPct } from "../data/heroes";
+import { HERO_DEFS, heroAuraPct, heroDamage, heroRange } from "../data/heroes";
 import type { HeroType } from "../data/heroes";
 import { auraBonus, heroAuraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
@@ -640,6 +640,8 @@ function HeroPanel({ hero }: { hero: Hero }) {
   const def = HERO_DEFS[hero.type];
   const isBuilding = hero.buildTimeRemaining > 0;
   const auraPct = def.ability.kind === "aura_damage" ? heroAuraPct(hero.level, def.ability) : 0;
+  const damage = heroDamage(hero.level, def);
+  const range = heroRange(hero.level, def);
 
   return (
     <>
@@ -652,8 +654,8 @@ function HeroPanel({ hero }: { hero: Hero }) {
       )}
 
       <div className="cm-stats">
-        <span>⚔️ {def.damage}</span>
-        <span>🎯 {def.range}</span>
+        <span>⚔️ {damage > def.damage ? `${def.damage} → ${damage}` : damage}</span>
+        <span>🎯 {range > def.range ? `${def.range} → ${range}` : range}</span>
         <span>⚡ {def.attackSpeed}/с</span>
         <span>🍖 {def.foodCost}</span>
         {def.ability.kind === "aura_damage" && (
