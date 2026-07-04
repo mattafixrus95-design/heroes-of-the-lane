@@ -28,13 +28,14 @@ function findTarget(tower: Tower, creeps: Creep[]): Creep | null {
   return best;
 }
 
-// Суммарный бонус к скорости атаки от аур соседних единорогов
-export function auraBonus(tower: Tower, towers: Tower[]): number {
+// Бонус к скорости атаки от ауры единорогов рядом — не стакается,
+// действует только сильнейший бафф в радиусе действия.
+export function auraBonus(target: { id: string; col: number; row: number }, towers: Tower[]): number {
   let bonus = 0;
   for (const t of towers) {
-    if (t.id === tower.id) continue;
-    if (t.ability?.kind === "aura_haste" && t.buildTimeRemaining <= 0 && towerDist(t, tower) <= t.ability.radius) {
-      bonus += t.ability.pct;
+    if (t.id === target.id) continue;
+    if (t.ability?.kind === "aura_haste" && t.buildTimeRemaining <= 0 && towerDist(t, target) <= t.ability.radius) {
+      bonus = Math.max(bonus, t.ability.pct);
     }
   }
   return bonus;
