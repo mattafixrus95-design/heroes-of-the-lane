@@ -247,6 +247,8 @@ body {
   color: #ccc;
 }
 
+.cm-buffed { color: #6fd66f; font-weight: 700; }
+
 .cm-hp-bar-outer {
   width: 100%;
   height: 8px;

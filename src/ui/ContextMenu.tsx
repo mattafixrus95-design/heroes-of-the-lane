@@ -161,9 +161,9 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
       )}
 
       <div className="cm-stats">
-        <span>⚔️ {heroBonus > 0 ? `${tower.damage} → ${effectiveDamage.toFixed(1)}` : tower.damage}{heroBonus > 0 && ` (+${Math.round(heroBonus * 100)}% герой)`}</span>
+        <span>⚔️ <span className={heroBonus > 0 ? "cm-buffed" : undefined}>{heroBonus > 0 ? effectiveDamage.toFixed(1) : tower.damage}</span>{heroBonus > 0 && ` (+${Math.round(heroBonus * 100)}%)`}</span>
         <span>🎯 {tower.range}</span>
-        <span>⚡ {bonus > 0 ? `${tower.attackSpeed} → ${effectiveAttackSpeed.toFixed(2)}` : tower.attackSpeed}/с{bonus > 0 && ` (+${Math.round(bonus * 100)}% аура)`}</span>
+        <span>⚡ <span className={bonus > 0 ? "cm-buffed" : undefined}>{bonus > 0 ? effectiveAttackSpeed.toFixed(2) : tower.attackSpeed}</span>/с{bonus > 0 && ` (+${Math.round(bonus * 100)}%)`}</span>
         {tower.ability?.kind === "aoe"           && <span>💥 AoE r{tower.ability.radius}</span>}
         {tower.ability?.kind === "multishot"     && <span>🏹 +{tower.ability.extraTargets}×{Math.round(tower.ability.extraDmgPct * 100)}%</span>}
         {tower.ability?.kind === "crit"           && <span>🎯 Крит {Math.round(tower.ability.chance * 100)}%×{tower.ability.multiplier}</span>}
@@ -636,13 +636,14 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
 }
 
 // ── Герой ─────────────────────────────────────────────────────────────────────
-function HeroPanel({ hero }: { hero: Hero }) {
+function HeroPanel({ hero, state }: { hero: Hero; state: GameState }) {
   const def = HERO_DEFS[hero.type];
   const isBuilding = hero.buildTimeRemaining > 0;
   const auraPct = def.ability.kind === "aura_damage" ? heroAuraPct(hero.level, def.ability) : 0;
   const damage = heroDamage(hero.level, def);
   const range = heroRange(hero.level, def);
-  const attackSpeed = heroAttackSpeed(hero.level, def);
+  const hasteBonus = auraBonus(hero, state.towers);
+  const attackSpeed = heroAttackSpeed(hero.level, def) * (1 + hasteBonus);
 
   return (
     <>
@@ -655,16 +656,16 @@ function HeroPanel({ hero }: { hero: Hero }) {
       )}
 
       <div className="cm-stats">
-        <span>⚔️ {damage > def.damage ? `${def.damage} → ${damage}` : damage}</span>
-        <span>🎯 {range > def.range ? `${def.range} → ${range}` : range}</span>
-        <span>⚡ {attackSpeed > def.attackSpeed ? `${def.attackSpeed} → ${attackSpeed.toFixed(2)}` : def.attackSpeed}/с</span>
+        <span>⚔️ {damage}</span>
+        <span>🎯 {range}</span>
+        <span>⚡ <span className={hasteBonus > 0 ? "cm-buffed" : undefined}>{hasteBonus > 0 ? attackSpeed.toFixed(2) : attackSpeed}</span>/с{hasteBonus > 0 && ` (+${Math.round(hasteBonus * 100)}%)`}</span>
         <span>🍖 {def.foodCost}</span>
         {def.ability.kind === "aura_damage" && (
           <span>✨ Аура +{Math.round(auraPct * 100)}% урона · r{def.ability.radius}</span>
         )}
       </div>
       <div className="cm-stats">
-        <span>Уровень {hero.level}/{HERO_MAX_LEVEL} · растёт после каждой волны</span>
+        <span>Уровень {hero.level}/{HERO_MAX_LEVEL}</span>
       </div>
     </>
   );
@@ -765,7 +766,7 @@ function ContextMenu({ state, selection, pendingHero, onUpdateState, onClose, on
     if (!hero) return null;
     return (
       <div className="context-menu">
-        <HeroPanel hero={hero} />
+        <HeroPanel hero={hero} state={state} />
       </div>
     );
   }
@@ -847,11 +848,7 @@ function contextMenuPropsEqual(prev: Props, next: Props): boolean {
     return pt === nt && heroesEqual && ps.gold === ns.gold && ps.food === ns.food && ps.townLevel === ns.townLevel;
   }
 
-  if (sel.kind === "hero") {
-    const ph = ps.heroes.find(h => h.id === sel.id);
-    const nh = ns.heroes.find(h => h.id === sel.id);
-    return ph === nh;
-  }
+  if (sel.kind === "hero") return false;
 
   if (sel.kind === "wave") {
     return (
