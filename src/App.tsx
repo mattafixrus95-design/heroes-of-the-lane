@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { createInitialState } from "./game/engine/gameState";
 import type { GameState } from "./game/engine/gameState";
 import versionData from "./version.json";
@@ -43,6 +43,22 @@ export default function App() {
     loopRef.current.start();
     return () => loopRef.current?.stop();
   }, [updateState]);
+
+  // Сетке нужно знать, сколько высоты уже занято HUD сверху и шопом/панелью
+  // снизу, чтобы клетки уменьшались и всё помещалось на невысоких экранах.
+  const hudRef = useRef<HTMLDivElement>(null);
+  const bottomDockRef = useRef<HTMLDivElement>(null);
+  const [reservedHeight, setReservedHeight] = useState(0);
+  useLayoutEffect(() => {
+    const hudEl = hudRef.current, bottomEl = bottomDockRef.current;
+    if (!hudEl || !bottomEl) return;
+    const update = () => setReservedHeight(hudEl.getBoundingClientRect().height + bottomEl.getBoundingClientRect().height);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(hudEl);
+    ro.observe(bottomEl);
+    return () => ro.disconnect();
+  }, []);
 
   // Синхронизируем громкость AudioManager
   useEffect(() => { audioManager.volume = volume; }, [volume]);
@@ -139,49 +155,54 @@ export default function App() {
 
   return (
     <div className="app">
-      <HUD
-        state={state}
-        onUpdateState={updateState}
-        onReset={handleReset}
-        volume={volume}
-        onVolumeChange={handleVolumeChange}
-        onToggleMute={handleToggleMute}
-      />
+      <div ref={hudRef}>
+        <HUD
+          state={state}
+          onUpdateState={updateState}
+          onReset={handleReset}
+          volume={volume}
+          onVolumeChange={handleVolumeChange}
+          onToggleMute={handleToggleMute}
+        />
+      </div>
       <GameGrid
         state={state}
         selectedItem={selectedItem}
         selection={selection}
         pendingHero={pendingHero}
+        reservedHeight={reservedHeight}
         onUpdateState={updateState}
         onExitBuildMode={handleExitBuildMode}
         onSelect={handleSelect}
         onPlaceHero={handlePlaceHero}
         onCancelPendingHero={handleCancelPendingHero}
       />
-      <BottomHUD
-        state={state}
-        activeTab={bottomTab}
-        onTabChange={setBottomTab}
-        selectedShopItem={selectedItem}
-        onSelectShopItem={handleSelectShopItem}
-        selection={selection}
-        onSelectBuilding={handleSelect}
-      />
-      {selection && !showStats && (
-        <ContextMenu
+      <div className="bottom-dock" ref={bottomDockRef}>
+        <BottomHUD
           state={state}
+          activeTab={bottomTab}
+          onTabChange={setBottomTab}
+          selectedShopItem={selectedItem}
+          onSelectShopItem={handleSelectShopItem}
           selection={selection}
-          pendingHero={pendingHero}
-          onUpdateState={updateState}
-          onClose={handleCloseSelection}
-          onShowTowerInfo={setInfoTowerType}
-          onShowBuildingInfo={setInfoBuildingKind}
-          onHireHero={handleHireHero}
+          onSelectBuilding={handleSelect}
         />
-      )}
-      {!selection && selectedItem && !showStats && (
-        <ShopPreviewPanel type={selectedItem} onShowInfo={setInfoTowerType} />
-      )}
+        {selection && !showStats && (
+          <ContextMenu
+            state={state}
+            selection={selection}
+            pendingHero={pendingHero}
+            onUpdateState={updateState}
+            onClose={handleCloseSelection}
+            onShowTowerInfo={setInfoTowerType}
+            onShowBuildingInfo={setInfoBuildingKind}
+            onHireHero={handleHireHero}
+          />
+        )}
+        {!selection && selectedItem && !showStats && (
+          <ShopPreviewPanel type={selectedItem} onShowInfo={setInfoTowerType} />
+        )}
+      </div>
       {infoTowerType && (
         <TowerInfoModal type={infoTowerType} onClose={handleCloseTowerInfo} />
       )}
