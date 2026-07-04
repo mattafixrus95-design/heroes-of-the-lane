@@ -19,17 +19,26 @@ import type { ShopItem } from "./TowerShop";
 import type { Selection } from "./selection";
 
 const MAX_CELL = 56;
+const MIN_CELL = 32;
+// Суммарные вертикальные отступы .app вне HUD и нижней панели:
+// паддинги контейнера (8+16) + гэпы между HUD/сеткой/панелью (8+8).
+const VERTICAL_MARGIN = 40;
 
-function useCell(): number {
-  const compute = () =>
-    Math.min(MAX_CELL, Math.floor((window.innerWidth - 8) / GRID_COLS));
-  const [cell, setCell] = useState(compute);
+// Размер клетки считается и от ширины, и от доступной высоты (окно минус
+// HUD сверху и шоп/контекстное меню снизу), иначе на невысоких экранах
+// нижняя панель не помещается в окно. Пересчитывается на каждый рендер
+// (в т.ч. при смене reservedHeight), эффект нужен только для resize.
+function useCell(reservedHeight: number): number {
+  const [, forceTick] = useState(0);
   useEffect(() => {
-    const handler = () => setCell(compute());
+    const handler = () => forceTick(t => t + 1);
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
-  return cell;
+
+  const widthBased = Math.floor((window.innerWidth - 8) / GRID_COLS);
+  const heightBased = Math.floor((window.innerHeight - reservedHeight - VERTICAL_MARGIN) / GRID_ROWS);
+  return Math.max(MIN_CELL, Math.min(MAX_CELL, widthBased, heightBased));
 }
 
 interface Props {
@@ -37,6 +46,7 @@ interface Props {
   selectedItem: ShopItem | null;
   selection: Selection | null;
   pendingHero: HeroType | null;
+  reservedHeight: number;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onExitBuildMode: () => void;
   onSelect: (s: Selection | null) => void;
@@ -96,9 +106,9 @@ function placeHero(col: number, row: number, type: HeroType, state: GameState): 
 }
 
 export default function GameGrid({
-  state, selectedItem, selection, pendingHero, onUpdateState, onExitBuildMode, onSelect, onPlaceHero, onCancelPendingHero,
+  state, selectedItem, selection, pendingHero, reservedHeight, onUpdateState, onExitBuildMode, onSelect, onPlaceHero, onCancelPendingHero,
 }: Props) {
-  const cell = useCell();
+  const cell = useCell(reservedHeight);
   const canBuild = true;
   const buildModeActive = !!selectedItem || !!pendingHero;
 
