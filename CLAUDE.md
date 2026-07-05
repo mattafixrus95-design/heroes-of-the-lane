@@ -113,7 +113,7 @@ idle → [кнопка "Начать"] → prep (15с) → wave → prep (15с) 
 
 | Фаза | Строить | Тикают системы |
 |------|---------|---------------|
-| idle | ✅ | buildTimer, floatingTexts (стройка идёт и до старта первой волны) |
+| idle | ✅ | только floatingTexts (стройка/добыча стартуют только по кнопке "Начать") |
 | prep | ✅ | buildTimer, prepCountdown, floatingTexts |
 | wave | ❌ | всё (включая buildTimer — можно достроить то, что осталось) |
 | victory | ❌ | только floatingTexts |

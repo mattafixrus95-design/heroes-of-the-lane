@@ -30,9 +30,8 @@ export function tickPrepSystems(state: GameState, dt: number): GameState {
   return s;
 }
 
+// Стройка/добыча дерева намеренно не тикают в idle — экономика игры
+// стартует только по кнопке "Начать" (первый переход в prep).
 export function tickIdleSystems(state: GameState, dt: number): GameState {
-  let s = { ...state, gameTime: state.gameTime + dt };
-  s = tickBuildTimer(s, dt);
-  s = tickFloatingTexts(s);
-  return s;
+  return tickFloatingTexts({ ...state, gameTime: state.gameTime + dt });
 }
