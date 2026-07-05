@@ -31,5 +31,8 @@ export function tickPrepSystems(state: GameState, dt: number): GameState {
 }
 
 export function tickIdleSystems(state: GameState, dt: number): GameState {
-  return tickFloatingTexts({ ...state, gameTime: state.gameTime + dt });
+  let s = { ...state, gameTime: state.gameTime + dt };
+  s = tickBuildTimer(s, dt);
+  s = tickFloatingTexts(s);
+  return s;
 }

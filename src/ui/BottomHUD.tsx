@@ -16,12 +16,15 @@ interface Props {
   onSelectShopItem: (item: ShopItem | null) => void;
   selection: Selection | null;
   onSelectBuilding: (s: Selection | null) => void;
+  // Список башен/зданий прячем, когда открыто контекстное меню (не нужен
+  // одновременно с ним), но табы Башни/Здания остаются видны всегда.
+  hideList: boolean;
 }
 
 function BottomHUD({
   state, activeTab, onTabChange,
   selectedShopItem, onSelectShopItem,
-  selection, onSelectBuilding,
+  selection, onSelectBuilding, hideList,
 }: Props) {
   const maxBuildTier = TOWN_LEVELS[state.townLevel - 1].maxBuildTier;
 
@@ -42,7 +45,7 @@ function BottomHUD({
         </button>
       </div>
 
-      {activeTab === "towers" && (
+      {!hideList && activeTab === "towers" && (
         <TowerShop
           gold={state.gold}
           food={state.food}
@@ -52,7 +55,7 @@ function BottomHUD({
         />
       )}
 
-      {activeTab === "buildings" && (
+      {!hideList && activeTab === "buildings" && (
         <BuildingsShop state={state} selection={selection} onSelect={onSelectBuilding} />
       )}
     </div>
@@ -69,7 +72,8 @@ export default memo(BottomHUD, (prev, next) => {
     prev.selectedShopItem !== next.selectedShopItem ||
     prev.onSelectShopItem !== next.onSelectShopItem ||
     prev.selection !== next.selection ||
-    prev.onSelectBuilding !== next.onSelectBuilding
+    prev.onSelectBuilding !== next.onSelectBuilding ||
+    prev.hideList !== next.hideList
   ) return false;
 
   const ps = prev.state, ns = next.state;

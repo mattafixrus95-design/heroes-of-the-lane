@@ -142,17 +142,16 @@ export default function App() {
         onCancelPendingHero={handleCancelPendingHero}
       />
       <div className="bottom-dock">
-        {!selection && (
-          <BottomHUD
-            state={state}
-            activeTab={bottomTab}
-            onTabChange={setBottomTab}
-            selectedShopItem={selectedItem}
-            onSelectShopItem={handleSelectShopItem}
-            selection={selection}
-            onSelectBuilding={handleSelect}
-          />
-        )}
+        <BottomHUD
+          state={state}
+          activeTab={bottomTab}
+          onTabChange={setBottomTab}
+          selectedShopItem={selectedItem}
+          onSelectShopItem={handleSelectShopItem}
+          selection={selection}
+          onSelectBuilding={handleSelect}
+          hideList={!!selection}
+        />
         {selection && !showStats && (
           <ContextMenu
             state={state}
