@@ -198,34 +198,30 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
             </span>
           </div>
         ) : (
-          <>
+          <div className="cm-action-pair">
             {nextGrade && (
-              <div className="cm-action-row">
-                <button
-                  className="cm-btn upgrade"
-                  disabled={!canUpgrade}
-                  onClick={() => { onUpdateState(s => applyUpgrade(tower.id, s)); onClose(); }}
-                >
-                  ⬆ {nextGrade.gradeName}
-                </button>
-                <span className="cm-cost-side">
+              <button
+                className="cm-btn upgrade paired"
+                disabled={!canUpgrade}
+                onClick={() => onUpdateState(s => applyUpgrade(tower.id, s))}
+              >
+                <span className="cm-btn-label">⬆ {nextGrade.gradeName}</span>
+                <span className="cm-btn-subcost">
                   💰{nextGrade.upgradeCost}
                   {nextGrade.foodUpgradeCost > 0 ? ` 🍖${nextGrade.foodUpgradeCost}` : ""}
                   {tierLocked ? " (город)" : !canAffordUpgrade ? " (недост.)" : ""}
                 </span>
-              </div>
+              </button>
             )}
 
-            <div className="cm-action-row">
-              <button
-                className="cm-btn sell"
-                onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
-              >
-                Продать
-              </button>
-              <span className="cm-cost-side">+{sellValue}💰 +{tower.foodSpent}🍖</span>
-            </div>
-          </>
+            <button
+              className="cm-btn sell paired"
+              onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
+            >
+              <span className="cm-btn-label">Продать</span>
+              <span className="cm-btn-subcost">+{sellValue}💰 +{tower.foodSpent}🍖</span>
+            </button>
+          </div>
         )}
       </div>
     </>
