@@ -20,25 +20,26 @@ import type { Selection } from "./selection";
 
 const MAX_CELL = 56;
 const MIN_CELL = 32;
-// Суммарные вертикальные отступы .app вне HUD и нижней панели:
-// паддинги контейнера (8+16) + гэпы между HUD/сеткой/панелью (8+8).
-const VERTICAL_MARGIN = 40;
+// Резерв под HUD сверху и нижнюю панель снизу (табы/шоп ИЛИ контекстное
+// меню — они не показываются одновременно). Резерв фиксирован и не
+// зависит от того, что выбрано — иначе сетка «прыгала» бы при выборе
+// башни/здания. Нижняя панель сама ограничена max-height + скроллом
+// в CSS, но с этим запасом обычно помещается целиком без скролла.
+const FIXED_RESERVED = 330;
 
-// Размер клетки считается и от ширины, и от доступной высоты (окно минус
-// HUD сверху и шоп/контекстное меню снизу), иначе на невысоких экранах
-// нижняя панель не помещается в окно. Пересчитывается на каждый рендер
-// (в т.ч. при смене reservedHeight), эффект нужен только для resize.
-function useCell(reservedHeight: number): number {
-  const [, forceTick] = useState(0);
+function useCell(): number {
+  const compute = () => {
+    const widthBased = Math.floor((window.innerWidth - 8) / GRID_COLS);
+    const heightBased = Math.floor((window.innerHeight - FIXED_RESERVED) / GRID_ROWS);
+    return Math.max(MIN_CELL, Math.min(MAX_CELL, widthBased, heightBased));
+  };
+  const [cell, setCell] = useState(compute);
   useEffect(() => {
-    const handler = () => forceTick(t => t + 1);
+    const handler = () => setCell(compute());
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
-
-  const widthBased = Math.floor((window.innerWidth - 8) / GRID_COLS);
-  const heightBased = Math.floor((window.innerHeight - reservedHeight - VERTICAL_MARGIN) / GRID_ROWS);
-  return Math.max(MIN_CELL, Math.min(MAX_CELL, widthBased, heightBased));
+  return cell;
 }
 
 interface Props {
@@ -46,7 +47,6 @@ interface Props {
   selectedItem: ShopItem | null;
   selection: Selection | null;
   pendingHero: HeroType | null;
-  reservedHeight: number;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onExitBuildMode: () => void;
   onSelect: (s: Selection | null) => void;
@@ -106,9 +106,9 @@ function placeHero(col: number, row: number, type: HeroType, state: GameState): 
 }
 
 export default function GameGrid({
-  state, selectedItem, selection, pendingHero, reservedHeight, onUpdateState, onExitBuildMode, onSelect, onPlaceHero, onCancelPendingHero,
+  state, selectedItem, selection, pendingHero, onUpdateState, onExitBuildMode, onSelect, onPlaceHero, onCancelPendingHero,
 }: Props) {
-  const cell = useCell(reservedHeight);
+  const cell = useCell();
   const canBuild = true;
   const buildModeActive = !!selectedItem || !!pendingHero;
 
@@ -445,6 +445,7 @@ export default function GameGrid({
       style={{
         position: "relative",
         width: GRID_COLS * cell, height: GRID_ROWS * cell,
+        flexShrink: 0,
         border: "2px solid rgba(255,255,255,0.15)",
         borderRadius: 6, overflow: "hidden", touchAction: "none",
       }}
