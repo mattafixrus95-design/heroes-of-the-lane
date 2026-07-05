@@ -1,6 +1,8 @@
 import { useRef, useEffect } from "react";
 import type { GameState } from "../game/engine/gameState";
 import { CREEP_DEFS } from "../data/waves";
+import { pathFacing } from "../data/map";
+import impImage from "../assets/impSprite";
 import type { Selection } from "./selection";
 
 type ArrowStyle = "default" | "elf" | "ivor";
@@ -235,13 +237,34 @@ export function EffectsCanvas({ state, cell, selection, width, height }: Effects
       fillRoundRect(ctx, barX, barY, barW * hpPct, barH, 2);
 
       const fontPx = Math.max(0.6, (isBoss ? cell * 1.3 : cell) / 56) * 16;
-      ctx.save();
-      ctx.filter = isSlowed ? "hue-rotate(180deg)" : "none";
-      ctx.font = `${fontPx}px sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.fillText(def.emoji, x, barY + barH + 1);
-      ctx.restore();
+
+      if (c.kind === "imp" && impImage.complete && impImage.naturalWidth > 0) {
+        // Спрайт Беса: единственная художественная ориентация (смотрит
+        // влево) — зеркалим по горизонтали, когда крип идёт вправо.
+        // Вверх/вниз — тот же спрайт без поворота, только лёгкое
+        // покачивание корпуса, имитирующее шаг.
+        const aspect = impImage.naturalHeight / impImage.naturalWidth;
+        const drawH = fontPx * 1.9;
+        const drawW = drawH / aspect;
+        const bob = Math.abs(Math.sin(state.gameTime * 8 + c.pathProgress * 3)) * drawH * 0.05;
+        const mirror = pathFacing(c.pathProgress) === 1;
+        const topY = barY + barH + 1 + drawH * 0.08 - bob;
+
+        ctx.save();
+        ctx.filter = isSlowed ? "hue-rotate(180deg)" : "none";
+        ctx.translate(x, topY);
+        if (mirror) ctx.scale(-1, 1);
+        ctx.drawImage(impImage, -drawW / 2, 0, drawW, drawH);
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.filter = isSlowed ? "hue-rotate(180deg)" : "none";
+        ctx.font = `${fontPx}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText(def.emoji, x, barY + barH + 1);
+        ctx.restore();
+      }
     }
 
     // Splash-эффекты
