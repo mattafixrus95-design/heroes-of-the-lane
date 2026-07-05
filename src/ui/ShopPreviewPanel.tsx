@@ -2,6 +2,7 @@ import { memo } from "react";
 import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import TowerIcon from "./TowerIcon";
+import InfoBadge from "./InfoBadge";
 
 interface Props {
   type: TowerType;
@@ -19,6 +20,7 @@ function ShopPreviewPanel({ type, onShowInfo }: Props) {
           <TowerIcon type={type} grade={0} size={26} />
           {" "}{def.name} · {grade.gradeName}
         </span>
+        <InfoBadge onClick={() => onShowInfo(type)} />
       </div>
 
       <div className="cm-stats">
@@ -32,18 +34,9 @@ function ShopPreviewPanel({ type, onShowInfo }: Props) {
         {grade.ability?.kind === "root"           && <span>🌿 Корни /{grade.ability.everyNth}</span>}
         {grade.ability?.kind === "aura_haste"     && <span>✨ Аура +{Math.round(grade.ability.pct * 100)}%</span>}
         {grade.slow > 0 && <span>❄️ {grade.slow * 100}%</span>}
-      </div>
-
-      <div className="cm-stats">
         <span>💰 {def.purchaseCost}</span>
         <span>🍖 {def.foodCost}</span>
         <span>⏱ {def.buildTime}с</span>
-      </div>
-
-      <div className="cm-actions">
-        <button className="cm-btn info" onClick={() => onShowInfo(type)}>
-          Информация
-        </button>
       </div>
     </div>
   );

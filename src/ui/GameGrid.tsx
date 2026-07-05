@@ -4,6 +4,7 @@ import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import type { HeroType } from "../data/heroes";
 import { HERO_DEFS, heroRange } from "../data/heroes";
+import { HERO_HIRE_COST, TOWN_LEVELS, FARM_BUILD_TIME, SAWMILL_BUILD_TIME, TAVERN_BUILD_TIME } from "../data/buildings";
 import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
 import GateSVG from "../assets/GateSVG";
 import FarmSVG from "../assets/FarmSVG";
@@ -12,6 +13,7 @@ import TavernSVG from "../assets/TavernSVG";
 import TowerIcon from "./TowerIcon";
 import TownIcon from "./TownIcon";
 import HeroIcon from "./HeroIcon";
+import BuildProgressBar from "./BuildProgressBar";
 import { EffectsCanvas, TextsCanvas } from "./HotCanvas";
 import TerrainLayer from "./TerrainLayer";
 import ObjectShadow from "./ObjectShadow";
@@ -83,13 +85,20 @@ function placeTower(col: number, row: number, type: TowerType, state: GameState)
   };
 }
 
-// Герой уже оплачен при найме в таверне — здесь только размещение на поле,
-// золото повторно не списывается.
+// Герой ведёт себя как обычная башня: оплата (золото + еда) и списание
+// оффера таверны происходят именно в момент постройки на поле, а не при
+// выборе иконки в таверне.
 function placeHero(col: number, row: number, type: HeroType, state: GameState): GameState {
   if (state.heroes.length > 0) return state;
   if (state.towers.some(t => t.col === col && t.row === row)) return state;
+  if (!state.tavern) return state;
+  const offerIdx = state.tavern.offers.findIndex(o => o.type === type);
+  if (offerIdx === -1) return state;
+  if (state.gold < HERO_HIRE_COST) return state;
   const def = HERO_DEFS[type];
   if (state.food < def.foodCost) return state;
+  const offers = [...state.tavern.offers];
+  offers.splice(offerIdx, 1);
   const hero: Hero = {
     id: `h-${Date.now()}-${Math.random()}`,
     type, col, row,
@@ -100,8 +109,14 @@ function placeHero(col: number, row: number, type: HeroType, state: GameState): 
   };
   return {
     ...state,
+    gold: state.gold - HERO_HIRE_COST,
     food: state.food - def.foodCost,
     heroes: [...state.heroes, hero],
+    tavern: { ...state.tavern, offers },
+    floatingTexts: [...state.floatingTexts, {
+      id: `ft-${Date.now()}`, text: `-${HERO_HIRE_COST}💰`,
+      x: col, y: row, color: "#ff8080", spawnTime: state.gameTime, duration: 1.4,
+    }],
   };
 }
 
@@ -271,14 +286,19 @@ export default function GameGrid({
                 <TownIcon level={state.townLevel} size={iconSize} />
               </span>
               {state.townBuildTimeRemaining > 0 && (
-                <span style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
-                  color: "#f0c040", flexDirection: "column", gap: 1,
-                }}>
-                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.townBuildTimeRemaining)}с</span>
-                </span>
+                <>
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    color: "#f0c040", flexDirection: "column", gap: 1,
+                  }}>
+                    ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.townBuildTimeRemaining)}с</span>
+                  </span>
+                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
+                    <BuildProgressBar remaining={state.townBuildTimeRemaining} total={TOWN_LEVELS[state.townLevel].buildTime} />
+                  </div>
+                </>
               )}
             </span>
           )}
@@ -290,14 +310,19 @@ export default function GameGrid({
                 <FarmSVG size={iconSize} />
               </span>
               {state.farm.buildTimeRemaining > 0 && (
-                <span style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
-                  color: "#f0c040", flexDirection: "column", gap: 1,
-                }}>
-                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.farm.buildTimeRemaining)}с</span>
-                </span>
+                <>
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    color: "#f0c040", flexDirection: "column", gap: 1,
+                  }}>
+                    ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.farm.buildTimeRemaining)}с</span>
+                  </span>
+                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
+                    <BuildProgressBar remaining={state.farm.buildTimeRemaining} total={FARM_BUILD_TIME} />
+                  </div>
+                </>
               )}
             </span>
           )}
@@ -309,14 +334,19 @@ export default function GameGrid({
                 <SawmillSVG size={iconSize} />
               </span>
               {state.sawmill.buildTimeRemaining > 0 && (
-                <span style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
-                  color: "#f0c040", flexDirection: "column", gap: 1,
-                }}>
-                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.sawmill.buildTimeRemaining)}с</span>
-                </span>
+                <>
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    color: "#f0c040", flexDirection: "column", gap: 1,
+                  }}>
+                    ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.sawmill.buildTimeRemaining)}с</span>
+                  </span>
+                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
+                    <BuildProgressBar remaining={state.sawmill.buildTimeRemaining} total={SAWMILL_BUILD_TIME} />
+                  </div>
+                </>
               )}
             </span>
           )}
@@ -328,14 +358,19 @@ export default function GameGrid({
                 <TavernSVG size={iconSize} />
               </span>
               {state.tavern.buildTimeRemaining > 0 && (
-                <span style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
-                  color: "#f0c040", flexDirection: "column", gap: 1,
-                }}>
-                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.tavern.buildTimeRemaining)}с</span>
-                </span>
+                <>
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    color: "#f0c040", flexDirection: "column", gap: 1,
+                  }}>
+                    ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.tavern.buildTimeRemaining)}с</span>
+                  </span>
+                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
+                    <BuildProgressBar remaining={state.tavern.buildTimeRemaining} total={TAVERN_BUILD_TIME} />
+                  </div>
+                </>
               )}
             </span>
           )}
@@ -348,14 +383,19 @@ export default function GameGrid({
                 <HeroIcon type={hero.type} size={towerSize} />
               </span>
               {hero.buildTimeRemaining > 0 && (
-                <span style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
-                  color: "#f0c040", flexDirection: "column", gap: 1,
-                }}>
-                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(hero.buildTimeRemaining)}с</span>
-                </span>
+                <>
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    color: "#f0c040", flexDirection: "column", gap: 1,
+                  }}>
+                    ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(hero.buildTimeRemaining)}с</span>
+                  </span>
+                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
+                    <BuildProgressBar remaining={hero.buildTimeRemaining} total={HERO_DEFS[hero.type].buildTime} />
+                  </div>
+                </>
               )}
               <span style={{
                 position: "absolute", top: -6, left: -8,
@@ -373,14 +413,19 @@ export default function GameGrid({
                 <TowerIcon type={tower.type} grade={tower.gradeIndex} size={towerSize} />
               </span>
               {tower.buildTimeRemaining > 0 && (
-                <span style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
-                  color: "#f0c040", flexDirection: "column", gap: 1,
-                }}>
-                  ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(tower.buildTimeRemaining)}с</span>
-                </span>
+                <>
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    color: "#f0c040", flexDirection: "column", gap: 1,
+                  }}>
+                    ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(tower.buildTimeRemaining)}с</span>
+                  </span>
+                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
+                    <BuildProgressBar remaining={tower.buildTimeRemaining} total={tower.gradeIndex === 0 ? TOWER_DEFS[tower.type].buildTime : TOWER_DEFS[tower.type].grades[tower.gradeIndex].upgradeTime} />
+                  </div>
+                </>
               )}
               {!isMaxGrade && tower.buildTimeRemaining === 0 && (
                 <span style={{

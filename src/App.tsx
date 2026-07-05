@@ -10,13 +10,14 @@ import type { ShopItem } from "./ui/TowerShop";
 import GameGrid from "./ui/GameGrid";
 import ContextMenu from "./ui/ContextMenu";
 import ShopPreviewPanel from "./ui/ShopPreviewPanel";
+import HeroPreviewPanel from "./ui/HeroPreviewPanel";
 import TowerInfoModal from "./ui/TowerInfoModal";
 import BuildingInfoModal from "./ui/BuildingInfoModal";
+import HeroInfoModal from "./ui/HeroInfoModal";
 import StatsOverlay from "./ui/StatsOverlay";
 import UpdateButton from "./ui/UpdateButton";
 import type { TowerType } from "./data/towers";
 import type { HeroType } from "./data/heroes";
-import { HERO_HIRE_COST } from "./data/buildings";
 import type { Selection } from "./ui/selection";
 import { audioManager } from "./audio/AudioManager";
 import "./index.css";
@@ -31,6 +32,7 @@ export default function App() {
   const prevVolumeRef = useRef(0.7);
   const [infoTowerType, setInfoTowerType] = useState<TowerType | null>(null);
   const [infoBuildingKind, setInfoBuildingKind] = useState<"farm" | "sawmill" | "town" | "tavern" | null>(null);
+  const [infoHeroType, setInfoHeroType] = useState<HeroType | null>(null);
 
   const updateState = useCallback(
     (updater: (s: GameState) => GameState) => setState(updater),
@@ -82,49 +84,30 @@ export default function App() {
   const handleSelectShopItem = useCallback((item: ShopItem | null) => {
     setSelectedItem(item);
     setSelection(null);
+    setPendingHero(null);
   }, []);
 
   const handleExitBuildMode = useCallback(() => setSelectedItem(null), []);
   const handleCloseSelection = useCallback(() => setSelection(null), []);
 
-  // Найм героя: золото списывается сразу, оффер убирается из таверны,
-  // герой переходит в режим размещения на поле (аналог selectedItem для башен).
-  const handleHireHero = useCallback((type: HeroType) => {
-    setState(s => {
-      if (s.gold < HERO_HIRE_COST) return s;
-      if (!s.tavern || s.tavern.buildTimeRemaining > 0) return s;
-      if (s.heroes.length > 0) return s;
-      const idx = s.tavern.offers.findIndex(o => o.type === type);
-      if (idx === -1) return s;
-      const offers = [...s.tavern.offers];
-      offers.splice(idx, 1);
-      return { ...s, gold: s.gold - HERO_HIRE_COST, tavern: { ...s.tavern, offers } };
-    });
+  // Герой ведёт себя как обычная башня в шопе: клик по иконке в таверне
+  // только выбирает его для размещения (превью статов), деньги и еда
+  // списываются, а оффер из таверны убирается только в момент реальной
+  // постройки на поле (см. placeHero в GameGrid.tsx).
+  const handleSelectHero = useCallback((type: HeroType) => {
     setPendingHero(type);
     setSelection(null);
     setSelectedItem(null);
   }, []);
 
-  // Отмена размещения героя до того, как он поставлен на поле — возврат
-  // золота и восстановление оффера в таверне.
-  const handleCancelPendingHero = useCallback(() => {
-    setPendingHero(current => {
-      if (current) {
-        setState(s => s.tavern ? {
-          ...s,
-          gold: s.gold + HERO_HIRE_COST,
-          tavern: { ...s.tavern, offers: [...s.tavern.offers, { type: current }] },
-        } : s);
-      }
-      return null;
-    });
-  }, []);
+  const handleCancelPendingHero = useCallback(() => setPendingHero(null), []);
 
   // Герой уже размещён в state (GameGrid вызвал placeHero) — здесь только
   // очищаем режим размещения.
   const handlePlaceHero = useCallback(() => setPendingHero(null), []);
   const handleCloseTowerInfo = useCallback(() => setInfoTowerType(null), []);
   const handleCloseBuildingInfo = useCallback(() => setInfoBuildingKind(null), []);
+  const handleCloseHeroInfo = useCallback(() => setInfoHeroType(null), []);
 
   const handleVolumeChange = useCallback((v: number) => {
     if (v > 0) prevVolumeRef.current = v;
@@ -179,11 +162,15 @@ export default function App() {
             onClose={handleCloseSelection}
             onShowTowerInfo={setInfoTowerType}
             onShowBuildingInfo={setInfoBuildingKind}
-            onHireHero={handleHireHero}
+            onSelectHero={handleSelectHero}
+            onShowHeroInfo={setInfoHeroType}
           />
         )}
         {!selection && selectedItem && !showStats && (
           <ShopPreviewPanel type={selectedItem} onShowInfo={setInfoTowerType} />
+        )}
+        {!selection && !selectedItem && pendingHero && !showStats && (
+          <HeroPreviewPanel type={pendingHero} onShowInfo={setInfoHeroType} />
         )}
       </div>
       {infoTowerType && (
@@ -191,6 +178,9 @@ export default function App() {
       )}
       {infoBuildingKind && (
         <BuildingInfoModal kind={infoBuildingKind} onClose={handleCloseBuildingInfo} />
+      )}
+      {infoHeroType && (
+        <HeroInfoModal type={infoHeroType} onClose={handleCloseHeroInfo} />
       )}
       {showStats && (
         <StatsOverlay state={state} onReset={handleReset} />
