@@ -74,11 +74,11 @@ export default function App() {
     setInfoBuildingKind(null);
   }, []);
 
+  // Выбор объекта (клик по башне/зданию — на карте или из под-списка в
+  // табе) НЕ трогает состояние табов — таб остаётся таким, каким был.
   const handleSelect = useCallback((sel: Selection | null) => {
     setSelection(sel);
     setSelectedItem(null);
-    if (sel?.kind === "tower") setBottomTab("towers");
-    else if (sel?.kind === "farm" || sel?.kind === "sawmill" || sel?.kind === "town" || sel?.kind === "tavern") setBottomTab("buildings");
   }, []);
 
   const handleSelectShopItem = useCallback((item: ShopItem | null) => {
@@ -89,6 +89,13 @@ export default function App() {
 
   const handleExitBuildMode = useCallback(() => setSelectedItem(null), []);
   const handleCloseSelection = useCallback(() => setSelection(null), []);
+
+  // Клик по табу Башни/Здания (включение ИЛИ выключение) всегда сбрасывает
+  // текущее выделение — таб и выделение больше не рассинхронизируются.
+  const handleTabChange = useCallback((tab: BottomTab) => {
+    setBottomTab(tab);
+    setSelection(null);
+  }, []);
 
   // Герой ведёт себя как обычная башня в шопе: клик по иконке в таверне
   // только выбирает его для размещения (превью статов), деньги и еда
@@ -145,12 +152,11 @@ export default function App() {
         <BottomHUD
           state={state}
           activeTab={bottomTab}
-          onTabChange={setBottomTab}
+          onTabChange={handleTabChange}
           selectedShopItem={selectedItem}
           onSelectShopItem={handleSelectShopItem}
           selection={selection}
           onSelectBuilding={handleSelect}
-          hideList={!!selection}
         />
         {selection && !showStats && (
           <ContextMenu

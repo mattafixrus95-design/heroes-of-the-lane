@@ -199,7 +199,7 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
           </div>
         ) : (
           <>
-            {nextGrade ? (
+            {nextGrade && (
               <div className="cm-action-row">
                 <button
                   className="cm-btn upgrade"
@@ -214,8 +214,6 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
                   {tierLocked ? " (город)" : !canAffordUpgrade ? " (недост.)" : ""}
                 </span>
               </div>
-            ) : (
-              <div className="cm-maxed">★ Макс. грейд</div>
             )}
 
             <div className="cm-action-row">
