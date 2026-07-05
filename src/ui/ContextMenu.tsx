@@ -19,6 +19,8 @@ import HeroIcon from "./HeroIcon";
 import WoodSVG from "../assets/WoodSVG";
 import SawmillSVG from "../assets/SawmillSVG";
 import TavernSVG from "../assets/TavernSVG";
+import InfoBadge from "./InfoBadge";
+import BuildProgressBar from "./BuildProgressBar";
 import type { Selection } from "./selection";
 
 interface Props {
@@ -29,7 +31,8 @@ interface Props {
   onClose: () => void;
   onShowTowerInfo: (type: TowerType) => void;
   onShowBuildingInfo: (kind: "farm" | "sawmill" | "town" | "tavern") => void;
-  onHireHero: (type: HeroType) => void;
+  onSelectHero: (type: HeroType) => void;
+  onShowHeroInfo: (type: HeroType) => void;
 }
 
 function ft(text: string, x: number, y: number, color: string, gameTime: number): FloatingText {
@@ -147,6 +150,8 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
     : false;
   const canUpgrade = canAffordUpgrade && !isBuilding && !tierLocked;
 
+  const buildTotal = tower.gradeIndex === 0 ? def.buildTime : def.grades[tower.gradeIndex].upgradeTime;
+
   return (
     <>
       <div className="cm-header">
@@ -154,10 +159,14 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
           <TowerIcon type={tower.type} grade={tower.gradeIndex} size={26} />
           {" "}{def.name} · {currentGrade.gradeName}
         </span>
+        <InfoBadge onClick={() => onShowTowerInfo(tower.type)} />
       </div>
 
       {isBuilding && (
-        <div className="cm-building-badge">⚙️ Строится… {Math.ceil(tower.buildTimeRemaining)}с</div>
+        <div className="cm-building-badge">
+          <span>⚙️ Строится… {Math.ceil(tower.buildTimeRemaining)}с</span>
+          <BuildProgressBar remaining={tower.buildTimeRemaining} total={buildTotal} />
+        </div>
       )}
 
       <div className="cm-stats">
@@ -175,51 +184,51 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
 
       <div className="cm-actions">
         {isBuilding ? (
-          <button
-            className="cm-btn cancel"
-            onClick={() => { onUpdateState(s => applyCancelBuild(tower.id, s)); onClose(); }}
-          >
-            ✕ Отменить {tower.gradeIndex === 0 ? "постройку" : "апгрейд"}
-            <span className="cm-btn-cost">
+          <div className="cm-action-row">
+            <button
+              className="cm-btn cancel"
+              onClick={() => { onUpdateState(s => applyCancelBuild(tower.id, s)); onClose(); }}
+            >
+              ✕ Отменить
+            </button>
+            <span className="cm-cost-side">
               {tower.gradeIndex === 0
                 ? `+${tower.totalInvested}💰${tower.foodSpent > 0 ? ` +${tower.foodSpent}🍖` : ""}`
                 : `+${currentGrade.upgradeCost}💰${currentGrade.foodUpgradeCost > 0 ? ` +${currentGrade.foodUpgradeCost}🍖` : ""}`}
             </span>
-          </button>
+          </div>
         ) : (
           <>
             {nextGrade ? (
-              <button
-                className="cm-btn upgrade"
-                disabled={!canUpgrade}
-                onClick={() => { onUpdateState(s => applyUpgrade(tower.id, s)); onClose(); }}
-              >
-                ⬆ {nextGrade.gradeName}
-                <span className="cm-btn-cost">
-                  💰 {nextGrade.upgradeCost}
-                  {nextGrade.foodUpgradeCost > 0 ? ` 🍖 ${nextGrade.foodUpgradeCost}` : ""}
+              <div className="cm-action-row">
+                <button
+                  className="cm-btn upgrade"
+                  disabled={!canUpgrade}
+                  onClick={() => { onUpdateState(s => applyUpgrade(tower.id, s)); onClose(); }}
+                >
+                  ⬆ {nextGrade.gradeName}
+                </button>
+                <span className="cm-cost-side">
+                  💰{nextGrade.upgradeCost}
+                  {nextGrade.foodUpgradeCost > 0 ? ` 🍖${nextGrade.foodUpgradeCost}` : ""}
                   {tierLocked ? " (город)" : !canAffordUpgrade ? " (недост.)" : ""}
                 </span>
-              </button>
+              </div>
             ) : (
               <div className="cm-maxed">★ Макс. грейд</div>
             )}
 
-            <button
-              className="cm-btn sell"
-              onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
-            >
-              Продать
-              <span className="cm-btn-cost">
-                {`+${sellValue}💰 +${tower.foodSpent}🍖`}
-              </span>
-            </button>
+            <div className="cm-action-row">
+              <button
+                className="cm-btn sell"
+                onClick={() => { onUpdateState(s => applySell(tower.id, s)); onClose(); }}
+              >
+                Продать
+              </button>
+              <span className="cm-cost-side">+{sellValue}💰 +{tower.foodSpent}🍖</span>
+            </div>
           </>
         )}
-
-        <button className="cm-btn info" onClick={() => onShowTowerInfo(tower.type)}>
-          Информация
-        </button>
       </div>
     </>
   );
@@ -282,41 +291,44 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
     <>
       <div className="cm-header">
         <span className="cm-title">🍖 Ферма{level > 0 ? ` ур.${level}` : ""}</span>
+        <InfoBadge onClick={() => onShowBuildingInfo("farm")} />
       </div>
       {isBuilding && (
-        <div className="cm-building-badge">⚙️ Строится… {Math.ceil(farm!.buildTimeRemaining)}с</div>
+        <div className="cm-building-badge">
+          <span>⚙️ Строится… {Math.ceil(farm!.buildTimeRemaining)}с</span>
+          <BuildProgressBar remaining={farm!.buildTimeRemaining} total={FARM_BUILD_TIME} />
+        </div>
       )}
       <div className="cm-stats">
         <span>🍖 Макс. еда: +{farm?.foodProduced ?? 0}</span>
       </div>
       <div className="cm-actions">
         {isBuilding ? (
-          <button
-            className="cm-btn cancel"
-            onClick={() => onUpdateState(applyCancelFarmBuild)}
-          >
-            ✕ Отменить строительство
-            <span className="cm-btn-cost">
+          <div className="cm-action-row">
+            <button
+              className="cm-btn cancel"
+              onClick={() => onUpdateState(applyCancelFarmBuild)}
+            >
+              ✕ Отменить
+            </button>
+            <span className="cm-cost-side">
               +{cancelCost!.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{cancelCost!.wood}</span>
             </span>
-          </button>
+          </div>
         ) : (
-          <>
+          <div className="cm-action-row">
             <button
               className="cm-btn upgrade"
               disabled={!canBuild}
               onClick={() => onUpdateState(buildOrUpgradeFarm)}
             >
               {level > 0 ? "⬆ Улучшить" : "Построить"}
-              <span className="cm-btn-cost">
-                💰 {nextCost.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextCost.wood}</span>
-                {!canAfford ? " (недост.)" : ""}
-              </span>
             </button>
-            <button className="cm-btn info" onClick={() => onShowBuildingInfo("farm")}>
-              Информация
-            </button>
-          </>
+            <span className="cm-cost-side">
+              💰{nextCost.gold} <span className="cost-icon"><WoodSVG size={13} />{nextCost.wood}</span>
+              {!canAfford ? " (недост.)" : ""}
+            </span>
+          </div>
         )}
       </div>
     </>
@@ -382,42 +394,47 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
     <>
       <div className="cm-header">
         <span className="cm-title"><SawmillSVG size={22} /> Лесопилка{level > 0 ? ` ур.${level}` : ""}</span>
+        <InfoBadge onClick={() => onShowBuildingInfo("sawmill")} />
       </div>
       {isBuilding && (
-        <div className="cm-building-badge">⚙️ Строится… {Math.ceil(sawmill!.buildTimeRemaining)}с</div>
+        <div className="cm-building-badge">
+          <span>⚙️ Строится… {Math.ceil(sawmill!.buildTimeRemaining)}с</span>
+          <BuildProgressBar remaining={sawmill!.buildTimeRemaining} total={SAWMILL_BUILD_TIME} />
+        </div>
       )}
       <div className="cm-stats">
         <span className="cost-icon"><WoodSVG size={14} /> Доход: {level * SAWMILL_WOOD_PER_LEVEL}/{SAWMILL_TICK_INTERVAL}с</span>
       </div>
       <div className="cm-actions">
         {isBuilding ? (
-          <button
-            className="cm-btn cancel"
-            onClick={() => onUpdateState(applyCancelSawmillBuild)}
-          >
-            ✕ Отменить строительство
-            <span className="cm-btn-cost">
+          <div className="cm-action-row">
+            <button
+              className="cm-btn cancel"
+              onClick={() => onUpdateState(applyCancelSawmillBuild)}
+            >
+              ✕ Отменить
+            </button>
+            <span className="cm-cost-side">
               +{cancelCost!.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{cancelCost!.wood}</span>
             </span>
-          </button>
+          </div>
         ) : isMaxed ? (
           <div className="cm-maxed">★ Макс. уровень</div>
         ) : (
-          <button
-            className="cm-btn upgrade"
-            disabled={!canBuild}
-            onClick={() => onUpdateState(buildOrUpgradeSawmill)}
-          >
-            {level > 0 ? "⬆ Улучшить" : "Построить"}
-            <span className="cm-btn-cost">
-              💰 {nextCost!.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextCost!.wood}</span>
+          <div className="cm-action-row">
+            <button
+              className="cm-btn upgrade"
+              disabled={!canBuild}
+              onClick={() => onUpdateState(buildOrUpgradeSawmill)}
+            >
+              {level > 0 ? "⬆ Улучшить" : "Построить"}
+            </button>
+            <span className="cm-cost-side">
+              💰{nextCost!.gold} <span className="cost-icon"><WoodSVG size={13} />{nextCost!.wood}</span>
               {!canAfford ? " (недост.)" : ""}
             </span>
-          </button>
+          </div>
         )}
-        <button className="cm-btn info" onClick={() => onShowBuildingInfo("sawmill")}>
-          Информация
-        </button>
       </div>
     </>
   );
@@ -476,42 +493,47 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
     <>
       <div className="cm-header">
         <span className="cm-title">🏘️ {currentDef.name}</span>
+        <InfoBadge onClick={() => onShowBuildingInfo("town")} />
       </div>
       {isBuilding && (
-        <div className="cm-building-badge">⚙️ Строится… {Math.ceil(state.townBuildTimeRemaining)}с</div>
+        <div className="cm-building-badge">
+          <span>⚙️ Строится… {Math.ceil(state.townBuildTimeRemaining)}с</span>
+          <BuildProgressBar remaining={state.townBuildTimeRemaining} total={nextDef!.buildTime} />
+        </div>
       )}
       <div className="cm-stats">
         <span>❤️ {state.lives}/{state.maxLives}</span>
       </div>
       <div className="cm-actions">
         {isBuilding ? (
-          <button
-            className="cm-btn cancel"
-            onClick={() => onUpdateState(applyCancelTownBuild)}
-          >
-            ✕ Отменить строительство
-            <span className="cm-btn-cost">
+          <div className="cm-action-row">
+            <button
+              className="cm-btn cancel"
+              onClick={() => onUpdateState(applyCancelTownBuild)}
+            >
+              ✕ Отменить
+            </button>
+            <span className="cm-cost-side">
               +{nextDef!.upgradeCost!.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{nextDef!.upgradeCost!.wood}</span>
             </span>
-          </button>
+          </div>
         ) : nextDef ? (
-          <button
-            className="cm-btn upgrade"
-            disabled={!canUpgrade}
-            onClick={() => onUpdateState(upgradeTown)}
-          >
-            ⬆ {nextDef.name}
-            <span className="cm-btn-cost">
-              💰 {nextDef.upgradeCost!.gold} <span className="cost-icon"><WoodSVG size={13} /> {nextDef.upgradeCost!.wood}</span>
+          <div className="cm-action-row">
+            <button
+              className="cm-btn upgrade"
+              disabled={!canUpgrade}
+              onClick={() => onUpdateState(upgradeTown)}
+            >
+              ⬆ {nextDef.name}
+            </button>
+            <span className="cm-cost-side">
+              💰{nextDef.upgradeCost!.gold} <span className="cost-icon"><WoodSVG size={13} />{nextDef.upgradeCost!.wood}</span>
               {!canAfford ? " (недост.)" : ""}
             </span>
-          </button>
+          </div>
         ) : (
           <div className="cm-maxed">★ Макс. уровень</div>
         )}
-        <button className="cm-btn info" onClick={() => onShowBuildingInfo("town")}>
-          Информация
-        </button>
       </div>
     </>
   );
@@ -550,9 +572,10 @@ function applyCancelTavernBuild(state: GameState): GameState {
   };
 }
 
-function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, onHireHero }: {
+function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, onSelectHero, onShowHeroInfo }: {
   state: GameState; pendingHero: HeroType | null;
-  onUpdateState: Props["onUpdateState"]; onShowBuildingInfo: Props["onShowBuildingInfo"]; onHireHero: Props["onHireHero"];
+  onUpdateState: Props["onUpdateState"]; onShowBuildingInfo: Props["onShowBuildingInfo"];
+  onSelectHero: Props["onSelectHero"]; onShowHeroInfo: Props["onShowHeroInfo"];
 }) {
   const tavern = state.tavern;
   const isBuilding = !!tavern && tavern.buildTimeRemaining > 0;
@@ -565,23 +588,34 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
     <>
       <div className="cm-header">
         <span className="cm-title"><TavernSVG size={22} /> Таверна</span>
+        <InfoBadge onClick={() => onShowBuildingInfo("tavern")} />
       </div>
 
       {isBuilding && (
-        <div className="cm-building-badge">⚙️ Строится… {Math.ceil(tavern!.buildTimeRemaining)}с</div>
+        <div className="cm-building-badge">
+          <span>⚙️ Строится… {Math.ceil(tavern!.buildTimeRemaining)}с</span>
+          <BuildProgressBar remaining={tavern!.buildTimeRemaining} total={TAVERN_BUILD_TIME} />
+        </div>
       )}
 
       {tavern && !isBuilding && (
         tavern.offers.length > 0 ? (
           tavern.offers.map((offer, i) => {
-            const def = HERO_DEFS[offer.type];
+            const canPick = !hasHeroInPlay && canAffordHire;
             return (
-              <div key={i} className="cm-stats" style={{ flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
-                <span><HeroIcon type={offer.type} size={20} /> {def.name} · {def.race} {def.className}</span>
-                <span>⚔️ {def.damage} 🎯 {def.range} ⚡ {def.attackSpeed}/с 🍖 {def.foodCost}</span>
-                {def.ability.kind === "aura_damage" && (
-                  <span>✨ Аура +{Math.round(def.ability.basePct * 100)}% урона башням в радиусе {def.ability.radius} (растёт с уровнем)</span>
-                )}
+              <div key={i} className="cm-hero-offer">
+                <button
+                  className="cm-hero-offer-icon"
+                  disabled={!canPick}
+                  onClick={() => onSelectHero(offer.type)}
+                >
+                  <HeroIcon type={offer.type} size={30} />
+                </button>
+                <span className="cm-hero-offer-cost">
+                  💰{HERO_HIRE_COST}
+                  {hasHeroInPlay ? " (герой уже есть)" : !canAffordHire ? " (недост.)" : ""}
+                </span>
+                <InfoBadge onClick={() => onShowHeroInfo(offer.type)} />
               </div>
             );
           })
@@ -592,51 +626,39 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
 
       <div className="cm-actions">
         {isBuilding ? (
-          <button
-            className="cm-btn cancel"
-            onClick={() => onUpdateState(applyCancelTavernBuild)}
-          >
-            ✕ Отменить строительство
-            <span className="cm-btn-cost">
+          <div className="cm-action-row">
+            <button
+              className="cm-btn cancel"
+              onClick={() => onUpdateState(applyCancelTavernBuild)}
+            >
+              ✕ Отменить
+            </button>
+            <span className="cm-cost-side">
               +{TAVERN_COST.gold}💰 <span className="cost-icon">+<WoodSVG size={13} />{TAVERN_COST.wood}</span>
             </span>
-          </button>
+          </div>
         ) : !tavern ? (
-          <button
-            className="cm-btn upgrade"
-            disabled={!canBuild}
-            onClick={() => onUpdateState(buildTavern)}
-          >
-            Построить
-            <span className="cm-btn-cost">
-              💰 {TAVERN_COST.gold} <span className="cost-icon"><WoodSVG size={13} /> {TAVERN_COST.wood}</span>
+          <div className="cm-action-row">
+            <button
+              className="cm-btn upgrade"
+              disabled={!canBuild}
+              onClick={() => onUpdateState(buildTavern)}
+            >
+              Построить
+            </button>
+            <span className="cm-cost-side">
+              💰{TAVERN_COST.gold} <span className="cost-icon"><WoodSVG size={13} />{TAVERN_COST.wood}</span>
               {!canAffordBuild ? " (недост.)" : ""}
             </span>
-          </button>
-        ) : tavern.offers.length > 0 ? (
-          <button
-            className="cm-btn upgrade"
-            disabled={hasHeroInPlay || !canAffordHire}
-            onClick={() => onHireHero(tavern.offers[0].type)}
-          >
-            Нанять
-            <span className="cm-btn-cost">
-              💰 {HERO_HIRE_COST}
-              {hasHeroInPlay ? " (герой уже есть)" : !canAffordHire ? " (недост.)" : ""}
-            </span>
-          </button>
+          </div>
         ) : null}
-
-        <button className="cm-btn info" onClick={() => onShowBuildingInfo("tavern")}>
-          Информация
-        </button>
       </div>
     </>
   );
 }
 
 // ── Герой ─────────────────────────────────────────────────────────────────────
-function HeroPanel({ hero, state }: { hero: Hero; state: GameState }) {
+function HeroPanel({ hero, state, onShowHeroInfo }: { hero: Hero; state: GameState; onShowHeroInfo: Props["onShowHeroInfo"] }) {
   const def = HERO_DEFS[hero.type];
   const isBuilding = hero.buildTimeRemaining > 0;
   const auraPct = def.ability.kind === "aura_damage" ? heroAuraPct(hero.level, def.ability) : 0;
@@ -649,10 +671,14 @@ function HeroPanel({ hero, state }: { hero: Hero; state: GameState }) {
     <>
       <div className="cm-header">
         <span className="cm-title"><HeroIcon type={hero.type} size={26} /> {def.name} · ур.{hero.level}</span>
+        <InfoBadge onClick={() => onShowHeroInfo(hero.type)} />
       </div>
 
       {isBuilding && (
-        <div className="cm-building-badge">⚙️ Занимает позицию… {Math.ceil(hero.buildTimeRemaining)}с</div>
+        <div className="cm-building-badge">
+          <span>⚙️ Занимает позицию… {Math.ceil(hero.buildTimeRemaining)}с</span>
+          <BuildProgressBar remaining={hero.buildTimeRemaining} total={def.buildTime} />
+        </div>
       )}
 
       <div className="cm-stats">
@@ -750,7 +776,7 @@ function WavePanel({ state }: { state: GameState }) {
   );
 }
 
-function ContextMenu({ state, selection, pendingHero, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo, onHireHero }: Props) {
+function ContextMenu({ state, selection, pendingHero, onUpdateState, onClose, onShowTowerInfo, onShowBuildingInfo, onSelectHero, onShowHeroInfo }: Props) {
   if (selection.kind === "tower") {
     const tower = state.towers.find(t => t.id === selection.id);
     if (!tower) return null;
@@ -766,7 +792,7 @@ function ContextMenu({ state, selection, pendingHero, onUpdateState, onClose, on
     if (!hero) return null;
     return (
       <div className="context-menu">
-        <HeroPanel hero={hero} state={state} />
+        <HeroPanel hero={hero} state={state} onShowHeroInfo={onShowHeroInfo} />
       </div>
     );
   }
@@ -808,7 +834,7 @@ function ContextMenu({ state, selection, pendingHero, onUpdateState, onClose, on
   if (selection.kind === "tavern") {
     return (
       <div className="context-menu">
-        <TavernPanel state={state} pendingHero={pendingHero} onUpdateState={onUpdateState} onShowBuildingInfo={onShowBuildingInfo} onHireHero={onHireHero} />
+        <TavernPanel state={state} pendingHero={pendingHero} onUpdateState={onUpdateState} onShowBuildingInfo={onShowBuildingInfo} onSelectHero={onSelectHero} onShowHeroInfo={onShowHeroInfo} />
       </div>
     );
   }
@@ -832,7 +858,8 @@ function contextMenuPropsEqual(prev: Props, next: Props): boolean {
     prev.onClose !== next.onClose ||
     prev.onShowTowerInfo !== next.onShowTowerInfo ||
     prev.onShowBuildingInfo !== next.onShowBuildingInfo ||
-    prev.onHireHero !== next.onHireHero
+    prev.onSelectHero !== next.onSelectHero ||
+    prev.onShowHeroInfo !== next.onShowHeroInfo
   ) return false;
 
   const sel = next.selection;

@@ -36,7 +36,7 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
       >
         <span className="shop-emoji"><FarmSVG size={26} /></span>
         <span className="shop-name">Ферма{farmLevel > 0 ? ` ур.${farmLevel}` : ""}</span>
-        <span className="shop-cost">{farmBuilding ? "⚙️ строится" : farmLevel > 0 ? "улучшить" : "построить"}</span>
+        <span className="shop-cost">{farmBuilding ? "⚙️ строится" : farmLevel > 0 ? "" : "построить"}</span>
       </div>
 
       <div
@@ -45,7 +45,7 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
       >
         <span className="shop-emoji"><SawmillSVG size={26} /></span>
         <span className="shop-name">Лесопилка{sawmillLevel > 0 ? ` ур.${sawmillLevel}` : ""}</span>
-        <span className="shop-cost">{sawmillBuilding ? "⚙️ строится" : sawmillMaxed ? "макс." : sawmillLevel > 0 ? "улучшить" : "построить"}</span>
+        <span className="shop-cost">{sawmillBuilding ? "⚙️ строится" : sawmillMaxed ? "макс." : sawmillLevel > 0 ? "" : "построить"}</span>
       </div>
 
       <div
@@ -54,7 +54,7 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
       >
         <span className="shop-emoji"><TownIcon level={state.townLevel} size={26} /></span>
         <span className="shop-name">{townDef.name}</span>
-        <span className="shop-cost">{townMaxed ? "макс." : "улучшить"}</span>
+        <span className="shop-cost">{townMaxed ? "макс." : ""}</span>
       </div>
 
       <div
@@ -63,7 +63,7 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
       >
         <span className="shop-emoji"><TavernSVG size={26} /></span>
         <span className="shop-name">Таверна</span>
-        <span className="shop-cost">{tavernBuilding ? "⚙️ строится" : tavernBuilt ? "открыта" : "построить"}</span>
+        <span className="shop-cost">{tavernBuilding ? "⚙️ строится" : tavernBuilt ? "" : "построить"}</span>
       </div>
     </div>
   );
