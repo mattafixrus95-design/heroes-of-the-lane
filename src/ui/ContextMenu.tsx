@@ -602,6 +602,7 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
         tavern.offers.length > 0 ? (
           tavern.offers.map((offer, i) => {
             const canPick = !hasHeroInPlay && canAffordHire;
+            const offerDef = HERO_DEFS[offer.type];
             return (
               <div key={i} className="cm-hero-offer">
                 <button
@@ -612,7 +613,7 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
                   <HeroIcon type={offer.type} size={30} />
                 </button>
                 <span className="cm-hero-offer-cost">
-                  💰{HERO_HIRE_COST}
+                  💰{HERO_HIRE_COST} 🍖{offerDef.foodCost}
                   {hasHeroInPlay ? " (герой уже есть)" : !canAffordHire ? " (недост.)" : ""}
                 </span>
                 <InfoBadge onClick={() => onShowHeroInfo(offer.type)} />
