@@ -8,10 +8,11 @@ import opened from "./gate-opened.png";
 const FRAMES = [closed, opening1, opening2, opened];
 // Открытие занимает столько же, сколько spawnWave.ts держит первого крипа
 // волны перед выходом (GATE_OPEN_SECONDS) — крип не должен появляться
-// раньше, чем створки полностью разъедутся.
+// раньше, чем створки полностью разъедутся. Закрытие — та же длительность
+// (симметрично открытию, оба быстрые — кадров всего 4).
 const OPEN_DURATION_MS = GATE_OPEN_SECONDS * 1000;
-const CLOSE_DELAY_MS = 1000;    // пауза перед началом закрытия (крипы успевают выйти)
-const CLOSE_DURATION_MS = 1000; // закрытие целиком
+const CLOSE_DELAY_MS = 1000; // пауза перед началом закрытия (крипы успевают выйти)
+const CLOSE_DURATION_MS = OPEN_DURATION_MS;
 
 interface Props {
   size?: number;

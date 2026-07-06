@@ -280,7 +280,7 @@ export default function GameGrid({
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(-${Math.round(cell * 0.14)}px)` }}>
               <ObjectShadow size={iconSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedTown ? { filter: SELECTION_GLOW } : {}) }}>
-                <TownIcon level={state.townLevel} size={iconSize} />
+                <TownIcon level={state.townLevel} size={Math.round(cell * 1.45)} />
               </span>
               {state.townBuildTimeRemaining > 0 && (
                 <>
@@ -307,7 +307,7 @@ export default function GameGrid({
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedFarm ? { filter: SELECTION_GLOW } : {}) }}>
-                <FarmImage size={iconSize} />
+                <FarmImage size={Math.round(cell * 1.05)} />
               </span>
               {state.farm.buildTimeRemaining > 0 && (
                 <>
@@ -361,7 +361,7 @@ export default function GameGrid({
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedTavern ? { filter: SELECTION_GLOW } : {}) }}>
-                <TavernImage size={iconSize} />
+                <TavernImage size={Math.round(cell * 1.05)} />
               </span>
               {state.tavern.buildTimeRemaining > 0 && (
                 <>
