@@ -1,4 +1,4 @@
-import type { GameState, Projectile, SplashEffect, FloatingText, Creep } from "../engine/gameState";
+import type { GameState, Projectile, SplashEffect, DeathEffect, FloatingText, Creep } from "../engine/gameState";
 import { SLOW_DURATION } from "../engine/gameState";
 
 let effectCounter = 0;
@@ -16,14 +16,20 @@ function makeFt(c: Creep, gameTime: number): FloatingText {
   };
 }
 
+// Крипы с художественным спрайтом ходьбы, у которых также есть кадры смерти
+// (пока только Бес) — остальные виды остаются просто эмодзи без анимации.
+const DEATH_ANIM_KINDS = new Set<Creep["kind"]>(["imp"]);
+const DEATH_ANIM_DURATION = 0.6;
+
 function sweepDead(
   creeps: Creep[],
   gold: number,
   killed: number,
   waveGold: number,
   texts: FloatingText[],
+  deaths: DeathEffect[],
   gameTime: number,
-): { creeps: Creep[]; gold: number; killed: number; waveGold: number; texts: FloatingText[] } {
+): { creeps: Creep[]; gold: number; killed: number; waveGold: number; texts: FloatingText[]; deaths: DeathEffect[] } {
   const alive: Creep[] = [];
   for (const c of creeps) {
     if (c.hp <= 0) {
@@ -31,11 +37,22 @@ function sweepDead(
       killed++;
       waveGold += c.reward;
       texts.push(makeFt(c, gameTime));
+      if (DEATH_ANIM_KINDS.has(c.kind)) {
+        deaths.push({
+          id: `de-${++effectCounter}`,
+          kind: c.kind,
+          x: c.position.x,
+          y: c.position.y,
+          pathProgress: c.pathProgress,
+          spawnTime: gameTime,
+          duration: DEATH_ANIM_DURATION,
+        });
+      }
     } else {
       alive.push(c);
     }
   }
-  return { creeps: alive, gold, killed, waveGold, texts };
+  return { creeps: alive, gold, killed, waveGold, texts, deaths };
 }
 
 function vulnMult(c: Creep): number {
@@ -60,6 +77,7 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
   let killed = state.currentWaveKilled;
   let waveGold = state.currentWaveGold;
   let texts: FloatingText[] = [];
+  let deaths: DeathEffect[] = [];
   const newSplash: SplashEffect[] = [];
 
   for (const p of expired) {
@@ -78,9 +96,9 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
         const d = Math.hypot(p.toX - c.position.x, p.toY - c.position.y);
         return d <= pd.explosionAoe! ? { ...c, hp: c.hp - pd.damage * pd.explosionDmgPct! * vulnMult(c) } : c;
       });
-      const swept = sweepDead(creeps, gold, killed, waveGold, texts, state.gameTime);
+      const swept = sweepDead(creeps, gold, killed, waveGold, texts, deaths, state.gameTime);
       creeps = swept.creeps; gold = swept.gold; killed = swept.killed;
-      waveGold = swept.waveGold; texts = swept.texts;
+      waveGold = swept.waveGold; texts = swept.texts; deaths = swept.deaths;
       newSplash.push({
         id: `sx-${++effectCounter}`,
         x: p.toX, y: p.toY,
@@ -103,9 +121,9 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
         ? applyDebuffs({ ...c, hp: c.hp - actualDamage, ...(pd.slow > 0 ? { slowFactor: pd.slow, slowTimer: SLOW_DURATION } : {}) }, pd)
         : c,
       );
-      const swept = sweepDead(creeps, gold, killed, waveGold, texts, state.gameTime);
+      const swept = sweepDead(creeps, gold, killed, waveGold, texts, deaths, state.gameTime);
       creeps = swept.creeps; gold = swept.gold; killed = swept.killed;
-      waveGold = swept.waveGold; texts = swept.texts;
+      waveGold = swept.waveGold; texts = swept.texts; deaths = swept.deaths;
     }
   }
 
@@ -114,9 +132,14 @@ function applyExpired(state: GameState, expired: Projectile[]): GameState {
     ...newSplash,
   ];
 
+  const deathEffects = [
+    ...state.deathEffects.filter(e => state.gameTime - e.spawnTime < e.duration),
+    ...deaths,
+  ];
+
   return {
     ...state,
-    creeps, gold, splashEffects,
+    creeps, gold, splashEffects, deathEffects,
     currentWaveKilled: killed,
     currentWaveGold: waveGold,
     floatingTexts: [...state.floatingTexts, ...texts],
