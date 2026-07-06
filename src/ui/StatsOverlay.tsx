@@ -1,6 +1,7 @@
 import { memo } from "react";
 import type { GameState } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
+import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
 
 interface Props {
@@ -86,7 +87,7 @@ function StatsOverlay({ state, onReset }: Props) {
             display: "flex", justifyContent: "space-between",
             fontSize: "0.8rem", color: "#ccc", padding: "2px 0",
           }}>
-            <span>🍖 Ферма</span>
+            <span className="cost-icon"><FarmImage size={16} /> Ферма</span>
             <span>ур. {state.farm.level}</span>
           </div>
         )}

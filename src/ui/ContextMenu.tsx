@@ -17,6 +17,7 @@ import { auraBonus, heroAuraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
 import HeroIcon from "./HeroIcon";
 import WoodSVG from "../assets/WoodSVG";
+import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
 import TavernImage from "../assets/buildings/tavern/TavernImage";
 import InfoBadge from "./InfoBadge";
@@ -284,7 +285,7 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
   return (
     <>
       <div className="cm-header">
-        <span className="cm-title">🍖 Ферма{level > 0 ? ` ур.${level}` : ""}</span>
+        <span className="cm-title"><FarmImage size={22} /> Ферма{level > 0 ? ` ур.${level}` : ""}</span>
         <InfoBadge onClick={() => onShowBuildingInfo("farm")} />
       </div>
       {isBuilding && (
