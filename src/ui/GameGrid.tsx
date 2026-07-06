@@ -29,6 +29,11 @@ const MIN_CELL = 32;
 // в CSS, но с этим запасом обычно помещается целиком без скролла.
 const FIXED_RESERVED = 330;
 
+// Подсветка выделения — жёлтый контур по силуэту самой картинки (drop-shadow
+// хугает альфу PNG/SVG), а не квадрат по границе клетки. Двойной drop-shadow
+// имитирует более плотное свечение (у CSS-фильтра нет параметра spread).
+const SELECTION_GLOW = "drop-shadow(0 0 2px #ffd700) drop-shadow(0 0 4px #ffd700)";
+
 function useCell(): number {
   const compute = () => {
     const widthBased = Math.floor((window.innerWidth - 8) / GRID_COLS);
@@ -175,7 +180,6 @@ export default function GameGrid({
       const isMaxGrade = tower ? tower.gradeIndex >= TOWER_DEFS[tower.type].grades.length - 1 : false;
       const isSelectedTower = !!tower && selection?.kind === "tower" && selection.id === tower.id;
       const isSelectedHero = !!hero && selection?.kind === "hero" && selection.id === hero.id;
-      const isSelectedGate = isEntry && selection?.kind === "wave";
       const isSelectedFarm = isFarmCell && selection?.kind === "farm";
       const isSelectedSawmill = isSawmillCell && selection?.kind === "sawmill";
       const isSelectedTown = isExit && selection?.kind === "town";
@@ -257,8 +261,6 @@ export default function GameGrid({
               ? "inset 0 0 0 2px rgba(80,255,80,0.7)"
               : "inset 0 0 0 2px rgba(255,60,60,0.7)"
             } : {}),
-            ...(isSelectedTower || isSelectedHero || isSelectedGate || isSelectedFarm || isSelectedSawmill || isSelectedTown || isSelectedTavern
-              ? { boxShadow: "inset 0 0 0 2px rgba(80,220,255,0.85)" } : {}),
           }}
         >
           {/* Подсветка ячейки при hover в режиме строительства */}
@@ -277,7 +279,7 @@ export default function GameGrid({
           {isExit && !tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(-${Math.round(cell * 0.14)}px)` }}>
               <ObjectShadow size={iconSize} />
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+              <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedTown ? { filter: SELECTION_GLOW } : {}) }}>
                 <TownIcon level={state.townLevel} size={iconSize} />
               </span>
               {state.townBuildTimeRemaining > 0 && (
@@ -304,7 +306,7 @@ export default function GameGrid({
           {isFarmCell && !tower && state.farm && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+              <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedFarm ? { filter: SELECTION_GLOW } : {}) }}>
                 <FarmImage size={iconSize} />
               </span>
               {state.farm.buildTimeRemaining > 0 && (
@@ -331,7 +333,7 @@ export default function GameGrid({
           {isSawmillCell && !tower && state.sawmill && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+              <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedSawmill ? { filter: SELECTION_GLOW } : {}) }}>
                 <SawmillImage size={Math.round(cell * 1.05)} />
               </span>
               {state.sawmill.buildTimeRemaining > 0 && (
@@ -358,7 +360,7 @@ export default function GameGrid({
           {isTavernCell && !tower && state.tavern && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+              <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedTavern ? { filter: SELECTION_GLOW } : {}) }}>
                 <TavernImage size={iconSize} />
               </span>
               {state.tavern.buildTimeRemaining > 0 && (
@@ -386,7 +388,7 @@ export default function GameGrid({
           {hero && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={towerSize} />
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+              <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedHero ? { filter: SELECTION_GLOW } : {}) }}>
                 <HeroIcon type={hero.type} size={towerSize} />
               </span>
               {hero.buildTimeRemaining > 0 && (
@@ -419,7 +421,7 @@ export default function GameGrid({
           {tower && (
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={towerSize} />
-              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+              <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedTower ? { filter: SELECTION_GLOW } : {}) }}>
                 <TowerIcon type={tower.type} grade={tower.gradeIndex} size={towerSize} />
               </span>
               {tower.buildTimeRemaining > 0 && (
@@ -522,7 +524,7 @@ export default function GameGrid({
         display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none",
       }}>
         <ObjectShadow size={iconSize} />
-        <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
+        <span style={{ position: "relative", zIndex: 1, display: "flex", ...(selection?.kind === "wave" ? { filter: SELECTION_GLOW } : {}) }}>
           <GateImage size={Math.round(cell * 1.45)} open={state.phase === "wave" && state.spawnQueue.length > 0} />
         </span>
       </div>

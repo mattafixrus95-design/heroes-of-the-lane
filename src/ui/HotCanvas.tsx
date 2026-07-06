@@ -223,20 +223,20 @@ export function EffectsCanvas({ state, cell, selection, width, height }: Effects
 
       drawShadow(ctx, x, y + size * 0.28, size * 0.3, size * 0.12);
 
-      if (isSelected) {
-        ctx.save();
-        ctx.strokeStyle = "rgba(80,220,255,0.9)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(barX - 3, barY - 3, barW + 6, size * 0.65 + barH + 10);
-        ctx.restore();
-      }
-
       ctx.fillStyle = "#333";
       fillRoundRect(ctx, barX, barY, barW, barH, 2);
       ctx.fillStyle = hpBarColor;
       fillRoundRect(ctx, barX, barY, barW * hpPct, barH, 2);
 
       const fontPx = Math.max(0.6, (isBoss ? cell * 1.3 : cell) / 56) * 16;
+
+      // Выделение — жёлтое свечение по силуэту (альфе) спрайта/эмодзи, а не
+      // квадрат поверх клетки. Совмещается с hue-rotate замедления через
+      // единый список CSS-фильтров canvas.
+      const filters: string[] = [];
+      if (isSlowed) filters.push("hue-rotate(180deg)");
+      if (isSelected) filters.push("drop-shadow(0 0 2px #ffd700)", "drop-shadow(0 0 4px #ffd700)");
+      const creepFilter = filters.length > 0 ? filters.join(" ") : "none";
 
       const art = CREEP_ART[c.kind];
       const walkImg = art?.walkFrames[Math.floor(state.gameTime * art.walkFps + c.pathProgress) % art.walkFrames.length];
@@ -253,14 +253,14 @@ export function EffectsCanvas({ state, cell, selection, width, height }: Effects
         const topY = barY + barH + 1 + drawH * 0.08 - bob;
 
         ctx.save();
-        ctx.filter = isSlowed ? "hue-rotate(180deg)" : "none";
+        ctx.filter = creepFilter;
         ctx.translate(x, topY);
         if (mirror) ctx.scale(-1, 1);
         ctx.drawImage(walkImg, -drawW / 2, 0, drawW, drawH);
         ctx.restore();
       } else {
         ctx.save();
-        ctx.filter = isSlowed ? "hue-rotate(180deg)" : "none";
+        ctx.filter = creepFilter;
         ctx.font = `${fontPx}px sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
