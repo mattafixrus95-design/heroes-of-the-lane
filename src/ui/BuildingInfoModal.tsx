@@ -7,8 +7,8 @@ import {
   TAVERN_COST, TAVERN_BUILD_TIME, HERO_HIRE_COST,
 } from "../data/buildings";
 import WoodSVG from "../assets/WoodSVG";
-import SawmillSVG from "../assets/SawmillSVG";
-import TavernSVG from "../assets/TavernSVG";
+import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
+import TavernSVG from "../assets/buildings/tavern/TavernSVG";
 
 interface Props {
   kind: "farm" | "sawmill" | "town" | "tavern";

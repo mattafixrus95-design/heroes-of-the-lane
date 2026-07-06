@@ -2,9 +2,9 @@ import type { GameState } from "../game/engine/gameState";
 import { SAWMILL_MAX_LEVEL } from "../data/buildings";
 import { TOWN_LEVELS } from "../data/buildings";
 import type { Selection } from "./selection";
-import FarmSVG from "../assets/FarmSVG";
-import SawmillSVG from "../assets/SawmillSVG";
-import TavernSVG from "../assets/TavernSVG";
+import FarmSVG from "../assets/buildings/farm/FarmSVG";
+import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
+import TavernSVG from "../assets/buildings/tavern/TavernSVG";
 import TownIcon from "./TownIcon";
 
 interface Props {

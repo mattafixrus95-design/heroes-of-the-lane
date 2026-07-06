@@ -1,7 +1,7 @@
-import VillageSVG from "../assets/VillageSVG";
-import FortSVG from "../assets/FortSVG";
-import CitadelSVG from "../assets/CitadelSVG";
-import CastleSVG from "../assets/CastleSVG";
+import VillageSVG from "../assets/buildings/town/VillageSVG";
+import FortSVG from "../assets/buildings/town/FortSVG";
+import CitadelSVG from "../assets/buildings/town/CitadelSVG";
+import CastleSVG from "../assets/buildings/town/CastleSVG";
 
 interface Props {
   level: 1 | 2 | 3 | 4;

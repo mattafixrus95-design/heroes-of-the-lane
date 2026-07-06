@@ -1,7 +1,7 @@
 import { memo } from "react";
 import type { GameState } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
-import SawmillSVG from "../assets/SawmillSVG";
+import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
 
 interface Props {
   state: GameState;

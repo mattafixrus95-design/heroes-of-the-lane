@@ -1,5 +1,5 @@
 import type { HeroType } from "../data/heroes";
-import IvorSVG from "../assets/IvorSVG";
+import IvorSVG from "../assets/heroes/ivor/IvorSVG";
 
 interface Props {
   type: HeroType;

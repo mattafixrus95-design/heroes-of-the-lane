@@ -99,7 +99,18 @@ src/
   audio/
     AudioManager.ts       — звуки снарядов (arrow/axe/fire), громкость из HUD
   assets/
-    *SVG.tsx              — иконки построек/героя/ворот/травы/дороги
+    buildings/{farm,sawmill,tavern,town,gate}/*SVG.tsx — иконки построек и ворот
+    heroes/ivor/IvorSVG.tsx — иконка героя
+    creeps/creepArt.ts    — реестр CreepKind -> {walkFrames, deathFrames, walkFps}
+    creeps/{imp,goblin}/  — растровые арты крипов с реальной анимацией (кадры
+                            ходьбы + смерти); остальные типы крипов — просто
+                            эмодзи, отдельных папок под них нет
+    GrassTile.tsx / RoadTile.tsx / WoodSVG.tsx — терраин и иконка ресурса,
+                            остаются в корне assets/ (не относятся к 4
+                            категориям построек/героев/крипов/башен)
+    Башни (TowerIcon.tsx в ui/) рисуются инлайн-SVG на все 7 типов в одном
+    файле — отдельных assets/towers/<name>/ папок пока нет, заведём при
+    подключении реального арта по башням (по аналогии с крипами)
 ```
 
 ---
