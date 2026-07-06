@@ -5,6 +5,7 @@ import { TOWER_DEFS } from "../data/towers";
 import type { HeroType } from "../data/heroes";
 import { HERO_DEFS, heroRange } from "../data/heroes";
 import { HERO_HIRE_COST, TOWN_LEVELS, FARM_BUILD_TIME, SAWMILL_BUILD_TIME, TAVERN_BUILD_TIME } from "../data/buildings";
+import { heroAttackPhase } from "../game/systems/heroAttack";
 import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
 import GateImage from "../assets/buildings/gate/GateImage";
 import FarmImage from "../assets/buildings/farm/FarmImage";
@@ -389,7 +390,7 @@ export default function GameGrid({
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={towerSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedHero ? { filter: SELECTION_GLOW } : {}) }}>
-                <HeroIcon type={hero.type} size={towerSize} />
+                <HeroIcon type={hero.type} size={towerSize} phase={heroAttackPhase(hero, state)} />
               </span>
               {hero.buildTimeRemaining > 0 && (
                 <>
