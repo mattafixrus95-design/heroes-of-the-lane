@@ -496,7 +496,7 @@ export default function GameGrid({
       onContextMenu={e => { e.preventDefault(); if (pendingHero) onCancelPendingHero(); else onExitBuildMode(); }}
       onClickCapture={handleContainerClickCapture}
     >
-      <TerrainLayer cell={cell} />
+      <TerrainLayer cell={cell} terrainSeed={state.terrainSeed} roadCornerVariant={state.roadCornerVariant} />
 
       {/* Спрайт ворот — НИЖЕ слоя крипов, чтобы только что заспавнившийся крип
           был виден поверх ворот и выглядел выходящим из открытых створок,

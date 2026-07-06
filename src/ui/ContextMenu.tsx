@@ -16,6 +16,7 @@ import type { HeroType } from "../data/heroes";
 import { auraBonus, heroAuraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
 import HeroIcon from "./HeroIcon";
+import CreepIcon from "./CreepIcon";
 import WoodSVG from "../assets/WoodSVG";
 import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
@@ -712,7 +713,7 @@ function CreepPanel({ creep }: { creep: Creep }) {
   return (
     <>
       <div className="cm-header">
-        <span className="cm-title">{def.emoji} {def.name}</span>
+        <span className="cm-title"><CreepIcon kind={creep.kind} /> {def.name}</span>
       </div>
       <div className="cm-hp-bar-outer">
         <div className="cm-hp-bar-inner" style={{ width: `${hpPct * 100}%`, background: hpBarColor }} />
@@ -762,7 +763,7 @@ function WavePanel({ state }: { state: GameState }) {
           const def = CREEP_DEFS[kind];
           return (
             <span key={kind}>
-              {def.emoji} {def.name} ×{count} — ❤️{def.hp} 🏃{def.speed}
+              <CreepIcon kind={kind} /> {def.name} ×{count} — ❤️{def.hp} 🏃{def.speed}
               {def.abilities.length > 0 && ` · ${def.abilities.map(a => ABILITY_LABEL[a]).join(", ")}`}
             </span>
           );
