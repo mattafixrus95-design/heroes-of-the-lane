@@ -18,7 +18,7 @@ function makeFt(c: Creep, gameTime: number): FloatingText {
 
 // Крипы с художественным спрайтом ходьбы, у которых также есть кадры смерти
 // (пока только Бес) — остальные виды остаются просто эмодзи без анимации.
-const DEATH_ANIM_KINDS = new Set<Creep["kind"]>(["imp"]);
+const DEATH_ANIM_KINDS = new Set<Creep["kind"]>(["imp", "goblin"]);
 const DEATH_ANIM_DURATION = 0.6;
 
 function sweepDead(
