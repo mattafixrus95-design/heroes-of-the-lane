@@ -6,7 +6,7 @@ import type { HeroType } from "../data/heroes";
 import { HERO_DEFS, heroRange } from "../data/heroes";
 import { HERO_HIRE_COST, TOWN_LEVELS, FARM_BUILD_TIME, SAWMILL_BUILD_TIME, TAVERN_BUILD_TIME } from "../data/buildings";
 import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
-import GateSVG from "../assets/buildings/gate/GateSVG";
+import GateImage from "../assets/buildings/gate/GateImage";
 import FarmSVG from "../assets/buildings/farm/FarmSVG";
 import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
 import TavernSVG from "../assets/buildings/tavern/TavernSVG";
@@ -523,7 +523,7 @@ export default function GameGrid({
       }}>
         <ObjectShadow size={iconSize} />
         <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
-          <GateSVG size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
+          <GateImage size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
         </span>
       </div>
 
