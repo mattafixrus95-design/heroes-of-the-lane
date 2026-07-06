@@ -76,4 +76,4 @@ export function isTownTerritory(col: number, row: number): boolean {
 
 // Ворота открываются перед первым крипом волны — крип не должен появляться
 // раньше, чем створки полностью разъедутся (см. GateImage.tsx и spawnWave.ts).
-export const GATE_OPEN_SECONDS = 0.35;
+export const GATE_OPEN_SECONDS = 0.24;
