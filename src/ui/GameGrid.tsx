@@ -7,9 +7,9 @@ import { HERO_DEFS, heroRange } from "../data/heroes";
 import { HERO_HIRE_COST, TOWN_LEVELS, FARM_BUILD_TIME, SAWMILL_BUILD_TIME, TAVERN_BUILD_TIME } from "../data/buildings";
 import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
 import GateImage from "../assets/buildings/gate/GateImage";
-import FarmSVG from "../assets/buildings/farm/FarmSVG";
+import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
-import TavernSVG from "../assets/buildings/tavern/TavernSVG";
+import TavernImage from "../assets/buildings/tavern/TavernImage";
 import TowerIcon from "./TowerIcon";
 import TownIcon from "./TownIcon";
 import HeroIcon from "./HeroIcon";
@@ -305,7 +305,7 @@ export default function GameGrid({
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
-                <FarmSVG size={iconSize} />
+                <FarmImage size={iconSize} />
               </span>
               {state.farm.buildTimeRemaining > 0 && (
                 <>
@@ -359,7 +359,7 @@ export default function GameGrid({
             <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ObjectShadow size={iconSize} />
               <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
-                <TavernSVG size={iconSize} />
+                <TavernImage size={iconSize} />
               </span>
               {state.tavern.buildTimeRemaining > 0 && (
                 <>

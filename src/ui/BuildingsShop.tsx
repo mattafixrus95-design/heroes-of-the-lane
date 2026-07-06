@@ -2,9 +2,9 @@ import type { GameState } from "../game/engine/gameState";
 import { SAWMILL_MAX_LEVEL } from "../data/buildings";
 import { TOWN_LEVELS } from "../data/buildings";
 import type { Selection } from "./selection";
-import FarmSVG from "../assets/buildings/farm/FarmSVG";
+import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
-import TavernSVG from "../assets/buildings/tavern/TavernSVG";
+import TavernImage from "../assets/buildings/tavern/TavernImage";
 import TownIcon from "./TownIcon";
 
 interface Props {
@@ -34,7 +34,7 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
         className={`shop-item${isSelected("farm") ? " selected" : ""}`}
         onClick={() => onSelect(isSelected("farm") ? null : { kind: "farm" })}
       >
-        <span className="shop-emoji"><FarmSVG size={26} /></span>
+        <span className="shop-emoji"><FarmImage size={26} /></span>
         <span className="shop-name">Ферма{farmLevel > 0 ? ` ур.${farmLevel}` : ""}</span>
         <span className="shop-cost">{farmBuilding ? "⚙️ строится" : farmLevel > 0 ? "" : "построить"}</span>
       </div>
@@ -61,7 +61,7 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
         className={`shop-item${isSelected("tavern") ? " selected" : ""}`}
         onClick={() => onSelect(isSelected("tavern") ? null : { kind: "tavern" })}
       >
-        <span className="shop-emoji"><TavernSVG size={26} /></span>
+        <span className="shop-emoji"><TavernImage size={26} /></span>
         <span className="shop-name">Таверна</span>
         <span className="shop-cost">{tavernBuilding ? "⚙️ строится" : tavernBuilt ? "" : "построить"}</span>
       </div>

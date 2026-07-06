@@ -18,7 +18,7 @@ import TowerIcon from "./TowerIcon";
 import HeroIcon from "./HeroIcon";
 import WoodSVG from "../assets/WoodSVG";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
-import TavernSVG from "../assets/buildings/tavern/TavernSVG";
+import TavernImage from "../assets/buildings/tavern/TavernImage";
 import InfoBadge from "./InfoBadge";
 import BuildProgressBar from "./BuildProgressBar";
 import type { Selection } from "./selection";
@@ -581,7 +581,7 @@ function TavernPanel({ state, pendingHero, onUpdateState, onShowBuildingInfo, on
   return (
     <>
       <div className="cm-header">
-        <span className="cm-title"><TavernSVG size={22} /> Таверна</span>
+        <span className="cm-title"><TavernImage size={22} /> Таверна</span>
         <InfoBadge onClick={() => onShowBuildingInfo("tavern")} />
       </div>
 
