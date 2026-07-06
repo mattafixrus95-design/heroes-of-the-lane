@@ -131,6 +131,17 @@ export interface SplashEffect {
   duration: number;
 }
 
+// Анимация смерти крипа (пока используется только для Беса — см. impFrames.ts).
+export interface DeathEffect {
+  id: string;
+  kind: CreepKind;
+  x: number;
+  y: number;
+  pathProgress: number;
+  spawnTime: number;
+  duration: number;
+}
+
 export interface FloatingText {
   id: string;
   text: string;
@@ -166,6 +177,7 @@ export interface GameState {
   tavern: Tavern | null;
   projectiles: Projectile[];
   splashEffects: SplashEffect[];
+  deathEffects: DeathEffect[];
   floatingTexts: FloatingText[];
   isPaused: boolean;
   gameTime: number;
@@ -211,6 +223,7 @@ export function createInitialState(): GameState {
     tavern: { buildTimeRemaining: 0, offers: [{ type: "ivor" }] },
     projectiles: [],
     splashEffects: [],
+    deathEffects: [],
     floatingTexts: [],
     isPaused: false,
     gameTime: 0,

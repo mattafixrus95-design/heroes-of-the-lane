@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import type { GameState } from "../game/engine/gameState";
 import { CREEP_DEFS } from "../data/waves";
 import { pathFacing } from "../data/map";
-import impImage from "../assets/impSprite";
+import { impWalkFrames, impDeathFrames } from "../assets/impFrames";
 import type { Selection } from "./selection";
 
 type ArrowStyle = "default" | "elf" | "ivor";
@@ -238,12 +238,13 @@ export function EffectsCanvas({ state, cell, selection, width, height }: Effects
 
       const fontPx = Math.max(0.6, (isBoss ? cell * 1.3 : cell) / 56) * 16;
 
-      if (c.kind === "imp" && impImage.complete && impImage.naturalWidth > 0) {
+      const impWalkImg = impWalkFrames[Math.floor(state.gameTime * 6 + c.pathProgress) % impWalkFrames.length];
+      if (c.kind === "imp" && impWalkImg.complete && impWalkImg.naturalWidth > 0) {
         // Спрайт Беса: единственная художественная ориентация (смотрит
         // влево) — зеркалим по горизонтали, когда крип идёт вправо.
-        // Вверх/вниз — тот же спрайт без поворота, только лёгкое
-        // покачивание корпуса, имитирующее шаг.
-        const aspect = impImage.naturalHeight / impImage.naturalWidth;
+        // Вверх/вниз — тот же спрайт без поворота. Цикл ходьбы — листаем
+        // 4 кадра по времени + лёгкое покачивание корпуса.
+        const aspect = impWalkImg.naturalHeight / impWalkImg.naturalWidth;
         const drawH = fontPx * 1.9;
         const drawW = drawH / aspect;
         const bob = Math.abs(Math.sin(state.gameTime * 8 + c.pathProgress * 3)) * drawH * 0.05;
@@ -254,7 +255,7 @@ export function EffectsCanvas({ state, cell, selection, width, height }: Effects
         ctx.filter = isSlowed ? "hue-rotate(180deg)" : "none";
         ctx.translate(x, topY);
         if (mirror) ctx.scale(-1, 1);
-        ctx.drawImage(impImage, -drawW / 2, 0, drawW, drawH);
+        ctx.drawImage(impWalkImg, -drawW / 2, 0, drawW, drawH);
         ctx.restore();
       } else {
         ctx.save();
@@ -265,6 +266,32 @@ export function EffectsCanvas({ state, cell, selection, width, height }: Effects
         ctx.fillText(def.emoji, x, barY + barH + 1);
         ctx.restore();
       }
+    }
+
+    // Анимация смерти (пока только Бес — 2 кадра: падение → лежит)
+    for (const de of state.deathEffects) {
+      if (de.kind !== "imp") continue;
+      const img = de.duration > 0 && state.gameTime - de.spawnTime < de.duration * 0.5
+        ? impDeathFrames[0]
+        : impDeathFrames[1];
+      if (!img.complete || img.naturalWidth === 0) continue;
+
+      const t = Math.min(1, (state.gameTime - de.spawnTime) / de.duration);
+      const opacity = t > 0.7 ? Math.max(0, 1 - (t - 0.7) / 0.3) : 1;
+      const x = de.x * cell + cell / 2;
+      const y = de.y * cell + cell / 2;
+      const aspect = img.naturalHeight / img.naturalWidth;
+      const fontPx = Math.max(0.6, cell / 56) * 16;
+      const drawH = fontPx * 1.9;
+      const drawW = drawH / aspect;
+      const mirror = pathFacing(de.pathProgress) === 1;
+
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.translate(x, y - drawH * 0.55);
+      if (mirror) ctx.scale(-1, 1);
+      ctx.drawImage(img, -drawW / 2, 0, drawW, drawH);
+      ctx.restore();
     }
 
     // Splash-эффекты
