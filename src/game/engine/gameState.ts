@@ -187,6 +187,8 @@ export interface GameState {
   waveStats: WaveStat[];
   currentWaveKilled: number;
   currentWaveGold: number;
+  terrainSeed: number;         // фикс. при старте игры — по нему выбирается вариант травы на клетку
+  roadCornerVariant: 2 | 3;    // фикс. при старте игры — один стиль угла дороги на всю карту
 }
 
 export const STARTING_GOLD  = 200;
@@ -233,5 +235,7 @@ export function createInitialState(): GameState {
     waveStats: [],
     currentWaveKilled: 0,
     currentWaveGold: 0,
+    terrainSeed: Math.floor(Math.random() * 1_000_000),
+    roadCornerVariant: Math.random() < 0.5 ? 2 : 3,
   };
 }
