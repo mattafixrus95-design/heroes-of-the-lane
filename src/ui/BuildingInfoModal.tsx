@@ -7,8 +7,8 @@ import {
   TAVERN_COST, TAVERN_BUILD_TIME, HERO_HIRE_COST,
 } from "../data/buildings";
 import WoodSVG from "../assets/WoodSVG";
-import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
-import TavernSVG from "../assets/buildings/tavern/TavernSVG";
+import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
+import TavernImage from "../assets/buildings/tavern/TavernImage";
 
 interface Props {
   kind: "farm" | "sawmill" | "town" | "tavern";
@@ -31,9 +31,9 @@ function BuildingInfoModal({ kind, onClose }: Props) {
         <div className="tm-header">
           <div className="tm-title">
             {kind === "farm" && "🍖 Ферма"}
-            {kind === "sawmill" && <span className="cost-icon"><SawmillSVG size={22} /> Лесопилка</span>}
+            {kind === "sawmill" && <span className="cost-icon"><SawmillImage size={22} /> Лесопилка</span>}
             {kind === "town" && "🏘️ Город"}
-            {kind === "tavern" && <span className="cost-icon"><TavernSVG size={22} /> Таверна</span>}
+            {kind === "tavern" && <span className="cost-icon"><TavernImage size={22} /> Таверна</span>}
           </div>
           <button className="tm-close" onClick={onClose}>✕</button>
         </div>

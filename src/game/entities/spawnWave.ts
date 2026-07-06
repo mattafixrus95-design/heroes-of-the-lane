@@ -1,6 +1,7 @@
 import type { GameState, SpawnEntry } from "../engine/gameState";
 import { PREP_DURATION } from "../engine/gameState";
 import { WAVE_DEFS } from "../../data/waves";
+import { GATE_OPEN_SECONDS } from "../../data/map";
 
 // Вызывается нажатием кнопки — уходит в фазу ожидания
 export function startWave(state: GameState): GameState {
@@ -22,7 +23,8 @@ export function startWaveInternal(state: GameState): GameState {
     wave: state.wave + 1,
     creeps: [],
     spawnQueue: entries,
-    spawnTimer: 0,
+    // Первый крип ждёт, пока ворота полностью откроются (см. GateImage.tsx)
+    spawnTimer: GATE_OPEN_SECONDS,
     currentWaveKilled: 0,
     currentWaveGold: 0,
   };

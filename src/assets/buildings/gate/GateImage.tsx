@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+import { GATE_OPEN_SECONDS } from "../../../data/map";
 import closed from "./gate-closed.png";
 import opening1 from "./gate-opening-1.png";
 import opening2 from "./gate-opening-2.png";
 import opened from "./gate-opened.png";
 
 const FRAMES = [closed, opening1, opening2, opened];
-const OPEN_DURATION_MS = 1000;  // открытие целиком
+// Открытие занимает столько же, сколько spawnWave.ts держит первого крипа
+// волны перед выходом (GATE_OPEN_SECONDS) — крип не должен появляться
+// раньше, чем створки полностью разъедутся.
+const OPEN_DURATION_MS = GATE_OPEN_SECONDS * 1000;
 const CLOSE_DELAY_MS = 1000;    // пауза перед началом закрытия (крипы успевают выйти)
 const CLOSE_DURATION_MS = 1000; // закрытие целиком
 
