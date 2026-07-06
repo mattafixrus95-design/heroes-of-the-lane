@@ -296,9 +296,6 @@ export default function GameGrid({
                   <div style={{ position: "absolute", left: 2, right: 2, top: -7 }}>
                     <BuildProgressBar remaining={state.townBuildTimeRemaining} total={TOWN_LEVELS[state.townLevel].buildTime} />
                   </div>
-                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
-                    <BuildProgressBar remaining={state.townBuildTimeRemaining} total={TOWN_LEVELS[state.townLevel].buildTime} />
-                  </div>
                 </>
               )}
             </span>
@@ -321,9 +318,6 @@ export default function GameGrid({
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.farm.buildTimeRemaining)}с</span>
                   </span>
                   <div style={{ position: "absolute", left: 2, right: 2, top: -7 }}>
-                    <BuildProgressBar remaining={state.farm.buildTimeRemaining} total={FARM_BUILD_TIME} />
-                  </div>
-                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
                     <BuildProgressBar remaining={state.farm.buildTimeRemaining} total={FARM_BUILD_TIME} />
                   </div>
                 </>
@@ -350,9 +344,6 @@ export default function GameGrid({
                   <div style={{ position: "absolute", left: 2, right: 2, top: -7 }}>
                     <BuildProgressBar remaining={state.sawmill.buildTimeRemaining} total={SAWMILL_BUILD_TIME} />
                   </div>
-                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
-                    <BuildProgressBar remaining={state.sawmill.buildTimeRemaining} total={SAWMILL_BUILD_TIME} />
-                  </div>
                 </>
               )}
             </span>
@@ -375,9 +366,6 @@ export default function GameGrid({
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.tavern.buildTimeRemaining)}с</span>
                   </span>
                   <div style={{ position: "absolute", left: 2, right: 2, top: -7 }}>
-                    <BuildProgressBar remaining={state.tavern.buildTimeRemaining} total={TAVERN_BUILD_TIME} />
-                  </div>
-                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
                     <BuildProgressBar remaining={state.tavern.buildTimeRemaining} total={TAVERN_BUILD_TIME} />
                   </div>
                 </>
@@ -403,9 +391,6 @@ export default function GameGrid({
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(hero.buildTimeRemaining)}с</span>
                   </span>
                   <div style={{ position: "absolute", left: 2, right: 2, top: -7 }}>
-                    <BuildProgressBar remaining={hero.buildTimeRemaining} total={HERO_DEFS[hero.type].buildTime} />
-                  </div>
-                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
                     <BuildProgressBar remaining={hero.buildTimeRemaining} total={HERO_DEFS[hero.type].buildTime} />
                   </div>
                 </>
@@ -436,9 +421,6 @@ export default function GameGrid({
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(tower.buildTimeRemaining)}с</span>
                   </span>
                   <div style={{ position: "absolute", left: 2, right: 2, top: -7 }}>
-                    <BuildProgressBar remaining={tower.buildTimeRemaining} total={tower.gradeIndex === 0 ? TOWER_DEFS[tower.type].buildTime : TOWER_DEFS[tower.type].grades[tower.gradeIndex].upgradeTime} />
-                  </div>
-                  <div style={{ position: "absolute", left: 2, right: 2, bottom: 1 }}>
                     <BuildProgressBar remaining={tower.buildTimeRemaining} total={tower.gradeIndex === 0 ? TOWER_DEFS[tower.type].buildTime : TOWER_DEFS[tower.type].grades[tower.gradeIndex].upgradeTime} />
                   </div>
                 </>
