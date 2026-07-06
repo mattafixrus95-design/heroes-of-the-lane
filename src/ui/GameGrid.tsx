@@ -133,11 +133,6 @@ export default function GameGrid({
 
   const [hoveredCell, setHoveredCell] = useState<{ col: number; row: number } | null>(null);
 
-  // Очищаем hover когда выходим из режима строительства/размещения героя
-  useEffect(() => {
-    if (!buildModeActive) setHoveredCell(null);
-  }, [buildModeActive]);
-
   // Крипы рисуются на canvas (см. EffectsCanvas в HotCanvas.tsx), поэтому клики
   // по ним перехватываем на фазе capture здесь — попадание считаем по тем же
   // размерам маркера, что использует EffectsCanvas.
@@ -513,7 +508,7 @@ export default function GameGrid({
         borderRadius: 6, overflow: "hidden", touchAction: "none",
       }}
       onMouseLeave={() => setHoveredCell(null)}
-      onContextMenu={e => { e.preventDefault(); pendingHero ? onCancelPendingHero() : onExitBuildMode(); }}
+      onContextMenu={e => { e.preventDefault(); if (pendingHero) onCancelPendingHero(); else onExitBuildMode(); }}
       onClickCapture={handleContainerClickCapture}
     >
       <TerrainLayer cell={cell} />
