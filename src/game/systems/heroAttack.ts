@@ -14,7 +14,7 @@ function travelTime(fromCol: number, fromRow: number, toX: number, toY: number, 
   return Math.max(0.05, Math.hypot(fromCol - toX, fromRow - toY) / speed);
 }
 
-function findTarget(hero: Hero, range: number, creeps: Creep[]): Creep | null {
+export function findTarget(hero: Hero, range: number, creeps: Creep[]): Creep | null {
   let best: Creep | null = null;
   for (const c of creeps) {
     if (dist(hero, c) <= range) {
@@ -22,6 +22,21 @@ function findTarget(hero: Hero, range: number, creeps: Creep[]): Creep | null {
     }
   }
   return best;
+}
+
+export type HeroAttackPhase = "idle" | "ready" | "after_shot";
+
+// Кратковременная поза "после выстрела" сразу по lastAttackTime; "ready" —
+// герой держит цель на прицеле (натянул тетиву) между выстрелами; иначе —
+// нейтральный idle. Только для рендера (GameGrid), не часть тикающих систем.
+const AFTER_SHOT_DURATION = 0.2;
+
+export function heroAttackPhase(hero: Hero, state: GameState): HeroAttackPhase {
+  if (hero.buildTimeRemaining > 0) return "idle";
+  if (state.gameTime - hero.lastAttackTime < AFTER_SHOT_DURATION) return "after_shot";
+  const def = HERO_DEFS[hero.type];
+  const range = heroRange(hero.level, def);
+  return findTarget(hero, range, state.creeps) ? "ready" : "idle";
 }
 
 // Атаки героев тикаются отдельно от башен — герои хранятся в своём контейнере
