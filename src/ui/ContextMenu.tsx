@@ -17,7 +17,7 @@ import { auraBonus, heroAuraBonus } from "../game/systems/towerAttack";
 import TowerIcon from "./TowerIcon";
 import HeroIcon from "./HeroIcon";
 import WoodSVG from "../assets/WoodSVG";
-import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
+import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
 import TavernSVG from "../assets/buildings/tavern/TavernSVG";
 import InfoBadge from "./InfoBadge";
 import BuildProgressBar from "./BuildProgressBar";
@@ -387,7 +387,7 @@ function SawmillPanel({ state, onUpdateState, onShowBuildingInfo }: {
   return (
     <>
       <div className="cm-header">
-        <span className="cm-title"><SawmillSVG size={22} /> Лесопилка{level > 0 ? ` ур.${level}` : ""}</span>
+        <span className="cm-title"><SawmillImage size={22} /> Лесопилка{level > 0 ? ` ур.${level}` : ""}</span>
         <InfoBadge onClick={() => onShowBuildingInfo("sawmill")} />
       </div>
       {isBuilding && (

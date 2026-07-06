@@ -7,7 +7,7 @@ import {
   TAVERN_COST, TAVERN_BUILD_TIME, HERO_HIRE_COST,
 } from "../data/buildings";
 import WoodSVG from "../assets/WoodSVG";
-import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
+import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
 import TavernSVG from "../assets/buildings/tavern/TavernSVG";
 
 interface Props {
@@ -31,7 +31,7 @@ function BuildingInfoModal({ kind, onClose }: Props) {
         <div className="tm-header">
           <div className="tm-title">
             {kind === "farm" && "🍖 Ферма"}
-            {kind === "sawmill" && <span className="cost-icon"><SawmillSVG size={22} /> Лесопилка</span>}
+            {kind === "sawmill" && <span className="cost-icon"><SawmillImage size={22} /> Лесопилка</span>}
             {kind === "town" && "🏘️ Город"}
             {kind === "tavern" && <span className="cost-icon"><TavernSVG size={22} /> Таверна</span>}
           </div>

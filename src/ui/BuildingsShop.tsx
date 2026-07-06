@@ -3,7 +3,7 @@ import { SAWMILL_MAX_LEVEL } from "../data/buildings";
 import { TOWN_LEVELS } from "../data/buildings";
 import type { Selection } from "./selection";
 import FarmSVG from "../assets/buildings/farm/FarmSVG";
-import SawmillSVG from "../assets/buildings/sawmill/SawmillSVG";
+import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
 import TavernSVG from "../assets/buildings/tavern/TavernSVG";
 import TownIcon from "./TownIcon";
 
@@ -43,7 +43,7 @@ export default function BuildingsShop({ state, selection, onSelect }: Props) {
         className={`shop-item${isSelected("sawmill") ? " selected" : ""}${sawmillMaxed ? " unaffordable" : ""}`}
         onClick={() => onSelect(isSelected("sawmill") ? null : { kind: "sawmill" })}
       >
-        <span className="shop-emoji"><SawmillSVG size={26} /></span>
+        <span className="shop-emoji"><SawmillImage size={26} /></span>
         <span className="shop-name">Лесопилка{sawmillLevel > 0 ? ` ур.${sawmillLevel}` : ""}</span>
         <span className="shop-cost">{sawmillBuilding ? "⚙️ строится" : sawmillMaxed ? "макс." : sawmillLevel > 0 ? "" : "построить"}</span>
       </div>
