@@ -523,7 +523,7 @@ export default function GameGrid({
       }}>
         <ObjectShadow size={iconSize} />
         <span style={{ position: "relative", zIndex: 1, display: "flex" }}>
-          <GateImage size={iconSize} open={state.phase === "wave" && state.spawnQueue.length > 0} />
+          <GateImage size={Math.round(cell * 1.35)} open={state.phase === "wave" && state.spawnQueue.length > 0} />
         </span>
       </div>
 
