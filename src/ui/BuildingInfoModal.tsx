@@ -1,8 +1,8 @@
 import { memo } from "react";
 import type { ReactNode } from "react";
 import {
-  farmCost, FARM_BUILD_TIME, FARM_FOOD_PER_LEVEL, FARM_COST_BY_LEVEL,
-  sawmillCost, SAWMILL_GOLD_COST, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
+  farmCost, farmBuildTime, FARM_FOOD_PER_LEVEL, FARM_COST_BY_LEVEL,
+  sawmillCost, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
   TAVERN_COST, TAVERN_BUILD_TIME, HERO_HIRE_COST,
 } from "../data/buildings";
@@ -43,14 +43,15 @@ function BuildingInfoModal({ kind, onClose }: Props) {
           <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 5 }}>
             <div style={{ fontSize: "0.78rem", color: "#aaa", lineHeight: 1.3, marginBottom: 4 }}>
               Увеличивает максимальный запас еды. Уровней неограниченно.
-              Золото и дерево растут с уровнем (после {FARM_COST_BY_LEVEL.length}-го держатся на месте).
+              Золото, дерево и время стройки растут с уровнем (после {FARM_COST_BY_LEVEL.length}-го держатся на месте).
             </div>
-            <Row label="Стройка"        value={`${FARM_BUILD_TIME}с на грейд`} />
             <Row label="+еды за грейд"  value={FARM_FOOD_PER_LEVEL} />
             {FARM_COST_BY_LEVEL.map((_, i) => {
               const cost = farmCost(i + 1);
+              const time = farmBuildTime(i + 1);
+              const isLast = i === FARM_COST_BY_LEVEL.length - 1;
               return (
-                <Row key={i} label={`Ур. ${i + 1}${i === FARM_COST_BY_LEVEL.length - 1 ? "+" : ""}`} value={<span className="cost-icon">💰{cost.gold} <WoodSVG size={13} />{cost.wood}</span>} />
+                <Row key={i} label={`Ур. ${i + 1}${isLast ? "+" : ""}`} value={<span className="cost-icon">💰{cost.gold} <WoodSVG size={13} />{cost.wood} · {time}с</span>} />
               );
             })}
           </div>
@@ -59,8 +60,8 @@ function BuildingInfoModal({ kind, onClose }: Props) {
         {kind === "sawmill" && (
           <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 5 }}>
             <div style={{ fontSize: "0.78rem", color: "#aaa", lineHeight: 1.3, marginBottom: 4 }}>
-              Автоматически производит дерево каждые {SAWMILL_TICK_INTERVAL} секунд. Максимум {SAWMILL_MAX_LEVEL} уровней.
-              Золото за грейд всегда {SAWMILL_GOLD_COST}, дерево растёт с уровнем.
+              Автоматически производит дерево каждые {SAWMILL_TICK_INTERVAL} секунд. Максимум {SAWMILL_MAX_LEVEL} уровня.
+              Золото и дерево растут с уровнем.
             </div>
             <Row label="Стройка"          value={`${SAWMILL_BUILD_TIME}с`} />
             <Row label="+дерева/уровень"  value={`${SAWMILL_WOOD_PER_LEVEL} каждые ${SAWMILL_TICK_INTERVAL}с`} />

@@ -1,9 +1,10 @@
 export const GRID_COLS = 10;
 export const GRID_ROWS = 11;
 
-// Visual layout (G=entry, C=exit, P=path, .=buildable, T=территория города):
+// Visual layout (G=entry, X=клетка над воротами, недоступна под застройку,
+// C=exit, P=path, .=buildable, T=территория города):
 //      0  1  2  3  4  5  6  7  8  9
-// r0  [ .  .  .  .  .  .  .  .  .  . ]  ← верхний ряд под застройку башнями
+// r0  [ X  .  .  .  .  .  .  .  .  . ]  ← верхний ряд под застройку башнями
 // r1  [ G  P  P  P  P  P  P  P  P  P ]
 // r2  [ .  .  .  .  .  .  .  .  .  P ]
 // r3  [ P  P  P  P  P  P  P  P  P  P ]
@@ -12,8 +13,8 @@ export const GRID_ROWS = 11;
 // r6  [ .  .  .  .  .  .  .  .  .  P ]
 // r7  [ P  P  P  P  P  P  P  P  P  P ]
 // r8  [ P  .  .  .  .  .  .  .  .  . ]
-// r9  [ P  P  P  P  P  P  P  P  C  T ]
-// r10 [ .  .  .  .  .  .  .  .  T  T ]
+// r9  [ P  P  P  P  P  P  P  P  C  T ]  ← T на (9,9): не отдельное здание, накрыта спрайтом замка
+// r10 [ .  .  .  .  .  .  .  T  T  T ]
 
 export const ENTRY_CELL: [number, number] = [0, 1];
 export const EXIT_CELL:  [number, number] = [8, 9];
@@ -62,13 +63,15 @@ export function pathFacing(progress: number): 1 | -1 {
   return 1;
 }
 
-// Территория города: нижние правые 2×2 клетки карты.
-// (8,9) — замок (конечная точка пути). (9,9) — слот таверны.
-// (8,10) — слот фермы, (9,10) — слот лесопилки.
+// Территория города: нижний правый угол карты, L-образная (не 2×2).
+// (8,9) — замок (конечная точка пути), спрайт замка визуально растянут на 2
+// клетки и центрирован между (8,9) и (9,9) (см. GameGrid.tsx) — поэтому (9,9)
+// тоже часть территории города, хоть там и нет отдельного здания.
+// Нижний ряд (row 10), слева направо: таверна (7,10) — ферма (8,10) — лесопилка (9,10).
 export const FARM_CELL:    [number, number] = [8, 10];
 export const SAWMILL_CELL: [number, number] = [9, 10];
-export const TAVERN_CELL:  [number, number] = [9, 9];
-export const TOWN_TERRITORY = new Set(["8,9", "9,9", "8,10", "9,10"]);
+export const TAVERN_CELL:  [number, number] = [7, 10];
+export const TOWN_TERRITORY = new Set(["8,9", "9,9", "7,10", "8,10", "9,10"]);
 
 export function isTownTerritory(col: number, row: number): boolean {
   return TOWN_TERRITORY.has(`${col},${row}`);
@@ -77,3 +80,12 @@ export function isTownTerritory(col: number, row: number): boolean {
 // Ворота открываются перед первым крипом волны — крип не должен появляться
 // раньше, чем створки полностью разъедутся (см. GateImage.tsx и spawnWave.ts).
 export const GATE_OPEN_SECONDS = 0.24;
+
+// Клетка над воротами — спрайт ворот приподнят на четверть клетки вверх
+// (см. GameGrid.tsx) и визуально заезжает на неё, поэтому строить тут нельзя;
+// саму клетку при этом оставляем травой, а не частью пути.
+export const NO_BUILD_CELLS = new Set([`${ENTRY_CELL[0]},${ENTRY_CELL[1] - 1}`]);
+
+export function isNoBuildCell(col: number, row: number): boolean {
+  return NO_BUILD_CELLS.has(`${col},${row}`);
+}
