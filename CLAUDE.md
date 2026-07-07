@@ -107,7 +107,9 @@ src/
       waveEnd.ts         — defeat (lives≤0) | victory (wave≥WAVE_DEFS.length) | → prep; левелит героев
   ui/
     App.tsx              — root, весь UI-стейт (selection/selectedItem/pendingHero/инфо-модалки)
-    HUD.tsx              — gold/wood/food, lives, wave/20, volume, кнопка "Начать"/пауза, версия
+    HUD.tsx              — gold/wood/food, lives, wave/20, volume, кнопка "Начать"/пауза, версия;
+                            "🏰 стоимость" — totalInvested всех башен + HERO_HIRE_COST за каждого
+                            живого героя (у героя нет totalInvested — цена найма фиксирована)
     BottomHUD.tsx         — табы Башни/Здания + TowerShop/BuildingsShop (скрывается, когда есть selection)
     GameGrid.tsx          — сетка (адаптивный cell по ширине/высоте окна), крипы/башни/герой/здания,
                             снаряды, floating texts, постройка, полоски прогресса стройки в модельке
@@ -125,7 +127,9 @@ src/
     InfoBadge.tsx         — квадратная кнопка "i" (SVG, объёмная), в шапке всех панелей
     BuildProgressBar.tsx  — полоска прогресса стройки/апгрейда (используется и в GameGrid, и в ContextMenu)
     TowerInfoModal.tsx / BuildingInfoModal.tsx / HeroInfoModal.tsx — модалки с полным описанием
-    TowerIcon.tsx / TownIcon.tsx — SVG-иконки по типу/грейду/уровню города
+    TowerIcon.tsx / TownIcon.tsx (→ TownImage.tsx) — иконки по типу/грейду/уровню города; Форт (ур.2)
+                            отзеркален по горизонтали (`MIRRORED` в TownImage.tsx) — исходный рендер
+                            смотрел воротами в другую сторону от дороги
     HeroIcon.tsx          — переключает 3 PNG-кадра героя по `phase` (idle/ready/after_shot)
     StatsOverlay.tsx      — оверлей победы/поражения со статистикой по волнам
   audio/

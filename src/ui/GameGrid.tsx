@@ -247,7 +247,7 @@ export default function GameGrid({
           onPlaceHero();
           return;
         }
-        if (!isPath && !isTerritory && canBuild && selectedItem) {
+        if (!isPath && !isTerritory && !isNoBuild && canBuild && selectedItem) {
           if (canPlaceTowerAt(c, r, selectedItem, state)) {
             const id = genId("t");
             onUpdateState(s => placeTower(c, r, selectedItem, s, id));
@@ -309,7 +309,7 @@ export default function GameGrid({
                   <span style={{
                     position: "absolute", inset: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9)", fontSize: "0.6rem",
                     color: "#f0c040", flexDirection: "column", gap: 1,
                   }}>
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.townBuildTimeRemaining)}с</span>
@@ -333,7 +333,7 @@ export default function GameGrid({
                   <span style={{
                     position: "absolute", inset: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9)", fontSize: "0.6rem",
                     color: "#f0c040", flexDirection: "column", gap: 1,
                   }}>
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.farm.buildTimeRemaining)}с</span>
@@ -357,7 +357,7 @@ export default function GameGrid({
                   <span style={{
                     position: "absolute", inset: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9)", fontSize: "0.6rem",
                     color: "#f0c040", flexDirection: "column", gap: 1,
                   }}>
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.sawmill.buildTimeRemaining)}с</span>
@@ -381,7 +381,7 @@ export default function GameGrid({
                   <span style={{
                     position: "absolute", inset: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9)", fontSize: "0.6rem",
                     color: "#f0c040", flexDirection: "column", gap: 1,
                   }}>
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.tavern.buildTimeRemaining)}с</span>
@@ -406,7 +406,7 @@ export default function GameGrid({
                   <span style={{
                     position: "absolute", inset: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9)", fontSize: "0.6rem",
                     color: "#f0c040", flexDirection: "column", gap: 1,
                   }}>
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(hero.buildTimeRemaining)}с</span>
@@ -436,7 +436,7 @@ export default function GameGrid({
                   <span style={{
                     position: "absolute", inset: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(0,0,0,0.55)", borderRadius: 4, fontSize: "0.6rem",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9)", fontSize: "0.6rem",
                     color: "#f0c040", flexDirection: "column", gap: 1,
                   }}>
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(tower.buildTimeRemaining)}с</span>
