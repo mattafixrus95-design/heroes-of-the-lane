@@ -1,6 +1,7 @@
 import type { CreepKind } from "../../game/engine/gameState";
 import { impWalkFrames, impDeathFrames } from "./imp/impFrames";
 import { goblinWalkFrames, goblinDeathFrames } from "./goblin/goblinFrames";
+import { pikemanWalkFrames, pikemanDeathFrames } from "./pikeman/pikemanFrames";
 
 export interface CreepArt {
   walkFrames: HTMLImageElement[];
@@ -13,4 +14,5 @@ export interface CreepArt {
 export const CREEP_ART: Partial<Record<CreepKind, CreepArt>> = {
   imp: { walkFrames: impWalkFrames, deathFrames: impDeathFrames as [HTMLImageElement, HTMLImageElement], walkFps: 6 },
   goblin: { walkFrames: goblinWalkFrames, deathFrames: goblinDeathFrames as [HTMLImageElement, HTMLImageElement], walkFps: 6 },
+  pikeman: { walkFrames: pikemanWalkFrames, deathFrames: pikemanDeathFrames as [HTMLImageElement, HTMLImageElement], walkFps: 6 },
 };
