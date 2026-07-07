@@ -1,7 +1,7 @@
 import type { CreepKind } from "../../game/engine/gameState";
-import { impWalkFrames, impDeathFrames } from "./imp/impFrames";
-import { goblinWalkFrames, goblinDeathFrames } from "./goblin/goblinFrames";
-import { pikemanWalkFrames, pikemanDeathFrames } from "./pikeman/pikemanFrames";
+import { impWalkFrames, impDeathFrames } from "./01_imp/impFrames";
+import { goblinWalkFrames, goblinDeathFrames } from "./02_goblin/goblinFrames";
+import { pikemanWalkFrames, pikemanDeathFrames } from "./03_pikeman/pikemanFrames";
 
 export interface CreepArt {
   walkFrames: HTMLImageElement[];
