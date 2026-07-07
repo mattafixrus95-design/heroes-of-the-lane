@@ -189,7 +189,14 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
           <div className="cm-action-row">
             <button
               className="cm-btn cancel"
-              onClick={() => { onUpdateState(s => applyCancelBuild(tower.id, s)); onClose(); }}
+              onClick={() => {
+                const isInitialBuild = tower.gradeIndex === 0;
+                onUpdateState(s => applyCancelBuild(tower.id, s));
+                // Отмена апгрейда откатывает башню к прошлому грейду — она остаётся на
+                // поле, закрывать её панель не нужно. Закрываем только когда отменяем
+                // самую первую постройку (башня целиком удаляется, id больше не валиден).
+                if (isInitialBuild) onClose();
+              }}
             >
               ✕ Отменить
             </button>
