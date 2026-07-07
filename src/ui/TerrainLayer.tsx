@@ -16,7 +16,6 @@ import roadCorner3 from "../assets/terrain/road/road-corner-3.png";
 interface Props {
   cell: number;
   terrainSeed: number;
-  roadCornerVariant: 2 | 3;
 }
 
 const GRASS_TILES = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8];
@@ -31,24 +30,26 @@ const ROAD_ROTATION: Record<string, number> = {
   ne: 0, se: 90, sw: 180, nw: 270,
 };
 
-// Каждый вариант травы — случайный отпечаток от terrainSeed + координат клетки,
-// не завязан на Math.random() напрямую, чтобы не перетасовывался при ресайзе
-// (TerrainLayer пересчитывается по cell, terrainSeed же фиксирован на всю игру).
-function hash2(seed: number, col: number, row: number): number {
-  let h = seed * 668265263 + col * 374761393 + row * 2246822519;
+// Каждый вариант травы/угла дороги — случайный отпечаток от terrainSeed + координат
+// клетки (+соль под конкретный выбор, чтобы трава и угол на одной клетке не были
+// скоррелированы), не завязан на Math.random() напрямую, чтобы не перетасовывался
+// при ресайзе (TerrainLayer пересчитывается по cell, terrainSeed же фиксирован на
+// всю игру).
+function hash2(seed: number, col: number, row: number, salt = 0): number {
+  let h = (seed + salt) * 668265263 + col * 374761393 + row * 2246822519;
   h = (h ^ (h >>> 13)) * 1274126177;
   h = h ^ (h >>> 16);
   return Math.abs(h);
 }
 
-function TerrainLayer({ cell, terrainSeed, roadCornerVariant }: Props) {
+function TerrainLayer({ cell, terrainSeed }: Props) {
   const tiles = useMemo(() => {
     const items: React.ReactNode[] = [];
-    const roadCorner = roadCornerVariant === 2 ? roadCorner2 : roadCorner3;
     for (let r = 0; r < GRID_ROWS; r++) {
       for (let c = 0; c < GRID_COLS; c++) {
         const segment = roadSegmentAt(c, r);
         const grassSrc = GRASS_TILES[hash2(terrainSeed, c, r) % GRASS_TILES.length];
+        const roadCorner = hash2(terrainSeed, c, r, 1) % 2 === 0 ? roadCorner2 : roadCorner3;
         items.push(
           <div key={`${c}-${r}`} style={{ position: "absolute", left: c * cell, top: r * cell, width: cell, height: cell }}>
             <img src={grassSrc} alt="" style={{ width: cell, height: cell, display: "block" }} />
@@ -67,7 +68,7 @@ function TerrainLayer({ cell, terrainSeed, roadCornerVariant }: Props) {
       }
     }
     return items;
-  }, [cell, terrainSeed, roadCornerVariant]);
+  }, [cell, terrainSeed]);
 
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
