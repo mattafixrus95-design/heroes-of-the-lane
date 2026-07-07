@@ -2,6 +2,7 @@ import type { TowerType } from "../../data/towers";
 import { elfGrade0Idle, elfGrade0AttackFrames, elfGrade1Idle, elfGrade1AttackFrames } from "./elf/elfFrames";
 import { dwarfGrade0Idle, dwarfGrade0AttackFrames, dwarfGrade1Idle, dwarfGrade1AttackFrames } from "./dwarf/dwarfFrames";
 import { centaurGrade0Idle, centaurGrade0AttackFrames, centaurGrade1Idle, centaurGrade1AttackFrames } from "./centaur/centaurFrames";
+import { pegasusGrade0Idle, pegasusGrade0AttackFrames, pegasusGrade1Idle, pegasusGrade1AttackFrames } from "./pegasus/pegasusFrames";
 
 export interface TowerGradeArt {
   idle: HTMLImageElement;
@@ -35,6 +36,12 @@ export const TOWER_ART: Partial<Record<TowerType, TowerArt>> = {
     grades: [
       { idle: elfGrade0Idle, attackFrames: elfGrade0AttackFrames, attackFps: 5, aspect: 492 / 360 },
       { idle: elfGrade1Idle, attackFrames: elfGrade1AttackFrames, attackFps: 5, aspect: 400 / 360, sizeMult: 1.25 },
+    ],
+  },
+  pegasus: {
+    grades: [
+      { idle: pegasusGrade0Idle, attackFrames: pegasusGrade0AttackFrames, attackFps: 5, aspect: 394 / 360 },
+      { idle: pegasusGrade1Idle, attackFrames: pegasusGrade1AttackFrames, attackFps: 5, aspect: 416 / 360 },
     ],
   },
 };
