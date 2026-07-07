@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { GameState } from "../game/engine/gameState";
-import { maxFood, usedFood } from "../game/engine/gameState";
+import { maxFood, usedFood, jumpToWave } from "../game/engine/gameState";
 import { startWave, startWaveInternal } from "../game/entities/spawnWave";
 import { WAVE_DEFS } from "../data/waves";
 import { HERO_HIRE_COST } from "../data/buildings";
@@ -8,6 +8,7 @@ import WoodSVG from "../assets/WoodSVG";
 
 interface Props {
   state: GameState;
+  devMode?: boolean;
   onUpdateState: (updater: (s: GameState) => GameState) => void;
   onReset: () => void;
   volume: number;
@@ -22,7 +23,7 @@ function volumeEmoji(v: number) {
   return "🔊";
 }
 
-function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMute }: Props) {
+function HUD({ state, devMode, onUpdateState, onReset, volume, onVolumeChange, onToggleMute }: Props) {
   const { phase, wave, gold, wood, lives, maxLives, spawnQueue, creeps } = state;
   const remaining = creeps.length + spawnQueue.length;
   const isPrep = phase === "prep";
@@ -46,6 +47,11 @@ function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMu
     <div className="hud">
       {/* Строка 1: Ресурсы + стоимость башен + звук */}
       <div className="hud-row">
+        {devMode && (
+          <span className="hud-stat" style={{ background: "#e05555", color: "#fff", borderRadius: 4, padding: "1px 6px" }}>
+            🛠 DEV
+          </span>
+        )}
         <span className="hud-stat">💰 {gold}</span>
         <span className="hud-stat hud-stat-icon"><WoodSVG size={16} /> {wood}</span>
         <span className="hud-stat">🍖 {usedFood(state)}/{maxFood(state)}</span>
@@ -88,6 +94,18 @@ function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMu
         </div>
 
         <div className="hud-actions">
+          {devMode && phase === "idle" && (
+            <select
+              className="hud-btn secondary"
+              style={{ padding: "7px 6px", fontSize: "0.78rem" }}
+              value={wave + 1}
+              onChange={e => onUpdateState(s => jumpToWave(s, +e.target.value))}
+            >
+              {WAVE_DEFS.map((w, i) => (
+                <option key={i} value={i + 1}>Волна {i + 1}: {w.name}</option>
+              ))}
+            </select>
+          )}
           {phase === "idle" && (
             <button className="hud-btn" onClick={() => onUpdateState(startWave)}>
               ▶ Начать
@@ -113,6 +131,7 @@ function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMu
 // только те поля, которые реально влияют на отображение.
 export default memo(HUD, (prev, next) => {
   if (
+    prev.devMode !== next.devMode ||
     prev.volume !== next.volume ||
     prev.onUpdateState !== next.onUpdateState ||
     prev.onReset !== next.onReset ||
