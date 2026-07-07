@@ -36,9 +36,17 @@ function hash2(seed: number, col: number, row: number, salt = 0): number {
   return Math.abs(h);
 }
 
+// Каждый тайл рисуется на 105% своего размера и центрируется поверх соседей —
+// иначе из-за дробного cell (зависит от размера окна) браузер округляет
+// left/width до целых px по-разному для соседних тайлов, и между ними
+// проскакивают тонкие щели фона (особенно заметно на стыках с дорогой).
+const BLEED = 0.025; // по 2.5% с каждой стороны = 105% суммарно
+
 function TerrainLayer({ cell, terrainSeed }: Props) {
   const tiles = useMemo(() => {
     const items: React.ReactNode[] = [];
+    const size = cell * (1 + BLEED * 2);
+    const offset = cell * BLEED;
     for (let r = 0; r < GRID_ROWS; r++) {
       for (let c = 0; c < GRID_COLS; c++) {
         const segment = roadSegmentAt(c, r);
@@ -46,13 +54,13 @@ function TerrainLayer({ cell, terrainSeed }: Props) {
         const roadCorner = hash2(terrainSeed, c, r, 1) % 2 === 0 ? roadCorner2 : roadCorner3;
         items.push(
           <div key={`${c}-${r}`} style={{ position: "absolute", left: c * cell, top: r * cell, width: cell, height: cell }}>
-            <img src={grassSrc} alt="" style={{ width: cell, height: cell, display: "block" }} />
+            <img src={grassSrc} alt="" style={{ position: "absolute", left: -offset, top: -offset, width: size, height: size, display: "block" }} />
             {segment && (
               <img
                 src={segment === "h" || segment === "v" ? roadStraight : roadCorner}
                 alt=""
                 style={{
-                  position: "absolute", inset: 0, width: cell, height: cell,
+                  position: "absolute", left: -offset, top: -offset, width: size, height: size,
                   transform: `rotate(${ROAD_ROTATION[segment]}deg)`,
                 }}
               />
