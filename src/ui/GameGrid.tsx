@@ -4,9 +4,9 @@ import type { TowerType } from "../data/towers";
 import { TOWER_DEFS } from "../data/towers";
 import type { HeroType } from "../data/heroes";
 import { HERO_DEFS, heroRange } from "../data/heroes";
-import { HERO_HIRE_COST, TOWN_LEVELS, FARM_BUILD_TIME, SAWMILL_BUILD_TIME, TAVERN_BUILD_TIME } from "../data/buildings";
+import { HERO_HIRE_COST, TOWN_LEVELS, farmBuildTime, SAWMILL_BUILD_TIME, TAVERN_BUILD_TIME } from "../data/buildings";
 import { heroAttackPhase } from "../game/systems/heroAttack";
-import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
+import { GRID_COLS, GRID_ROWS, isPathCell, isTownTerritory, isNoBuildCell, ENTRY_CELL, EXIT_CELL, FARM_CELL, SAWMILL_CELL, TAVERN_CELL } from "../data/map";
 import GateImage from "../assets/buildings/gate/GateImage";
 import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
@@ -181,6 +181,7 @@ export default function GameGrid({
     for (let c = 0; c < GRID_COLS; c++) {
       const isPath   = isPathCell(c, r);
       const isTerritory = isTownTerritory(c, r);
+      const isNoBuild = isNoBuildCell(c, r);
       const tower    = state.towers.find(t => t.col === c && t.row === r);
       const hero     = state.heroes.find(h => h.col === c && h.row === r);
       const isEntry  = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
@@ -198,7 +199,7 @@ export default function GameGrid({
 
       // Состояние hover и подсветки
       const isHovered = buildModeActive && hoveredCell?.col === c && hoveredCell?.row === r;
-      const canPlaceHere = !isPath && !isTerritory && !tower && !hero && canBuild;
+      const canPlaceHere = !isPath && !isTerritory && !isNoBuild && !tower && !hero && canBuild;
       const highlightColor = isHovered
         ? (canPlaceHere ? "rgba(80,255,80,0.28)" : "rgba(255,60,60,0.32)")
         : undefined;
@@ -293,10 +294,15 @@ export default function GameGrid({
               визуально скрыт под воротами и "выезжает из-за" них, а не
               выходит из открытых створок. Здесь остаётся только клик-зона. */}
           {isExit && !tower && (
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(-${Math.round(cell * 0.14)}px)` }}>
-              <ObjectShadow size={iconSize} />
+            <span style={{
+              position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
+              // Замок растянут на 2 клетки — центрирован между (8,9) и (9,9),
+              // поэтому сдвинут на пол-клетки вправо от своей клетки-якоря.
+              transform: `translate(${Math.round(cell * 0.5)}px, -${Math.round(cell * 0.14)}px)`,
+            }}>
+              <ObjectShadow size={Math.round(iconSize * 1.6)} />
               <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedTown ? { filter: SELECTION_GLOW } : {}) }}>
-                <TownIcon level={state.townLevel} size={Math.round(cell * 1.45)} />
+                <TownIcon level={state.townLevel} size={Math.round(cell * 2.3)} />
               </span>
               {state.townBuildTimeRemaining > 0 && (
                 <>
@@ -333,7 +339,7 @@ export default function GameGrid({
                     ⚙️<span style={{ fontSize: "0.5rem" }}>{Math.ceil(state.farm.buildTimeRemaining)}с</span>
                   </span>
                   <div style={{ position: "absolute", left: 2, right: 2, top: -7 }}>
-                    <BuildProgressBar remaining={state.farm.buildTimeRemaining} total={FARM_BUILD_TIME} />
+                    <BuildProgressBar remaining={state.farm.buildTimeRemaining} total={farmBuildTime(state.farm.level)} />
                   </div>
                 </>
               )}
@@ -517,7 +523,7 @@ export default function GameGrid({
           был виден поверх ворот и выглядел выходящим из открытых створок,
           а не прячущимся за силуэтом ворот. */}
       <div style={{
-        position: "absolute", left: ENTRY_CELL[0] * cell, top: ENTRY_CELL[1] * cell,
+        position: "absolute", left: ENTRY_CELL[0] * cell, top: ENTRY_CELL[1] * cell - cell * 0.25,
         width: cell, height: cell, zIndex: 1,
         display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none",
       }}>

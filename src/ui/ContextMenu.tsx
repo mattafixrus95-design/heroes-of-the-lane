@@ -4,7 +4,7 @@ import { SELL_RATE } from "../game/engine/gameState";
 import { TOWER_DEFS } from "../data/towers";
 import type { TowerType } from "../data/towers";
 import {
-  farmCost, FARM_BUILD_TIME,
+  farmCost, farmBuildTime,
   sawmillCost, SAWMILL_MAX_LEVEL, SAWMILL_BUILD_TIME, SAWMILL_TICK_INTERVAL, SAWMILL_WOOD_PER_LEVEL,
   TOWN_LEVELS,
   TAVERN_COST, TAVERN_BUILD_TIME, HERO_HIRE_COST, HERO_MAX_LEVEL,
@@ -253,7 +253,7 @@ function buildOrUpgradeFarm(state: GameState): GameState {
       level: nextLevel,
       foodProduced: state.farm?.foodProduced ?? 0,
       totalInvested: (state.farm?.totalInvested ?? 0) + cost.gold,
-      buildTimeRemaining: FARM_BUILD_TIME,
+      buildTimeRemaining: farmBuildTime(nextLevel),
     },
     floatingTexts: [...state.floatingTexts, ...texts],
   };
@@ -297,7 +297,7 @@ function FarmPanel({ state, onUpdateState, onShowBuildingInfo }: {
       {isBuilding && (
         <div className="cm-building-badge">
           <span>⚙️ Строится… {Math.ceil(farm!.buildTimeRemaining)}с</span>
-          <BuildProgressBar remaining={farm!.buildTimeRemaining} total={FARM_BUILD_TIME} />
+          <BuildProgressBar remaining={farm!.buildTimeRemaining} total={farmBuildTime(farm!.level)} />
         </div>
       )}
       <div className="cm-stats">

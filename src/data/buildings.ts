@@ -7,15 +7,15 @@ export const STARTING_WOOD = 100;
 
 // ── Ферма ─────────────────────────────────────────────────────────────────────
 // Количество уровней не ограничено. После последнего значения в таблице
-// цена (и золото, и дерево) больше не растёт — держится на последнем уровне вечно.
+// цена (и золото, и дерево, и время стройки) больше не растёт — держится на
+// последнем уровне вечно.
 export const FARM_COST_BY_LEVEL: ResourceCost[] = [
   { gold: 20, wood: 50 },
-  { gold: 30, wood: 70 },
-  { gold: 40, wood: 100 },
-  { gold: 50, wood: 125 },
-  { gold: 65, wood: 150 },
+  { gold: 50, wood: 100 },
+  { gold: 100, wood: 150 },
+  { gold: 150, wood: 250 },
 ];
-export const FARM_BUILD_TIME = 2; // секунд на каждый грейд
+export const FARM_BUILD_TIME_BY_LEVEL = [2, 2, 3, 4]; // секунд, растёт с уровнем
 export const FARM_FOOD_PER_LEVEL = 15;
 
 // Стоимость постройки/апгрейда фермы ДО указанного уровня (1-based)
@@ -24,9 +24,16 @@ export function farmCost(targetLevel: number): ResourceCost {
   return FARM_COST_BY_LEVEL[idx];
 }
 
+// Время постройки/апгрейда фермы ДО указанного уровня (1-based)
+export function farmBuildTime(targetLevel: number): number {
+  const idx = Math.min(targetLevel - 1, FARM_BUILD_TIME_BY_LEVEL.length - 1);
+  return FARM_BUILD_TIME_BY_LEVEL[idx];
+}
+
 // ── Лесопилка ─────────────────────────────────────────────────────────────────
-export const SAWMILL_GOLD_COST = 30; // золото — одинаково на каждом грейде
-export const SAWMILL_WOOD_COST_BY_LEVEL = [75, 100, 130, 160, 200, 250, 300]; // дерево — растёт с уровнем
+// Макс. уровень — 4 (жёсткий кап, дальше не апгрейдится).
+export const SAWMILL_GOLD_COST_BY_LEVEL = [30, 30, 50, 100]; // золото — растёт с уровнем
+export const SAWMILL_WOOD_COST_BY_LEVEL = [75, 100, 150, 250]; // дерево — растёт с уровнем
 export const SAWMILL_BUILD_TIME = 5; // секунд, всегда одинаково
 export const SAWMILL_TICK_INTERVAL = 5; // секунд между тиками дохода
 export const SAWMILL_WOOD_PER_LEVEL = 5; // дерева за тик на уровень
@@ -34,7 +41,7 @@ export const SAWMILL_MAX_LEVEL = SAWMILL_WOOD_COST_BY_LEVEL.length;
 
 // Стоимость постройки/апгрейда лесопилки ДО указанного уровня (1-based)
 export function sawmillCost(targetLevel: number): ResourceCost {
-  return { gold: SAWMILL_GOLD_COST, wood: SAWMILL_WOOD_COST_BY_LEVEL[targetLevel - 1] };
+  return { gold: SAWMILL_GOLD_COST_BY_LEVEL[targetLevel - 1], wood: SAWMILL_WOOD_COST_BY_LEVEL[targetLevel - 1] };
 }
 
 // ── Город ─────────────────────────────────────────────────────────────────────
