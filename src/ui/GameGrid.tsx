@@ -62,13 +62,23 @@ interface Props {
   onCancelPendingHero: () => void;
 }
 
-function placeTower(col: number, row: number, type: TowerType, state: GameState): GameState {
+function genId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random()}`;
+}
+
+function canPlaceTowerAt(col: number, row: number, type: TowerType, state: GameState): boolean {
   const def = TOWER_DEFS[type];
-  if (state.gold < def.purchaseCost || state.food < def.foodCost) return state;
-  if (state.towers.some(t => t.col === col && t.row === row)) return state;
+  if (state.gold < def.purchaseCost || state.food < def.foodCost) return false;
+  if (state.towers.some(t => t.col === col && t.row === row)) return false;
+  return true;
+}
+
+function placeTower(col: number, row: number, type: TowerType, state: GameState, id: string): GameState {
+  if (!canPlaceTowerAt(col, row, type, state)) return state;
+  const def = TOWER_DEFS[type];
   const g = def.grades[0];
   const tower: Tower = {
-    id: `t-${Date.now()}-${Math.random()}`,
+    id,
     type, col, row,
     gradeIndex: 0,
     damage: g.damage, range: g.range, attackSpeed: g.attackSpeed,
@@ -237,7 +247,12 @@ export default function GameGrid({
           return;
         }
         if (!isPath && !isTerritory && canBuild && selectedItem) {
-          onUpdateState(s => placeTower(c, r, selectedItem, s));
+          if (canPlaceTowerAt(c, r, selectedItem, state)) {
+            const id = genId("t");
+            onUpdateState(s => placeTower(c, r, selectedItem, s, id));
+            onExitBuildMode();
+            onSelect({ kind: "tower", id });
+          }
           return;
         }
         if (selection) onSelect(null);

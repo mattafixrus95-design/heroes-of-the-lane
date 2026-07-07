@@ -75,10 +75,14 @@ export default function App() {
   }, []);
 
   // Выбор объекта (клик по башне/зданию — на карте или из под-списка в
-  // табе) НЕ трогает состояние табов — таб остаётся таким, каким был.
+  // табе) закрывает таб Башни/Здания — контекстное меню выбранного объекта
+  // не должно соседствовать с открытым шопом. При снятии выделения (sel
+  // === null) таб не трогаем — открывать его обратно самостоятельно
+  // не наше дело, пользователь откроет сам, если нужно.
   const handleSelect = useCallback((sel: Selection | null) => {
     setSelection(sel);
     setSelectedItem(null);
+    if (sel) setBottomTab(null);
   }, []);
 
   const handleSelectShopItem = useCallback((item: ShopItem | null) => {

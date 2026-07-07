@@ -152,8 +152,6 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
     : false;
   const canUpgrade = canAffordUpgrade && !isBuilding && !tierLocked;
 
-  const buildTotal = tower.gradeIndex === 0 ? def.buildTime : def.grades[tower.gradeIndex].upgradeTime;
-
   return (
     <>
       <div className="cm-header">
@@ -163,13 +161,6 @@ function TowerPanel({ tower, state, onUpdateState, onClose, onShowTowerInfo }: {
         </span>
         <InfoBadge onClick={() => onShowTowerInfo(tower.type)} />
       </div>
-
-      {isBuilding && (
-        <div className="cm-building-badge">
-          <span>⚙️ Строится… {Math.ceil(tower.buildTimeRemaining)}с</span>
-          <BuildProgressBar remaining={tower.buildTimeRemaining} total={buildTotal} />
-        </div>
-      )}
 
       <div className="cm-stats">
         <span>⚔️ <span className={heroBonus > 0 ? "cm-buffed" : undefined}>{heroBonus > 0 ? effectiveDamage.toFixed(1) : tower.damage}</span>{heroBonus > 0 && ` (+${Math.round(heroBonus * 100)}%)`}</span>
