@@ -10,61 +10,6 @@ interface Props {
   gameTime?: number;
 }
 
-// ── Pegasus ───────────────────────────────────────────────────────────────────
-function PegasusGrade0({ s }: { s: number }) {
-  return (
-    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      {/* Body */}
-      <ellipse cx="20" cy="24" rx="12" ry="8" fill="#FAFAFA"/>
-      {/* Legs */}
-      <rect x="12" y="28" width="3" height="8" rx="1.5" fill="#E0E0E0"/>
-      <rect x="25" y="28" width="3" height="8" rx="1.5" fill="#E0E0E0"/>
-      {/* Wings */}
-      <path d="M14,20 Q4,10 8,4 Q16,8 18,18" fill="#FFFFFF" opacity="0.95"/>
-      <path d="M26,20 Q36,10 32,4 Q24,8 22,18" fill="#FFFFFF" opacity="0.95"/>
-      <path d="M14,20 Q8,14 10,8" fill="none" stroke="#CFCFCF" strokeWidth="1"/>
-      <path d="M26,20 Q32,14 30,8" fill="none" stroke="#CFCFCF" strokeWidth="1"/>
-      {/* Neck & head */}
-      <path d="M13,18 Q11,10 16,7" fill="none" stroke="#FAFAFA" strokeWidth="6" strokeLinecap="round"/>
-      <ellipse cx="16" cy="6" rx="4" ry="3" fill="#FAFAFA"/>
-      {/* Mane */}
-      <path d="M13,10 Q10,8 12,4" fill="none" stroke="#8B6914" strokeWidth="1.5"/>
-      {/* Tail */}
-      <path d="M30,26 Q37,28 35,34" fill="none" stroke="#E0E0E0" strokeWidth="2.5"/>
-      {/* Eye */}
-      <circle cx="17" cy="6" r="0.8" fill="#2C2C2C"/>
-    </svg>
-  );
-}
-
-function PegasusGrade1({ s }: { s: number }) {
-  return (
-    <svg width={s} height={s} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      {/* Body – silver */}
-      <ellipse cx="20" cy="24" rx="12" ry="8" fill="#CFD8DC"/>
-      {/* Legs */}
-      <rect x="12" y="28" width="3" height="8" rx="1.5" fill="#90A4AE"/>
-      <rect x="25" y="28" width="3" height="8" rx="1.5" fill="#90A4AE"/>
-      {/* Wings – larger, silver-gold */}
-      <path d="M14,20 Q2,8 7,2 Q17,7 18,18" fill="#ECEFF1"/>
-      <path d="M26,20 Q38,8 33,2 Q23,7 22,18" fill="#ECEFF1"/>
-      <path d="M14,20 Q7,12 10,5" fill="none" stroke="#FFD700" strokeWidth="1"/>
-      <path d="M26,20 Q33,12 30,5" fill="none" stroke="#FFD700" strokeWidth="1"/>
-      {/* Neck & head */}
-      <path d="M13,18 Q11,10 16,7" fill="none" stroke="#CFD8DC" strokeWidth="6" strokeLinecap="round"/>
-      <ellipse cx="16" cy="6" rx="4" ry="3" fill="#CFD8DC"/>
-      {/* Golden mane */}
-      <path d="M13,10 Q9,8 12,3" fill="none" stroke="#FFD700" strokeWidth="1.8"/>
-      {/* Tail */}
-      <path d="M30,26 Q38,28 36,34" fill="none" stroke="#FFD700" strokeWidth="2.5"/>
-      {/* Horn-like crest */}
-      <path d="M16,3 L15,-1 L18,2" fill="#FFD700"/>
-      {/* Eye */}
-      <circle cx="17" cy="6" r="0.8" fill="#1A237E"/>
-    </svg>
-  );
-}
-
 // ── Dendroid ──────────────────────────────────────────────────────────────────
 function DendroidGrade0({ s }: { s: number }) {
   return (
@@ -280,7 +225,6 @@ export default function TowerIcon(props: Props) {
   const { type, grade, size = 36 } = props;
   if (TOWER_ART[type]) return <RasterTowerIcon {...props} size={size} />;
   const s = size;
-  if (type === "pegasus")  return grade === 0 ? <PegasusGrade0  s={s} /> : <PegasusGrade1  s={s} />;
   if (type === "dendroid") return grade === 0 ? <DendroidGrade0 s={s} /> : <DendroidGrade1 s={s} />;
   if (type === "unicorn")  return grade === 0 ? <UnicornGrade0  s={s} /> : <UnicornGrade1  s={s} />;
   return grade === 0 ? <DragonGrade0 s={s} /> : <DragonGrade1 s={s} />;
