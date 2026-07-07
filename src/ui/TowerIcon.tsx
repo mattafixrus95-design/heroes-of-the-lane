@@ -265,11 +265,12 @@ function RasterTowerIcon({ type, grade, size, phase, gameTime }: Props & { size:
   const frame = attacking
     ? art.attackFrames[Math.floor((gameTime ?? 0) * art.attackFps) % art.attackFrames.length]
     : art.idle;
+  const w = size * (art.sizeMult ?? 1);
   return (
     <img
       src={frame.src}
       alt=""
-      style={{ width: size, height: size * art.aspect, objectFit: "contain", display: "block" }}
+      style={{ width: w, height: w * art.aspect, objectFit: "contain", display: "block" }}
     />
   );
 }

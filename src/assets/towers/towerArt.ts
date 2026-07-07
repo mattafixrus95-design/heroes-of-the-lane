@@ -8,6 +8,7 @@ export interface TowerGradeArt {
   attackFrames: HTMLImageElement[];
   attackFps: number;
   aspect: number; // height/width исходных обработанных PNG — все кадры грейда одного размера
+  sizeMult?: number; // визуальный множитель размера относительно обычной башни (по умолчанию 1)
 }
 
 export interface TowerArt {
@@ -33,7 +34,7 @@ export const TOWER_ART: Partial<Record<TowerType, TowerArt>> = {
   elf: {
     grades: [
       { idle: elfGrade0Idle, attackFrames: elfGrade0AttackFrames, attackFps: 5, aspect: 492 / 360 },
-      { idle: elfGrade1Idle, attackFrames: elfGrade1AttackFrames, attackFps: 5, aspect: 400 / 360 },
+      { idle: elfGrade1Idle, attackFrames: elfGrade1AttackFrames, attackFps: 5, aspect: 400 / 360, sizeMult: 1.25 },
     ],
   },
 };
