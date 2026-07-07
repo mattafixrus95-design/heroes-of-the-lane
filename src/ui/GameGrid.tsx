@@ -186,6 +186,10 @@ export default function GameGrid({
       const hero     = state.heroes.find(h => h.col === c && h.row === r);
       const isEntry  = c === ENTRY_CELL[0] && r === ENTRY_CELL[1];
       const isExit   = c === EXIT_CELL[0]  && r === EXIT_CELL[1];
+      // Замок визуально растянут на 2 клетки (см. рендер ниже) — соседняя
+      // клетка справа тоже должна открывать панель города по клику/hover.
+      const isTownNeighbor = c === EXIT_CELL[0] + 1 && r === EXIT_CELL[1];
+      const isTownClickable = isExit || isTownNeighbor;
       const isFarmCell    = c === FARM_CELL[0]    && r === FARM_CELL[1];
       const isSawmillCell = c === SAWMILL_CELL[0] && r === SAWMILL_CELL[1];
       const isTavernCell  = c === TAVERN_CELL[0]  && r === TAVERN_CELL[1];
@@ -222,7 +226,7 @@ export default function GameGrid({
           onExitBuildMode();
           return;
         }
-        if (isExit) {
+        if (isTownClickable) {
           onSelect(selection?.kind === "town" ? null : { kind: "town" });
           onExitBuildMode();
           return;
@@ -267,7 +271,7 @@ export default function GameGrid({
           style={{
             width: cell, height: cell,
             background: highlightColor ?? "transparent",
-            cursor: (tower || hero || isEntry || isExit || isFarmCell || isSawmillCell || isTavernCell) ? "pointer"
+            cursor: (tower || hero || isEntry || isTownClickable || isFarmCell || isSawmillCell || isTavernCell) ? "pointer"
               : (isPath || isTerritory || !canBuild) ? "default"
               : buildModeActive ? "crosshair" : "default",
             display: "flex", alignItems: "center", justifyContent: "center",
