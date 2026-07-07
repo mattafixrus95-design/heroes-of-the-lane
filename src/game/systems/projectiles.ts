@@ -1,5 +1,6 @@
 import type { GameState, Projectile, SplashEffect, DeathEffect, FloatingText, Creep } from "../engine/gameState";
 import { SLOW_DURATION } from "../engine/gameState";
+import { CREEP_ART } from "../../assets/creeps/creepArt";
 
 let effectCounter = 0;
 let ftCounter = 0;
@@ -16,9 +17,14 @@ function makeFt(c: Creep, gameTime: number): FloatingText {
   };
 }
 
-// Крипы с художественным спрайтом ходьбы, у которых также есть кадры смерти
-// (пока только Бес) — остальные виды остаются просто эмодзи без анимации.
-const DEATH_ANIM_KINDS = new Set<Creep["kind"]>(["imp", "goblin"]);
+// Крипы с художественным спрайтом смерти — выводится прямо из CREEP_ART, чтобы
+// не дублировать список вручную (раньше был отдельный set, из-за которого
+// у новых крипов с зарегистрированным артом смерть "исчезала", а не игралась
+// анимация падения, пока их забывали добавить сюда же). Остальные виды
+// остаются просто эмодзи без анимации смерти.
+const DEATH_ANIM_KINDS = new Set<Creep["kind"]>(
+  (Object.keys(CREEP_ART) as Creep["kind"][]).filter(k => CREEP_ART[k]?.deathFrames),
+);
 const DEATH_ANIM_DURATION = 0.6;
 
 function sweepDead(
