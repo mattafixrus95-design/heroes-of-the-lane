@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { createInitialState } from "./game/engine/gameState";
+import { createInitialState, createDevInitialState } from "./game/engine/gameState";
 import type { GameState } from "./game/engine/gameState";
 import versionData from "./version.json";
 import { GameLoop } from "./game/engine/gameLoop";
+import MainMenu from "./ui/MainMenu";
 import HUD from "./ui/HUD";
 import BottomHUD from "./ui/BottomHUD";
 import type { BottomTab } from "./ui/BottomHUD";
@@ -23,6 +24,8 @@ import { audioManager } from "./audio/AudioManager";
 import "./index.css";
 
 export default function App() {
+  const [screen, setScreen] = useState<"menu" | "game">("menu");
+  const [devMode, setDevMode] = useState(false);
   const [state, setState] = useState<GameState>(createInitialState);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -66,12 +69,24 @@ export default function App() {
   }, [state.projectiles, volume]);
 
   const handleReset = useCallback(() => {
-    setState(createInitialState());
+    setState(devMode ? createDevInitialState() : createInitialState());
     setSelectedItem(null);
     setSelection(null);
     setPendingHero(null);
     setInfoTowerType(null);
     setInfoBuildingKind(null);
+  }, [devMode]);
+
+  const handleStart = useCallback(() => {
+    setState(createInitialState());
+    setDevMode(false);
+    setScreen("game");
+  }, []);
+
+  const handleStartDev = useCallback(() => {
+    setState(createDevInitialState());
+    setDevMode(true);
+    setScreen("game");
   }, []);
 
   // Выбор объекта (клик по башне/зданию — на карте или из под-списка в
@@ -131,10 +146,19 @@ export default function App() {
 
   const showStats = state.phase === "defeat" || state.phase === "victory";
 
+  if (screen === "menu") {
+    return (
+      <div className="app">
+        <MainMenu onStart={handleStart} onStartDev={handleStartDev} />
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <HUD
         state={state}
+        devMode={devMode}
         onUpdateState={updateState}
         onReset={handleReset}
         volume={volume}

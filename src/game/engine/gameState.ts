@@ -237,3 +237,36 @@ export function createInitialState(): GameState {
     terrainSeed: Math.floor(Math.random() * 1_000_000),
   };
 }
+
+// Режим разработчика: безлимитные ресурсы/жизни для ручного тестирования
+// фич — не влияет на обычную игру, включается отдельной кнопкой в главном
+// меню (см. MainMenu.tsx).
+export const DEV_RESOURCE_AMOUNT = 9999;
+
+export function createDevInitialState(): GameState {
+  const state = createInitialState();
+  return {
+    ...state,
+    gold: DEV_RESOURCE_AMOUNT,
+    wood: DEV_RESOURCE_AMOUNT,
+    lives: DEV_RESOURCE_AMOUNT,
+    maxLives: DEV_RESOURCE_AMOUNT,
+    food: DEV_RESOURCE_AMOUNT,
+    farm: state.farm && { ...state.farm, foodProduced: DEV_RESOURCE_AMOUNT },
+  };
+}
+
+// Прыжок на волну N (1-based) для ручного тестирования: возвращает игру
+// в idle с нужным номером волны — дальше игрок жмёт "Начать" как обычно.
+export function jumpToWave(state: GameState, waveNumber: number): GameState {
+  return {
+    ...state,
+    phase: "idle",
+    wave: waveNumber - 1,
+    creeps: [],
+    spawnQueue: [],
+    spawnTimer: 0,
+    prepTimer: 0,
+    isPaused: false,
+  };
+}
