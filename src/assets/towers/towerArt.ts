@@ -1,6 +1,7 @@
 import type { TowerType } from "../../data/towers";
 import { elfGrade0Idle, elfGrade0AttackFrames, elfGrade1Idle, elfGrade1AttackFrames } from "./elf/elfFrames";
 import { dwarfGrade0Idle, dwarfGrade0AttackFrames, dwarfGrade1Idle, dwarfGrade1AttackFrames } from "./dwarf/dwarfFrames";
+import { centaurGrade0Idle, centaurGrade0AttackFrames, centaurGrade1Idle, centaurGrade1AttackFrames } from "./centaur/centaurFrames";
 
 export interface TowerGradeArt {
   idle: HTMLImageElement;
@@ -17,6 +18,12 @@ export interface TowerArt {
 // здесь) остаются инлайн-SVG (см. фолбэк в TowerIcon.tsx). По аналогии
 // с CREEP_ART в assets/creeps/creepArt.ts.
 export const TOWER_ART: Partial<Record<TowerType, TowerArt>> = {
+  centaur: {
+    grades: [
+      { idle: centaurGrade0Idle, attackFrames: centaurGrade0AttackFrames, attackFps: 5, aspect: 320 / 360 },
+      { idle: centaurGrade1Idle, attackFrames: centaurGrade1AttackFrames, attackFps: 5, aspect: 322 / 360 },
+    ],
+  },
   dwarf: {
     grades: [
       { idle: dwarfGrade0Idle, attackFrames: dwarfGrade0AttackFrames, attackFps: 5, aspect: 345 / 360 },
