@@ -17,6 +17,11 @@ const MIRRORED: Record<1 | 2 | 3 | 4, boolean> = {
   1: false, 2: true, 3: true, 4: false,
 };
 
+// Замок (ур.4) чуть довёрнут по часовой стрелке для более живой композиции.
+const ROTATE_DEG: Record<1 | 2 | 3 | 4, number> = {
+  1: 0, 2: 0, 3: 0, 4: 30,
+};
+
 interface Props {
   level: 1 | 2 | 3 | 4;
   size?: number;
@@ -24,13 +29,17 @@ interface Props {
 
 export default function TownImage({ level, size = 52 }: Props) {
   const [src, w, h] = SIZES[level];
+  const transforms = [
+    MIRRORED[level] ? "scaleX(-1)" : null,
+    ROTATE_DEG[level] ? `rotate(${ROTATE_DEG[level]}deg)` : null,
+  ].filter(Boolean).join(" ");
   return (
     <img
       src={src}
       alt=""
       style={{
         width: size, height: size * (h / w), objectFit: "contain", display: "block",
-        transform: MIRRORED[level] ? "scaleX(-1)" : undefined,
+        transform: transforms || undefined,
       }}
     />
   );
