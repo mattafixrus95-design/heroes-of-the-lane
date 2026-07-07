@@ -18,7 +18,7 @@ function travelTime(fromCol: number, fromRow: number, toX: number, toY: number, 
   return Math.max(0.05, Math.hypot(fromCol - toX, fromRow - toY) / speed);
 }
 
-function findTarget(tower: Tower, creeps: Creep[]): Creep | null {
+export function findTarget(tower: Tower, creeps: Creep[]): Creep | null {
   let best: Creep | null = null;
   for (const c of creeps) {
     if (dist(tower, c) <= tower.range) {
@@ -26,6 +26,18 @@ function findTarget(tower: Tower, creeps: Creep[]): Creep | null {
     }
   }
   return best;
+}
+
+export type TowerAttackPhase = "idle" | "attack";
+
+// Только для рендера (GameGrid/TowerIcon) — не часть тикающих систем.
+// "attack", пока в радиусе есть цель (растровый арт крутит кадры атаки по
+// gameTime), иначе "idle". В отличие от героя, отдельной позы "после
+// выстрела" у башен нет — цикл атаки уже включает кадр восстановления
+// (например reload у гнома) как последний кадр в attackFrames.
+export function towerAttackPhase(tower: Tower, state: GameState): TowerAttackPhase {
+  if (tower.buildTimeRemaining > 0) return "idle";
+  return findTarget(tower, state.creeps) ? "attack" : "idle";
 }
 
 // Бонус к скорости атаки от ауры единорогов рядом — не стакается,
