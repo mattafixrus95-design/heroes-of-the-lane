@@ -1,7 +1,8 @@
 import type { CreepKind } from "../game/engine/gameState";
 import { CREEP_DEFS } from "../data/waves";
-import impIcon from "../assets/creeps/imp/imp-walk-1.png";
-import goblinIcon from "../assets/creeps/goblin/goblin-walk-1.png";
+import impIcon from "../assets/creeps/01_imp/imp-walk-1.png";
+import goblinIcon from "../assets/creeps/02_goblin/goblin-walk-1.png";
+import pikemanIcon from "../assets/creeps/03_pikeman/pikeman-walk-1.png";
 
 // Реестр статичных иконок для UI (панели/списки) — по аналогии с CREEP_ART
 // в creepArt.ts, но там HTMLImageElement для canvas-анимации, здесь просто
@@ -9,6 +10,7 @@ import goblinIcon from "../assets/creeps/goblin/goblin-walk-1.png";
 const CREEP_ICONS: Partial<Record<CreepKind, string>> = {
   imp: impIcon,
   goblin: goblinIcon,
+  pikeman: pikemanIcon,
 };
 
 interface Props {
