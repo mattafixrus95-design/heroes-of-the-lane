@@ -210,7 +210,7 @@ export default function App() {
         <TowerInfoModal type={infoTowerType} onClose={handleCloseTowerInfo} />
       )}
       {infoBuildingKind && (
-        <BuildingInfoModal kind={infoBuildingKind} onClose={handleCloseBuildingInfo} />
+        <BuildingInfoModal kind={infoBuildingKind} townLevel={state.townLevel} onClose={handleCloseBuildingInfo} />
       )}
       {infoHeroType && (
         <HeroInfoModal type={infoHeroType} onClose={handleCloseHeroInfo} />

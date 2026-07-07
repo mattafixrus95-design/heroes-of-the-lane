@@ -10,9 +10,11 @@ import WoodSVG from "../assets/WoodSVG";
 import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
 import TavernImage from "../assets/buildings/tavern/TavernImage";
+import TownIcon from "./TownIcon";
 
 interface Props {
   kind: "farm" | "sawmill" | "town" | "tavern";
+  townLevel: 1 | 2 | 3 | 4;
   onClose: () => void;
 }
 
@@ -25,7 +27,7 @@ function Row({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-function BuildingInfoModal({ kind, onClose }: Props) {
+function BuildingInfoModal({ kind, townLevel, onClose }: Props) {
   return (
     <div className="tower-menu-overlay" onClick={onClose}>
       <div className="tower-menu" style={{ gap: 10 }} onClick={e => e.stopPropagation()}>
@@ -33,7 +35,7 @@ function BuildingInfoModal({ kind, onClose }: Props) {
           <div className="tm-title">
             {kind === "farm" && <span className="cost-icon"><FarmImage size={22} /> Ферма</span>}
             {kind === "sawmill" && <span className="cost-icon"><SawmillImage size={22} /> Лесопилка</span>}
-            {kind === "town" && "🏘️ Город"}
+            {kind === "town" && <span className="cost-icon"><TownIcon level={townLevel} size={22} /> Город</span>}
             {kind === "tavern" && <span className="cost-icon"><TavernImage size={22} /> Таверна</span>}
           </div>
           <button className="tm-close" onClick={onClose}>✕</button>
