@@ -3,12 +3,6 @@ import { GRID_COLS, GRID_ROWS } from "../data/map";
 import { roadSegmentAt } from "../data/road";
 import grass1 from "../assets/terrain/grass/grass-1.png";
 import grass2 from "../assets/terrain/grass/grass-2.png";
-import grass3 from "../assets/terrain/grass/grass-3.png";
-import grass4 from "../assets/terrain/grass/grass-4.png";
-import grass5 from "../assets/terrain/grass/grass-5.png";
-import grass6 from "../assets/terrain/grass/grass-6.png";
-import grass7 from "../assets/terrain/grass/grass-7.png";
-import grass8 from "../assets/terrain/grass/grass-8.png";
 import roadStraight from "../assets/terrain/road/road-straight.png";
 import roadCorner2 from "../assets/terrain/road/road-corner-2.png";
 import roadCorner3 from "../assets/terrain/road/road-corner-3.png";
@@ -18,7 +12,7 @@ interface Props {
   terrainSeed: number;
 }
 
-const GRASS_TILES = [grass1, grass2, grass3, grass4, grass5, grass6, grass7, grass8];
+const GRASS_TILES = [grass1, grass2];
 
 // Угол дороги обработан в ориентации "N+E" (вход сверху, выход справа) — для
 // остальных трёх поворотов просто крутим тот же файл на 90°/180°/270° (CSS
