@@ -59,16 +59,14 @@ function applyUpgrade(id: string, state: GameState): GameState {
     foodSpent: tower.foodSpent + g.foodUpgradeCost,
     buildTimeRemaining: g.upgradeTime,
   };
-  const texts: FloatingText[] = [
-    ft(`-${g.upgradeCost}💰`, tower.col, tower.row, "#ff8080", state.gameTime),
-  ];
-  if (g.foodUpgradeCost > 0) texts.push(ft(`-${g.foodUpgradeCost}🍖`, tower.col, tower.row - 0.6, "#ff8080", state.gameTime));
   return {
     ...state,
     gold: state.gold - g.upgradeCost,
     food: state.food - g.foodUpgradeCost,
     towers: state.towers.map(t => t.id === id ? upgraded : t),
-    floatingTexts: [...state.floatingTexts, ...texts],
+    floatingTexts: [...state.floatingTexts,
+      ft(`-${g.upgradeCost}💰`, tower.col, tower.row, "#ff8080", state.gameTime),
+    ],
   };
 }
 
