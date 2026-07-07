@@ -150,6 +150,7 @@ export default function App() {
     return (
       <div className="app">
         <MainMenu onStart={handleStart} onStartDev={handleStartDev} />
+        <UpdateButton currentVersion={versionData.version} />
       </div>
     );
   }
