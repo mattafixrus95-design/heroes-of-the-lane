@@ -21,6 +21,7 @@ import WoodSVG from "../assets/WoodSVG";
 import FarmImage from "../assets/buildings/farm/FarmImage";
 import SawmillImage from "../assets/buildings/sawmill/SawmillImage";
 import TavernImage from "../assets/buildings/tavern/TavernImage";
+import TownIcon from "./TownIcon";
 import InfoBadge from "./InfoBadge";
 import BuildProgressBar from "./BuildProgressBar";
 import type { Selection } from "./selection";
@@ -493,7 +494,7 @@ function TownPanel({ state, onUpdateState, onShowBuildingInfo }: {
   return (
     <>
       <div className="cm-header">
-        <span className="cm-title">🏘️ {currentDef.name}</span>
+        <span className="cm-title"><TownIcon level={state.townLevel} size={22} /> {currentDef.name}</span>
         <InfoBadge onClick={() => onShowBuildingInfo("town")} />
       </div>
       {isBuilding && (

@@ -305,9 +305,9 @@ export default function GameGrid({
               // поэтому сдвинут на пол-клетки вправо от своей клетки-якоря.
               transform: `translate(${Math.round(cell * 0.5)}px, -${Math.round(cell * 0.14)}px)`,
             }}>
-              <ObjectShadow size={Math.round(iconSize * 1.52)} />
+              <ObjectShadow size={Math.round(iconSize * 1.444)} />
               <span style={{ position: "relative", zIndex: 1, display: "flex", ...(isSelectedTown ? { filter: SELECTION_GLOW } : {}) }}>
-                <TownIcon level={state.townLevel} size={Math.round(cell * 2.185)} />
+                <TownIcon level={state.townLevel} size={Math.round(cell * 2.076)} />
               </span>
               {state.townBuildTimeRemaining > 0 && (
                 <>
