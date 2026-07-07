@@ -34,7 +34,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   centaur: {
     type: "centaur", name: "Кентавр",
     tier: 1,
-    purchaseCost: 10,
+    purchaseCost: 15,
     buildTime: 1,
     foodCost: 1,
     grades: [
@@ -45,7 +45,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Капитан",
-        damage: 6, range: 3, attackSpeed: 1.70, slow: 0,
+        damage: 5, range: 3, attackSpeed: 1.70, slow: 0,
         ability: { kind: "crit", chance: 0.20, multiplier: 2 },
         upgradeCost: 30, upgradeTime: 1, foodUpgradeCost: 0,
       },
@@ -60,7 +60,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
     grades: [
       {
         gradeName: "Лесной",
-        damage: 4, range: 2, attackSpeed: 1.50, slow: 0,
+        damage: 4, range: 2, attackSpeed: 1.40, slow: 0,
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
@@ -93,55 +93,55 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
   pegasus: {
     type: "pegasus", name: "Пегас",
     tier: 4,
-    purchaseCost: 80,
+    purchaseCost: 85,
     buildTime: 2,
     foodCost: 2,
     grades: [
       {
         gradeName: "Лесной",
-        damage: 7, range: 3, attackSpeed: 2.00, slow: 0,
+        damage: 8, range: 3, attackSpeed: 1.80, slow: 0,
         ability: { kind: "vulnerability", pct: 0.15, duration: 2 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Серебряный",
-        damage: 10, range: 4, attackSpeed: 2.30, slow: 0,
+        damage: 11, range: 4, attackSpeed: 2.20, slow: 0,
         ability: { kind: "vulnerability", pct: 0.30, duration: 3 },
-        upgradeCost: 155, upgradeTime: 2, foodUpgradeCost: 3,
+        upgradeCost: 165, upgradeTime: 2, foodUpgradeCost: 3,
       },
     ],
   },
   dendroid: {
     type: "dendroid", name: "Дендроид",
     tier: 5,
-    purchaseCost: 100,
+    purchaseCost: 105,
     buildTime: 2,
     foodCost: 2,
     grades: [
       {
         gradeName: "Страж",
-        damage: 8, range: 2, attackSpeed: 0.80, slow: 0,
+        damage: 10, range: 2, attackSpeed: 0.80, slow: 0,
         ability: { kind: "root", everyNth: 3, duration: 0.5 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
       {
         gradeName: "Солдат",
-        damage: 13, range: 3, attackSpeed: 1.00, slow: 0,
+        damage: 13, range: 3, attackSpeed: 1.10, slow: 0,
         ability: { kind: "root", everyNth: 2, duration: 0.75 },
-        upgradeCost: 165, upgradeTime: 2, foodUpgradeCost: 3,
+        upgradeCost: 145, upgradeTime: 2, foodUpgradeCost: 3,
       },
     ],
   },
   unicorn: {
     type: "unicorn", name: "Единорог",
     tier: 6,
-    purchaseCost: 195,
+    purchaseCost: 185,
     buildTime: 2,
     foodCost: 3,
     grades: [
       {
         gradeName: "Лесной",
-        damage: 9, range: 3, attackSpeed: 1.50, slow: 0,
+        damage: 11, range: 3, attackSpeed: 1.40, slow: 0,
         ability: { kind: "aura_haste", radius: 2.5, pct: 0.15 },
         upgradeCost: 0, upgradeTime: 0, foodUpgradeCost: 0,
       },
@@ -168,7 +168,7 @@ export const TOWER_DEFS: Record<TowerType, TowerDef> = {
       },
       {
         gradeName: "Золотой",
-        damage: 18, range: 4.5, attackSpeed: 1.20, slow: 0,
+        damage: 19, range: 4.5, attackSpeed: 1.20, slow: 0,
         ability: { kind: "aoe", radius: 2, dmgPct: 0.5 },
         upgradeCost: 340, upgradeTime: 3, foodUpgradeCost: 4,
       },
