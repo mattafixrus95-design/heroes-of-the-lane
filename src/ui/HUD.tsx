@@ -94,11 +94,11 @@ function HUD({ state, devMode, onUpdateState, onReset, volume, onVolumeChange, o
         </div>
 
         <div className="hud-actions">
-          {devMode && phase === "idle" && (
+          {devMode && (
             <select
               className="hud-btn secondary"
               style={{ padding: "7px 6px", fontSize: "0.78rem" }}
-              value={wave + 1}
+              value={waveIdx + 1}
               onChange={e => onUpdateState(s => jumpToWave(s, +e.target.value))}
             >
               {WAVE_DEFS.map((w, i) => (
