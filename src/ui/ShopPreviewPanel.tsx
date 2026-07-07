@@ -36,7 +36,6 @@ function ShopPreviewPanel({ type, onShowInfo }: Props) {
         {grade.slow > 0 && <span>❄️ {grade.slow * 100}%</span>}
         <span>💰 {def.purchaseCost}</span>
         <span>🍖 {def.foodCost}</span>
-        <span>⏱ {def.buildTime}с</span>
       </div>
     </div>
   );
