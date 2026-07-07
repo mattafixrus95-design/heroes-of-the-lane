@@ -3,6 +3,7 @@ import type { GameState } from "../game/engine/gameState";
 import { maxFood, usedFood } from "../game/engine/gameState";
 import { startWave, startWaveInternal } from "../game/entities/spawnWave";
 import { WAVE_DEFS } from "../data/waves";
+import { HERO_HIRE_COST } from "../data/buildings";
 import WoodSVG from "../assets/WoodSVG";
 
 interface Props {
@@ -37,8 +38,9 @@ function HUD({ state, onUpdateState, onReset, volume, onVolumeChange, onToggleMu
   const recommended = waveDef?.recommended ?? 0;
   const mobCount    = isWave ? remaining : (waveDef?.entries.length ?? 0);
 
-  // Текущая стоимость башен
-  const towerValue = state.towers.reduce((s, t) => s + t.totalInvested, 0);
+  // Текущая стоимость башен + героя (фикс. цена найма, апгрейдов у героя нет)
+  const towerValue = state.towers.reduce((s, t) => s + t.totalInvested, 0)
+    + state.heroes.length * HERO_HIRE_COST;
 
   return (
     <div className="hud">
@@ -130,6 +132,7 @@ export default memo(HUD, (prev, next) => {
     ps.isPaused !== ns.isPaused ||
     ps.creeps.length !== ns.creeps.length ||
     ps.spawnQueue.length !== ns.spawnQueue.length ||
+    ps.heroes.length !== ns.heroes.length ||
     (ps.farm?.foodProduced ?? 0) !== (ns.farm?.foodProduced ?? 0)
   ) return false;
 
