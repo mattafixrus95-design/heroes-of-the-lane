@@ -10,7 +10,7 @@
 
 Tower defense в духе HoMM3 + LTD (Legion TD) для браузера и мобилки.
 Цель: простой вход (зашёл — сразу играешь), но глубокий геймплей (7 типов башен, герой с аурой, экономика еды/дерева/золота, 20 волн с боссами).
-Деплой: **tower-lane-chess.vercel.app** | GitHub: `mattafixrus95-design/heroes-of-the-lane`
+Деплой: **heroes-of-the-lane.vercel.app** | GitHub: `mattafixrus95-design/heroes-of-the-lane`
 
 ### Что уже есть
 - 20 волн крипов (роями по 20–65 юнитов на волну) + 2 волны-боссы (10 и 20)
